@@ -1,0 +1,24 @@
+@import "tailwindcss";
+
+@theme {
+  --color-brand-900: #0B5D3B;
+  --color-brand-700: #1F7A5C;
+  --color-brand-500: #38C172;
+  --color-brand-300: #A7E3C5;
+  --color-gray-900: #1A1A1A;
+  --color-gray-600: #6B7280;
+  --color-gray-200: #E5E7EB;
+  --shadow-soft: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+body {
+  background-color: #ffffff;
+  color: var(--color-gray-900);
+}
+
+.container {
+  width: 100%;
+  max-width: 80rem;
+  margin-inline: auto;
+  padding-inline: 1.5rem;
+}
