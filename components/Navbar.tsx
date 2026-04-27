@@ -1,4 +1,4 @@
-"use client";
+"use client"
 
 import React, { useState } from "react";
 import Link from "next/link";
@@ -19,17 +19,17 @@ export default function Navbar() {
     return (
         <header
             className={`sticky top-0 z-50 w-full border-b border-gray-200 shadow-sm transition-colors duration-200
-            ${open ? "bg-white/95 backdrop-blur-md" : "bg-white/80 backdrop-blur-lg"}`}
+            ${open ? "bg-white" : "bg-white md:bg-white/95 backdrop-blur-lg backdrop-saturate-105"}`}
         >
             <div className="flex items-center justify-between px-6 py-3 max-w-7xl mx-auto">
-                {/* Logo + Text */}
+                {/* Logo */}
                 <Link href="/" className="flex items-center gap-2">
                     <Image
                         src="/logo.png"
                         alt="Dayli Energy"
-                        width={90}
-                        height={28}
-                        className="object-contain h-7 w-auto"
+                        width={70}
+                        height={22}
+                        className="h-6 w-auto object-contain"
                         priority
                     />
                     <span className="text-lg font-bold text-[#0B5D3B]">
@@ -75,10 +75,11 @@ export default function Navbar() {
                 </div>
             </div>
 
+            {/* Mobile menu */}
             <AnimatePresence>
                 {open && (
                     <>
-                        {/* Overlay */}
+                        {/* blurred overlay */}
                         <motion.div
                             className="fixed inset-0 bg-black/30 backdrop-blur-md z-40 md:hidden"
                             initial={{ opacity: 0 }}
@@ -87,7 +88,7 @@ export default function Navbar() {
                             onClick={() => setOpen(false)}
                         />
 
-                        {/* Sidebar */}
+                        {/* sidebar */}
                         <motion.aside
                             className="fixed left-0 top-0 bottom-0 z-50 md:hidden w-[80%] bg-white/90 backdrop-blur-xl shadow-lg border-r border-gray-100"
                             initial={{ x: "-100%" }}
@@ -97,14 +98,14 @@ export default function Navbar() {
                         >
                             <div className="h-full flex flex-col">
                                 {/* Header */}
-                                <div className="flex items-center justify-between px-6 py-4 border-b">
+                                <div className="flex items-center justify-between px-6 py-4">
                                     <Link href="/" className="flex items-center gap-2">
                                         <Image
                                             src="/logo.png"
                                             alt="Dayli Energy"
-                                            width={80}
-                                            height={24}
-                                            className="object-contain h-6 w-auto"
+                                            width={60}
+                                            height={20}
+                                            className="h-5 w-auto object-contain"
                                         />
                                         <span className="text-base font-bold text-[#0B5D3B]">
                                             Dayli Energy
