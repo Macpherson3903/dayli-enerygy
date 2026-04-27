@@ -76,16 +76,31 @@ export default function NavLinks({ items, className = "", onLinkClick }: Props) 
         }
     };
 
+    const isMobileContainer = className.includes("flex-col");
+
+    const ulClass = `${baseClass} ${className} ${isMobileContainer ? "bg-white w-full p-2" : ""}`;
+
     return (
-        <motion.ul className={`${baseClass} ${className}`} initial="hidden" animate="show" variants={list}>
+        <motion.ul className={ulClass} initial="hidden" animate="show" variants={list}>
             {items.map((itemData) => {
                 const isActive = pathname === itemData.href || (itemData.href !== "/" && pathname.startsWith(itemData.href));
+                const isMobile = className.includes("flex-col");
+
+                const linkBase = isMobile
+                    ? "flex w-full items-center gap-2 px-4 py-2 rounded-md"
+                    : "inline-flex items-center gap-2 px-2 py-1 rounded-md";
+
+                const activeClass = isActive
+                    ? isMobile
+                        ? "bg-[#0B5D3B] text-white"
+                        : "font-semibold text-[#0B5D3B]"
+                    : "text-gray-800";
 
                 return (
                     <motion.li key={itemData.href} variants={item}>
                         <Link
                             href={itemData.href}
-                            className={`inline-flex items-center gap-2 px-2 py-1 rounded-md capitalize text-[15px] transition-transform transform duration-150 ease-in-out hover:scale-110 hover:bg-[#0B5D3B] hover:text-white ${isActive ? "font-semibold text-[#0B5D3B]" : "text-gray-800"}`}
+                            className={`${linkBase} capitalize text-[15px] transition-transform transform duration-150 ease-in-out hover:scale-110 hover:bg-[#0B5D3B] hover:text-white ${activeClass}`}
                             aria-current={isActive ? "page" : undefined}
                             onClick={onLinkClick}
                         >
