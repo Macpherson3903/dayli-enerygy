@@ -13,6 +13,7 @@ export default function Navbar() {
         { label: "Shop", href: "/shop" },
         { label: "About", href: "/about" },
         { label: "Contact", href: "/contact" },
+        { label: "Cart", href: "/cart" },
     ];
 
     return (
@@ -22,12 +23,19 @@ export default function Navbar() {
                     <Link href="/" className="text-xl font-bold text-[#0B5D3B]">Dayli Energy</Link>
                 </div>
 
-                <nav className="hidden md:flex">
-                    <NavLinks items={items} className="flex gap-6 text-sm items-center" />
-                </nav>
+                <div className="hidden md:flex items-center gap-6">
+                    <nav>
+                        <NavLinks items={items} className="flex gap-4 items-center" />
+                    </nav>
 
-                <div className="hidden md:flex items-center gap-4">
-                    <button className="bg-[#38C172] text-white px-4 py-2 rounded-md">Request Quote</button>
+                    <div>
+                        <Link href="/account" className="inline-flex items-center gap-2 bg-[#f1f5f9] hover:bg-[#e6eef3] text-gray-800 px-3 py-2 rounded-md">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-[#0B5D3B]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5.121 17.804A7 7 0 0112 15a7 7 0 016.879 2.804M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                            </svg>
+                            <span className="uppercase text-sm">Account</span>
+                        </Link>
+                    </div>
                 </div>
 
                 {/* Mobile */}
