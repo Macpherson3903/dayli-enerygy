@@ -21,19 +21,12 @@ export default function FinalCTA() {
                     Take control of your energy costs with reliable solar, inverter, and battery solutions tailored for your home or business.
                 </p>
 
-                <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4">
+                <div className="mt-8 flex justify-center">
                     <Link
                         href="/shop"
                         className="w-full sm:w-auto bg-[#38C172] hover:bg-[#2faa63] transition-colors px-6 py-3 rounded-md font-medium text-white shadow-md focus:outline-none focus:ring-2 focus:ring-white/60"
                     >
                         Browse Products
-                    </Link>
-
-                    <Link
-                        href="/contact"
-                        className="w-full sm:w-auto bg-white/10 hover:bg-white/20 transition-colors px-6 py-3 rounded-md font-medium text-white border border-white/30 focus:outline-none focus:ring-2 focus:ring-white/60"
-                    >
-                        Contact Us
                     </Link>
                 </div>
 
