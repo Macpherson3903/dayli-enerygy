@@ -1,5 +1,6 @@
 "use client";
 
+import { motion } from "framer-motion";
 import {
     ShoppingCart,
     ClipboardList,
@@ -30,6 +31,25 @@ const steps = [
     },
 ];
 
+const container = {
+    hidden: { opacity: 0 },
+    show: {
+        opacity: 1,
+        transition: {
+            staggerChildren: 0.15,
+        },
+    },
+};
+
+const item = {
+    hidden: { opacity: 0, y: 20 },
+    show: {
+        opacity: 1,
+        y: 0,
+        transition: { duration: 0.5, ease: "easeOut" },
+    },
+};
+
 export default function HowItWorks() {
     return (
         <section className="bg-green-100 py-20 px-6">
@@ -43,13 +63,20 @@ export default function HowItWorks() {
                     </p>
                 </div>
 
-                <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+                <motion.div
+                    variants={container}
+                    initial="hidden"
+                    whileInView="show"
+                    viewport={{ once: true, amount: 0.2 }}
+                    className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4"
+                >
                     {steps.map((step, i) => {
                         const Icon = step.icon;
 
                         return (
-                            <div
+                            <motion.div
                                 key={i}
+                                variants={item}
                                 className="bg-white rounded-2xl shadow-md p-6 hover:shadow-lg transition"
                             >
                                 <div className="flex items-center justify-center w-12 h-12 rounded-full bg-green-200 text-green-800 mb-4">
@@ -67,10 +94,10 @@ export default function HowItWorks() {
                                 <p className="text-sm text-gray-600">
                                     {step.desc}
                                 </p>
-                            </div>
+                            </motion.div>
                         );
                     })}
-                </div>
+                </motion.div>
             </div>
         </section>
     );
