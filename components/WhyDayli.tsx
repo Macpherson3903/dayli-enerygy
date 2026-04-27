@@ -103,7 +103,7 @@ export default function WhyDayli() {
                     className="mt-10 text-center"
                 >
                     <p className="text-gray-600 max-w-3xl mx-auto mb-6">
-                        Whether you're powering a home, business, or large facility, our solar solutions are designed to scale with your energy needs while maintaining efficiency and reliability over time.
+                        Whether you are powering a home, business, or large facility, our solar solutions are designed to scale with your energy needs while maintaining efficiency and reliability over time.
                     </p>
 
                     <Link

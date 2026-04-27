@@ -1,10 +1,14 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
+import { useAuth } from "@clerk/nextjs";
 import { FaInstagram, FaFacebookF, FaLinkedinIn, FaGlobe } from "react-icons/fa";
 import { Mail, Phone, MapPin } from "lucide-react";
 
 export default function Footer() {
-    const isAuthenticated = false; // placeholder for auth logic later
+    const { isSignedIn } = useAuth();
+    const isAuthenticated = Boolean(isSignedIn);
 
     return (
         <footer className="bg-[#0B5D3B] text-white px-6 py-12">

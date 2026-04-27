@@ -3,13 +3,21 @@
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
+import { clsx } from "clsx";
+import type { ProductPublic } from "@/lib/types";
 
-export default function ProductCard({ product }) {
+export default function ProductCard({
+  product,
+  variant = "default",
+}: {
+  product: ProductPublic;
+  variant?: "default" | "shop";
+}) {
     const router = useRouter();
 
     const handleClick = () => {
-        if (product?.id) {
-            router.push(`/shop/${product.id}`);
+        if (product?.slug) {
+            router.push(`/shop/${encodeURIComponent(product.slug)}`);
         } else {
             router.push("/shop");
         }
@@ -23,7 +31,12 @@ export default function ProductCard({ product }) {
             viewport={{ once: true, amount: 0.2 }}
             whileHover={{ y: -6 }}
             transition={{ duration: 0.3 }}
-            className="group cursor-pointer bg-white border border-gray-200 rounded-2xl overflow-hidden hover:shadow-xl transition-all"
+            className={clsx(
+              "group cursor-pointer overflow-hidden rounded-2xl border bg-white transition-all",
+              variant === "shop"
+                ? "border-brand-300 shadow-[0_4px_20px_-2px_rgba(31,122,92,0.14)] hover:shadow-[0_12px_32px_-6px_rgba(31,122,92,0.22)]"
+                : "border-gray-200 hover:shadow-xl"
+            )}
         >
             {/* Image */}
             <div className="relative h-52 w-full bg-gray-100 overflow-hidden">
@@ -50,9 +63,9 @@ export default function ProductCard({ product }) {
                         {product?.name}
                     </h3>
 
-                    {product?.description && (
+                    {(product.shortDescription || product.description) && (
                         <p className="text-sm text-gray-500 mt-2 line-clamp-2">
-                            {product.description}
+                            {product.shortDescription || product.description}
                         </p>
                     )}
                 </div>

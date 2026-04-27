@@ -46,7 +46,7 @@ const item = {
     show: {
         opacity: 1,
         y: 0,
-        transition: { duration: 0.5, ease: "easeOut" },
+        transition: { duration: 0.5, ease: [0.33, 1, 0.68, 1] as const },
     },
 };
 

@@ -8,7 +8,11 @@
   --color-gray-900: #1A1A1A;
   --color-gray-600: #6B7280;
   --color-gray-200: #E5E7EB;
+  --color-warning-600: #B45309;
+  --color-success-600: #0F766E;
   --shadow-soft: 0 4px 12px rgba(0, 0, 0, 0.08);
+  --radius-card: 16px;
+  --ring-focus: 0 0 0 2px #ffffff, 0 0 0 4px #1F7A5C;
 }
 
 body {

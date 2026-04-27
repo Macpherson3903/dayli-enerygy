@@ -9,7 +9,7 @@ const fadeUp = {
   show: {
     opacity: 1,
     y: 0,
-    transition: { duration: 0.5, ease: "easeOut" },
+    transition: { duration: 0.5, ease: [0.33, 1, 0.68, 1] as const },
   },
 };
 
@@ -17,7 +17,7 @@ const fadeIn = {
   hidden: { opacity: 0 },
   show: {
     opacity: 1,
-    transition: { duration: 0.6, ease: "easeOut" },
+    transition: { duration: 0.6, ease: [0.33, 1, 0.68, 1] as const },
   },
 };
 
@@ -39,7 +39,7 @@ export default function Hero() {
       {/* Desktop Background */}
       <div className="absolute inset-0 -z-10 hidden md:block">
         <Image
-          src="/solar.jpg"
+          src="/solarRoof.png"
           alt="Solar background"
           fill
           priority
