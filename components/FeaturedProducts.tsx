@@ -1,3 +1,7 @@
+"use client";
+
+import { useRouter } from "next/navigation";
+
 const products = [
     {
         id: 1,
@@ -5,6 +9,7 @@ const products = [
         description:
             "High-efficiency monocrystalline solar panels designed for residential and commercial installations.",
         image: "/solarRoof.png",
+        category: "solar-panel",
     },
     {
         id: 2,
@@ -12,6 +17,7 @@ const products = [
         description:
             "Reliable pure sine wave inverter for stable and efficient energy conversion.",
         image: "/inverter.png",
+        category: "inverter",
     },
     {
         id: 3,
@@ -19,10 +25,21 @@ const products = [
         description:
             "Durable deep-cycle lithium battery for long-lasting energy storage solutions.",
         image: "/battery.png",
+        category: "battery",
     },
 ];
 
 export default function FeaturedProducts() {
+    const router = useRouter();
+
+    const handleNavigate = (category) => {
+        if (category) {
+            router.push(`/shop?category=${encodeURIComponent(category)}`);
+        } else {
+            router.push("/shop");
+        }
+    };
+
     return (
         <section className="py-16 px-6">
             <div className="max-w-7xl mx-auto">
@@ -39,7 +56,8 @@ export default function FeaturedProducts() {
                     {products.map((product) => (
                         <div
                             key={product.id}
-                            className="group border border-gray-200 rounded-xl bg-white overflow-hidden hover:shadow-lg transition-shadow"
+                            onClick={() => handleNavigate(product.category)}
+                            className="group border border-gray-200 rounded-xl bg-white overflow-hidden hover:shadow-lg transition-shadow cursor-pointer"
                         >
                             <div className="h-52 w-full bg-gray-100 overflow-hidden">
                                 <img
@@ -58,12 +76,9 @@ export default function FeaturedProducts() {
                                     {product.description}
                                 </p>
 
-                                <button
-                                    type="button"
-                                    className="mt-6 w-full bg-[#38C172] hover:bg-green-600 text-white text-sm font-medium py-2.5 rounded-md transition-colors"
-                                >
-                                    Request Order
-                                </button>
+                                <div className="mt-6 text-sm font-medium text-[#38C172]">
+                                    View in Shop →
+                                </div>
                             </div>
                         </div>
                     ))}

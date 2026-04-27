@@ -4,7 +4,7 @@ import TrustBar from "@/components/TrustBar";
 import FeaturedProducts from "@/components/FeaturedProducts";
 import HowItWorks from "@/components/HowItWorks";
 import WhyDayli from "@/components/WhyDayli";
-import Testimonials from "@/components/Testimonials";
+import FAQ from "@/components/FAQ";
 import FinalCTA from "@/components/FinalCTA";
 import Footer from "@/components/Footer";
 
@@ -17,8 +17,8 @@ export default function Home() {
       <FeaturedProducts />
       <HowItWorks />
       <WhyDayli />
-      <Testimonials />
       <FinalCTA />
+      <FAQ />
       <Footer />
     </main>
   );
