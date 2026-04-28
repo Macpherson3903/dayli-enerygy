@@ -14,6 +14,7 @@ import type { NavItem } from "./navbar/types";
 const BASE_ITEMS: NavItem[] = [
   { label: "Home", href: "/" },
   { label: "Shop", href: "/shop" },
+  { label: "Quotation", href: "/quotation" },
   { label: "About", href: "/about" },
   { label: "Contact", href: "/contact" },
 ];
