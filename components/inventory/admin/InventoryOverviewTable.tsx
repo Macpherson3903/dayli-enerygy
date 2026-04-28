@@ -10,6 +10,7 @@ export function InventoryOverviewTable({ products }: { products: ProductDoc[] })
             <th className="px-4 py-2 font-medium">Image</th>
             <th className="px-4 py-2 font-medium">Name</th>
             <th className="px-4 py-2 font-medium">Category</th>
+            <th className="px-4 py-2 font-medium">Brand</th>
             <th className="px-4 py-2 font-medium">Price</th>
             <th className="px-4 py-2 font-medium">Stock</th>
             <th className="px-4 py-2 font-medium">Active</th>
@@ -32,6 +33,7 @@ export function InventoryOverviewTable({ products }: { products: ProductDoc[] })
               </td>
               <td className="px-4 py-3 font-medium">{product.name}</td>
               <td className="px-4 py-3 capitalize">{product.category}</td>
+              <td className="px-4 py-3">{product.brand ?? "-"}</td>
               <td className="px-4 py-3">₦{product.price.toLocaleString()}</td>
               <td className="px-4 py-3">{product.stock}</td>
               <td className="px-4 py-3">{product.active ? "Yes" : "No"}</td>

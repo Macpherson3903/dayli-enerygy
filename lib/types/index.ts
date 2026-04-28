@@ -15,7 +15,8 @@ export type ProductDoc = {
   _id: ObjectId;
   name: string;
   slug: string;
-  category: Exclude<ProductCategory, "all">;
+  category: string;
+  brand?: string;
   price: number;
   description: string;
   shortDescription?: string;
@@ -58,7 +59,8 @@ export type ProductPublic = {
   id: string;
   name: string;
   slug: string;
-  category: Exclude<ProductCategory, "all">;
+  category: string;
+  brand?: string;
   price: number;
   description: string;
   shortDescription?: string;

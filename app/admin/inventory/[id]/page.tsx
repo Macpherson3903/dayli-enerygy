@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { getProductById } from "@/lib/db/products";
+import { getInventoryCategories, getProductById } from "@/lib/db/products";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { ProductEditForm } from "@/components/inventory/ProductEditForm";
 import { DeleteProductButton } from "@/components/inventory/DeleteProductButton";
@@ -16,6 +16,7 @@ export default async function EditProductPage({
 }) {
   const { id } = await params;
   const p = await getProductById(id);
+  const categories = await getInventoryCategories();
   if (!p) {
     notFound();
   }
@@ -30,6 +31,7 @@ export default async function EditProductPage({
         product={{
           name: p.name,
           category: p.category,
+          brand: p.brand,
           price: p.price,
           description: p.description,
           shortDescription: p.shortDescription,
@@ -38,6 +40,7 @@ export default async function EditProductPage({
           stock: p.stock,
           active: p.active,
         }}
+        categories={Array.from(new Set([...categories, p.category]))}
       />
       <div className="pt-4 border-t">
         <DeleteProductButton productId={p._id.toString()} name={p.name} />

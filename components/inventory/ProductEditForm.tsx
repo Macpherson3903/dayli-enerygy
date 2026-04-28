@@ -5,18 +5,19 @@ import { updateProductAction } from "@/app/actions/products";
 import { Input, Textarea } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
 import { ImageUrlField } from "./ImageUrlField";
-import type { ProductCategory } from "@/lib/types";
 
 const initial: { error?: string; ok?: boolean } | undefined = undefined;
 
 export function ProductEditForm({
   productId,
   product,
+  categories,
 }: {
   productId: string;
   product: {
     name: string;
-    category: Exclude<ProductCategory, "all">;
+    category: string;
+    brand?: string;
     price: number;
     description: string;
     shortDescription?: string;
@@ -25,6 +26,7 @@ export function ProductEditForm({
     stock: number;
     active: boolean;
   };
+  categories: string[];
 }) {
   const [state, formAction, pending] = useActionState(
     (prev: typeof initial, formData: FormData) =>
@@ -64,11 +66,18 @@ export function ProductEditForm({
           required
           defaultValue={product.category}
         >
-          <option value="solar">Solar</option>
-          <option value="inverter">Inverter</option>
-          <option value="battery">Battery</option>
+          {categories.map((category) => (
+            <option key={category} value={category}>
+              {category}
+            </option>
+          ))}
         </select>
       </div>
+      <Input
+        name="brand"
+        label="Brand (optional)"
+        defaultValue={product.brand ?? ""}
+      />
       <Input
         name="price"
         label="Price (₦)"

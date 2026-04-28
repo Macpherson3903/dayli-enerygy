@@ -30,7 +30,8 @@ export const productInputSchema = z.object({
     .string()
     .min(1)
     .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/),
-  category: z.enum(["solar", "inverter", "battery"]),
+  category: z.string().trim().min(1),
+  brand: z.string().trim().max(120).optional(),
   price: z.number().nonnegative(),
   description: z.string().min(1),
   shortDescription: z.string().max(500).optional(),

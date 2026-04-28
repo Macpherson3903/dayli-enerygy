@@ -1,9 +1,11 @@
+import { getInventoryCategories } from "@/lib/db/products";
 import { ProductCreateForm } from "@/components/inventory/ProductCreateForm";
 
-export default function AddInventoryPage() {
+export default async function AddInventoryPage() {
+  const categories = await getInventoryCategories();
   return (
     <div className="max-w-2xl">
-      <ProductCreateForm />
+      <ProductCreateForm categories={categories} />
     </div>
   );
 }

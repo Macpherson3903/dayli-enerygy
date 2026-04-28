@@ -7,9 +7,6 @@ import ShopCatalogLayout from "@/components/shop/ShopCatalogLayout";
 import ShopToolbar from "@/components/shop/ShopToolbar";
 import ProductGrid from "@/components/shop/ProductGrid";
 import type { ProductPublic } from "@/lib/types";
-import { CATEGORIES } from "@/lib/constants";
-
-const CAT_LIST = [...CATEGORIES] as string[];
 
 export default function ShopCatalogClient({
   initialProducts,
@@ -37,6 +34,13 @@ export default function ShopCatalogClient({
 
   const [sort, setSort] = useState("default");
   const [search, setSearch] = useState("");
+  const categories = useMemo(
+    () =>
+      ["all", ...Array.from(new Set(initialProducts.map((p) => p.category))).sort(
+        (a, b) => a.localeCompare(b)
+      )],
+    [initialProducts]
+  );
 
   const filteredProducts = useMemo(() => {
     let result = initialProducts;
@@ -62,7 +66,7 @@ export default function ShopCatalogClient({
       <ShopCatalogLayout
         category={category}
         setCategory={setCategory}
-        categories={CAT_LIST}
+        categories={categories}
       >
         <ProductGrid products={filteredProducts} />
       </ShopCatalogLayout>

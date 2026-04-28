@@ -3,7 +3,7 @@ import type { ProductCategory } from "@/lib/types";
 export type SeedProduct = {
   name: string;
   slug: string;
-  category: Exclude<ProductCategory, "all">;
+  category: Exclude<ProductCategory, "all"> | string;
   price: number;
   image: string;
   shortDescription: string;

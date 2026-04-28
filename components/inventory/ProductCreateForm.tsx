@@ -9,7 +9,7 @@ import { ImageUrlField } from "./ImageUrlField";
 
 const initial: { error?: string; ok?: boolean } | undefined = undefined;
 
-export function ProductCreateForm() {
+export function ProductCreateForm({ categories }: { categories: string[] }) {
   const [state, formAction, pending] = useActionState(
     createProductAction,
     initial
@@ -42,13 +42,16 @@ export function ProductCreateForm() {
             name="category"
             className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
             required
-            defaultValue="solar"
+            defaultValue={categories[0] ?? ""}
           >
-            <option value="solar">Solar</option>
-            <option value="inverter">Inverter</option>
-            <option value="battery">Battery</option>
+            {categories.map((category) => (
+              <option key={category} value={category}>
+                {category}
+              </option>
+            ))}
           </select>
         </div>
+        <Input name="brand" label="Brand (optional)" />
         <Input
           name="price"
           label="Price (₦)"

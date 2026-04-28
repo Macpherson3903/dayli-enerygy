@@ -43,6 +43,8 @@ function seedProductsAsPublic(): ProductPublic[] {
 }
 
 const COL = "products";
+const CATEGORY_COL = "inventoryCategories";
+const DEFAULT_CATEGORIES = ["solar", "inverter", "battery"];
 
 function toPublic(p: ProductDoc): ProductPublic {
   return {
@@ -50,6 +52,7 @@ function toPublic(p: ProductDoc): ProductPublic {
     name: p.name,
     slug: p.slug,
     category: p.category,
+    brand: p.brand,
     price: p.price,
     description: p.description,
     shortDescription: p.shortDescription,
@@ -75,6 +78,7 @@ export async function seedProductsIfEmpty() {
     slug: s.slug,
     category: s.category,
     price: s.price,
+    brand: undefined,
     description: s.description,
     shortDescription: s.shortDescription,
     image: s.image,
@@ -212,6 +216,7 @@ export async function createProduct(input: ProductInput) {
     name: input.name,
     slug: input.slug,
     category: input.category,
+    brand: input.brand,
     price: input.price,
     description: input.description,
     shortDescription: input.shortDescription,
@@ -227,6 +232,50 @@ export async function createProduct(input: ProductInput) {
     .collection<Omit<ProductDoc, "_id">>(COL)
     .insertOne(doc);
   return r.insertedId;
+}
+
+export async function getInventoryCategories(): Promise<string[]> {
+  const db = await getDb();
+  const docs = await db
+    .collection<{ name: string }>(CATEGORY_COL)
+    .find()
+    .project({ _id: 0, name: 1 })
+    .toArray();
+  const products = await db
+    .collection<ProductDoc>(COL)
+    .find()
+    .project({ _id: 0, category: 1 })
+    .toArray();
+  const productCategories = products.map((p) => p.category).filter(Boolean);
+  return Array.from(
+    new Set([
+      ...DEFAULT_CATEGORIES,
+      ...docs.map((d) => d.name),
+      ...productCategories,
+    ])
+  ).sort((a, b) => a.localeCompare(b));
+}
+
+export async function addInventoryCategory(name: string) {
+  const trimmed = name.trim().toLowerCase();
+  if (!trimmed) throw new Error("Category name is required");
+  const db = await getDb();
+  await db.collection(CATEGORY_COL).updateOne(
+    { name: trimmed },
+    { $setOnInsert: { name: trimmed, createdAt: new Date() } },
+    { upsert: true }
+  );
+}
+
+export async function removeInventoryCategory(name: string) {
+  const trimmed = name.trim().toLowerCase();
+  if (!trimmed) throw new Error("Category name is required");
+  const db = await getDb();
+  const inUse = await db.collection(COL).countDocuments({ category: trimmed });
+  if (inUse > 0) {
+    throw new Error("Cannot remove a category that has products");
+  }
+  await db.collection(CATEGORY_COL).deleteOne({ name: trimmed });
 }
 
 export async function updateProduct(

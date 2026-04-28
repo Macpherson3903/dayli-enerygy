@@ -7,6 +7,8 @@ import {
   createProduct,
   updateProduct,
   deleteProduct,
+  addInventoryCategory,
+  removeInventoryCategory,
 } from "@/lib/db/products";
 
 function makeSlugFromName(name: string): string {
@@ -25,6 +27,7 @@ function makeSlugFromName(name: string): string {
 function formToProductInput(formData: FormData, forUpdate: boolean) {
   const name = String(formData.get("name") ?? "");
   const category = String(formData.get("category") ?? "solar");
+  const brandRaw = String(formData.get("brand") ?? "");
   const price = Number(formData.get("price"));
   const description = String(formData.get("description") ?? "");
   const shortRaw = String(formData.get("shortDescription") ?? "");
@@ -40,7 +43,8 @@ function formToProductInput(formData: FormData, forUpdate: boolean) {
 
   const base = {
     name,
-    category: category as ProductInput["category"],
+    category: category.trim().toLowerCase(),
+    brand: brandRaw.trim() || undefined,
     price,
     description,
     image,
@@ -79,6 +83,52 @@ export async function createProductAction(
   revalidatePath("/admin/inventory");
   revalidatePath("/shop");
   revalidatePath("/");
+  return { ok: true as const };
+}
+
+export async function addInventoryCategoryAction(
+  _prev: { error?: string; ok?: boolean } | undefined,
+  formData: FormData
+) {
+  if ((await getAppRole()) !== "inventory_admin") {
+    return { error: "Not allowed" };
+  }
+  const name = String(formData.get("categoryName") ?? "");
+  if (!name.trim()) {
+    return { error: "Category name is required" };
+  }
+  try {
+    await addInventoryCategory(name);
+  } catch (error) {
+    return { error: error instanceof Error ? error.message : "Unable to add category" };
+  }
+  revalidatePath("/admin/inventory/dashboard");
+  revalidatePath("/admin/inventory/add");
+  revalidatePath("/admin/inventory");
+  revalidatePath("/shop");
+  return { ok: true as const };
+}
+
+export async function removeInventoryCategoryAction(
+  _prev: { error?: string; ok?: boolean } | undefined,
+  formData: FormData
+) {
+  if ((await getAppRole()) !== "inventory_admin") {
+    return { error: "Not allowed" };
+  }
+  const name = String(formData.get("categoryName") ?? "");
+  if (!name.trim()) {
+    return { error: "Select a category to remove" };
+  }
+  try {
+    await removeInventoryCategory(name);
+  } catch (error) {
+    return { error: error instanceof Error ? error.message : "Unable to remove category" };
+  }
+  revalidatePath("/admin/inventory/dashboard");
+  revalidatePath("/admin/inventory/add");
+  revalidatePath("/admin/inventory");
+  revalidatePath("/shop");
   return { ok: true as const };
 }
 
