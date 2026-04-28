@@ -1,24 +1,24 @@
 "use client";
 
-import { useActionState, useEffect, useRef } from "react";
+import { type FormEvent, useEffect, useRef, useState } from "react";
 import { useUser } from "@clerk/nextjs";
-import {
-  submitContactMessage,
-  type ContactFormState,
-} from "@/app/actions/contact";
 import { Input, Textarea } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
+import { useStatusMessage } from "@/context/StatusMessageContext";
 
-const initial: ContactFormState = {};
+type ContactFormState = {
+  error?: string;
+  success?: boolean;
+  fieldErrors?: Record<string, string>;
+};
 
 export function ContactForm() {
   const { user } = useUser();
+  const { showStatusMessage } = useStatusMessage();
   const formRef = useRef<HTMLFormElement>(null);
-  const [state, formAction, pending] = useActionState(
-    submitContactMessage,
-    initial
-  );
+  const [state, setState] = useState<ContactFormState>({});
+  const [pending, setPending] = useState(false);
 
   useEffect(() => {
     if (user?.primaryEmailAddress?.emailAddress) {
@@ -36,6 +36,52 @@ export function ContactForm() {
       formRef.current?.reset();
     }
   }, [state?.success]);
+
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const form = event.currentTarget;
+    const formData = new FormData(form);
+
+    setPending(true);
+    setState({});
+
+    try {
+      const response = await fetch("/api/contact", {
+        method: "POST",
+        body: formData,
+      });
+      const data = (await response.json()) as {
+        success?: boolean;
+        message?: string;
+        functionRan?: string;
+        fieldErrors?: Record<string, string>;
+      };
+
+      const statusMessage = data.functionRan
+        ? `${data.functionRan}: ${data.message ?? "Completed"}`
+        : data.message;
+      if (statusMessage) {
+        showStatusMessage(statusMessage, data.success ? "success" : "error");
+      }
+
+      setState({
+        success: Boolean(data.success),
+        error: data.success ? undefined : data.message ?? "Request failed.",
+        fieldErrors: data.fieldErrors ?? {},
+      });
+    } catch {
+      showStatusMessage(
+        "submitContactMessage: Network error. Please try again.",
+        "error"
+      );
+      setState({
+        success: false,
+        error: "Network error. Please try again.",
+      });
+    } finally {
+      setPending(false);
+    }
+  }
 
   const fe = state?.fieldErrors ?? {};
 
@@ -64,7 +110,7 @@ export function ContactForm() {
 
       <form
         ref={formRef}
-        action={formAction}
+        onSubmit={handleSubmit}
         className="relative flex flex-col gap-4"
       >
         <div

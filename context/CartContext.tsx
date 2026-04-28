@@ -18,6 +18,7 @@ import {
   removeMyCartLineAction,
   setMyCartQuantityAction,
 } from "@/app/actions/cart";
+import { useStatusMessage } from "@/context/StatusMessageContext";
 import type { CartLine, ProductPublic } from "@/lib/types";
 
 const STORAGE = "dayli-energy-cart";
@@ -60,6 +61,7 @@ function clearStorage() {
 
 export function CartProvider({ children }: { children: React.ReactNode }) {
   const { isLoaded: authLoaded, isSignedIn } = useUser();
+  const { showStatusMessage } = useStatusMessage();
   const [lines, setLines] = useState<CartLine[]>([]);
   const [ready, setReady] = useState(false);
   const hydratedRef = useRef(false);
@@ -169,14 +171,18 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         },
       ];
     });
+    showStatusMessage(`${p.name} added to cart.`, "success");
     if (isSignedIn) {
       void addMyCartItemAction(p, qty)
         .then((next) => setLines(next.lines))
         .catch(() => {
-          // Keep optimistic local state on sync failure.
+          showStatusMessage(
+            "Added to cart, but we could not sync with your account.",
+            "error"
+          );
         });
     }
-  }, [isSignedIn]);
+  }, [isSignedIn, showStatusMessage]);
 
   const setQuantity = useCallback((productId: string, quantity: number) => {
     setLines((prev) => {

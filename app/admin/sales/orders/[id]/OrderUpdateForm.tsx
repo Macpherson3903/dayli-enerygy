@@ -1,12 +1,13 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect } from "react";
 import { updateOrderStatusAction } from "@/app/actions/orders";
 import { Button } from "@/components/ui/Button";
 import { Textarea } from "@/components/ui/Input";
 import { Card } from "@/components/ui/Card";
 import type { OrderStatus } from "@/lib/types";
 import { ORDER_STATUS_LABEL } from "@/lib/constants";
+import { useStatusMessage } from "@/context/StatusMessageContext";
 
 type S = { error?: string; ok?: boolean } | undefined;
 
@@ -23,10 +24,22 @@ export function OrderUpdateForm({
   internalNotes: string;
   statusOptions: OrderStatus[];
 }) {
+  const { showStatusMessage } = useStatusMessage();
   const [state, formAction, pending] = useActionState(
     updateOrderStatusAction,
     initial
   );
+
+  useEffect(() => {
+    if (!state) return;
+    if (state.error) {
+      showStatusMessage(`Order update failed: ${state.error}`, "error");
+      return;
+    }
+    if (state.ok) {
+      showStatusMessage("Order updated successfully.", "success");
+    }
+  }, [state, showStatusMessage]);
 
   return (
     <Card>

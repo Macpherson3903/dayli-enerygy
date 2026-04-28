@@ -1,10 +1,11 @@
 "use client";
 
-import { useActionState, useId } from "react";
+import { useActionState, useEffect, useId } from "react";
 import { updateProductAction } from "@/app/actions/products";
 import { Input, Textarea } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
 import { ImageUrlField } from "./ImageUrlField";
+import { useStatusMessage } from "@/context/StatusMessageContext";
 
 const initial: { error?: string; ok?: boolean } | undefined = undefined;
 
@@ -28,12 +29,25 @@ export function ProductEditForm({
   };
   categories: string[];
 }) {
+  const { showStatusMessage } = useStatusMessage();
   const [state, formAction, pending] = useActionState(
     (prev: typeof initial, formData: FormData) =>
       updateProductAction(productId, prev, formData),
     initial
   );
   const activeId = useId();
+
+  useEffect(() => {
+    if (!state) return;
+    if (state.error) {
+      showStatusMessage(`Save failed: ${state.error}`, "error");
+      return;
+    }
+    if (state.ok) {
+      showStatusMessage("Product updated successfully.", "success");
+    }
+  }, [state, showStatusMessage]);
+
   return (
     <form action={formAction} className="space-y-3 rounded-2xl border border-gray-200 p-5">
       {state?.error && (

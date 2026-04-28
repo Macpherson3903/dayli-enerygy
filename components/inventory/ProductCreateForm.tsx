@@ -1,19 +1,32 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect } from "react";
 import { createProductAction } from "@/app/actions/products";
 import { Input, Textarea } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { ImageUrlField } from "./ImageUrlField";
+import { useStatusMessage } from "@/context/StatusMessageContext";
 
 const initial: { error?: string; ok?: boolean } | undefined = undefined;
 
 export function ProductCreateForm({ categories }: { categories: string[] }) {
+  const { showStatusMessage } = useStatusMessage();
   const [state, formAction, pending] = useActionState(
     createProductAction,
     initial
   );
+
+  useEffect(() => {
+    if (!state) return;
+    if (state.error) {
+      showStatusMessage(`Create product failed: ${state.error}`, "error");
+      return;
+    }
+    if (state.ok) {
+      showStatusMessage("Product created successfully.", "success");
+    }
+  }, [state, showStatusMessage]);
 
   return (
     <Card>

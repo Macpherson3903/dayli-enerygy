@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect } from "react";
 import {
   addInventoryCategoryAction,
   removeInventoryCategoryAction,
@@ -8,10 +8,12 @@ import {
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
+import { useStatusMessage } from "@/context/StatusMessageContext";
 
 const initialState: { error?: string; ok?: boolean } | undefined = undefined;
 
 export function CategoryManagerCard({ categories }: { categories: string[] }) {
+  const { showStatusMessage } = useStatusMessage();
   const [addState, addAction, adding] = useActionState(
     addInventoryCategoryAction,
     initialState
@@ -20,6 +22,28 @@ export function CategoryManagerCard({ categories }: { categories: string[] }) {
     removeInventoryCategoryAction,
     initialState
   );
+
+  useEffect(() => {
+    if (!addState) return;
+    if (addState.error) {
+      showStatusMessage(`Add category failed: ${addState.error}`, "error");
+      return;
+    }
+    if (addState.ok) {
+      showStatusMessage("Category added successfully.", "success");
+    }
+  }, [addState, showStatusMessage]);
+
+  useEffect(() => {
+    if (!removeState) return;
+    if (removeState.error) {
+      showStatusMessage(`Remove category failed: ${removeState.error}`, "error");
+      return;
+    }
+    if (removeState.ok) {
+      showStatusMessage("Category removed successfully.", "success");
+    }
+  }, [removeState, showStatusMessage]);
 
   return (
     <Card>

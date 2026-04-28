@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { deleteProductAction } from "@/app/actions/products";
 import { Button } from "@/components/ui/Button";
+import { useStatusMessage } from "@/context/StatusMessageContext";
 
 export function DeleteProductButton({
   productId,
@@ -13,6 +14,7 @@ export function DeleteProductButton({
   name: string;
 }) {
   const router = useRouter();
+  const { showStatusMessage } = useStatusMessage();
   const [pending, setPending] = useState(false);
   const [err, setErr] = useState("");
 
@@ -23,9 +25,11 @@ export function DeleteProductButton({
     const r = await deleteProductAction(productId);
     if (r && "error" in r && r.error) {
       setErr(r.error);
+      showStatusMessage(`Delete product failed: ${r.error}`, "error");
       setPending(false);
       return;
     }
+    showStatusMessage("Product deleted successfully.", "success");
     router.push("/admin/inventory");
   }
 

@@ -1,25 +1,5 @@
-"use client";
-
 import Image from "next/image";
 import Link from "next/link";
-import { motion } from "framer-motion";
-
-const fadeUp = {
-  hidden: { opacity: 0, y: 16 },
-  show: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.5, ease: [0.33, 1, 0.68, 1] as const },
-  },
-};
-
-const fadeIn = {
-  hidden: { opacity: 0 },
-  show: {
-    opacity: 1,
-    transition: { duration: 0.6, ease: [0.33, 1, 0.68, 1] as const },
-  },
-};
 
 export default function Hero() {
   return (
@@ -30,7 +10,7 @@ export default function Hero() {
           src="/heroImg.png"
           alt="Solar installation background"
           fill
-          priority
+          sizes="100vw"
           className="object-cover object-center"
         />
         <div className="absolute inset-0 bg-[#0B5D3B]/85" />
@@ -43,6 +23,7 @@ export default function Hero() {
           alt="Solar background"
           fill
           priority
+          sizes="100vw"
           className="object-cover object-center"
         />
         <div className="absolute inset-0 bg-[#0B5D3B]/80" />
@@ -51,12 +32,7 @@ export default function Hero() {
       <div className="mx-auto max-w-7xl px-6 py-20 md:py-28">
         <div className="grid items-center gap-12 md:grid-cols-2">
           {/* Text */}
-          <motion.div
-            variants={fadeUp}
-            initial="hidden"
-            animate="show"
-            className="max-w-xl"
-          >
+          <div className="max-w-xl">
             <h1 className="text-4xl font-bold leading-tight tracking-tight sm:text-5xl">
               Power Your Life with Reliable Solar Energy
             </h1>
@@ -75,25 +51,20 @@ export default function Hero() {
                 Browse Products
               </Link>
             </div>
-          </motion.div>
+          </div>
 
           {/* Image (desktop only) */}
-          <motion.div
-            variants={fadeIn}
-            initial="hidden"
-            animate="show"
-            className="relative hidden w-full md:block"
-          >
+          <div className="relative hidden w-full md:block">
             <div className="relative h-[420px] w-full overflow-hidden rounded-xl shadow-2xl">
               <Image
                 src="/heroImg.png"
                 alt="Solar panel installation"
                 fill
-                priority
+                sizes="(min-width: 768px) 50vw, 100vw"
                 className="object-cover"
               />
             </div>
-          </motion.div>
+          </div>
         </div>
       </div>
     </section>
