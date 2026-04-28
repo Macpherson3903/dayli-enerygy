@@ -30,13 +30,6 @@ export function ProductCreateForm() {
       )}
       <form action={formAction} className="space-y-3">
         <Input name="name" label="Name" required />
-        <Input
-          name="slug"
-          label="URL slug (lowercase, hyphens)"
-          required
-          pattern="[a-z0-9]+(?:-[a-z0-9]+)*"
-          title="e.g. solar-panel-300w"
-        />
         <div>
           <label
             htmlFor="category"

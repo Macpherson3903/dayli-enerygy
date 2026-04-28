@@ -29,7 +29,6 @@ export default async function EditProductPage({
         productId={p._id.toString()}
         product={{
           name: p.name,
-          slug: p.slug,
           category: p.category,
           price: p.price,
           description: p.description,

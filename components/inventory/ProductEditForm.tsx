@@ -16,7 +16,6 @@ export function ProductEditForm({
   productId: string;
   product: {
     name: string;
-    slug: string;
     category: Exclude<ProductCategory, "all">;
     price: number;
     description: string;
@@ -50,13 +49,6 @@ export function ProductEditForm({
         label="Name"
         defaultValue={product.name}
         required
-      />
-      <Input
-        name="slug"
-        label="URL slug"
-        defaultValue={product.slug}
-        required
-        pattern="[a-z0-9]+(?:-[a-z0-9]+)*"
       />
       <div>
         <label

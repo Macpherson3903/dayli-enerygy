@@ -1,11 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { Input } from "@/components/ui/Input";
 
 export function ImageUrlField({
   name = "image",
-  label = "Image URL",
+  label = "Product image",
   defaultValue = "",
 }: {
   name?: string;
@@ -39,14 +38,8 @@ export function ImageUrlField({
 
   return (
     <div className="space-y-2">
-      <Input
-        name={name}
-        label={label}
-        value={value}
-        onChange={(e) => setValue(e.target.value)}
-        required
-        hint="Upload an image, or paste a /public or https URL"
-      />
+      <p className="block text-sm font-medium text-gray-700">{label}</p>
+      <input type="hidden" name={name} value={value} readOnly />
       {err && <p className="text-sm text-red-600">{err}</p>}
       <div className="flex flex-wrap items-center gap-2">
         <input
@@ -59,7 +52,22 @@ export function ImageUrlField({
         {status === "uploading" && (
           <span className="text-xs text-gray-500">Uploading…</span>
         )}
+        {value && status !== "uploading" && (
+          <span className="text-xs text-green-700">Image uploaded.</span>
+        )}
       </div>
+      {value ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={value}
+          alt="Product preview"
+          className="h-24 w-24 rounded-md border border-gray-200 object-cover"
+        />
+      ) : (
+        <p className="text-xs text-gray-500">
+          Choose an image from your device to upload.
+        </p>
+      )}
     </div>
   );
 }

@@ -9,9 +9,21 @@ import {
   deleteProduct,
 } from "@/lib/db/products";
 
-function formToProductInput(formData: FormData, forUpdate: boolean): ProductInput {
+function makeSlugFromName(name: string): string {
+  const base = name
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, "")
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "");
+  const safeBase = base || "product";
+  const suffix = Date.now().toString(36).slice(-6);
+  return `${safeBase}-${suffix}`;
+}
+
+function formToProductInput(formData: FormData, forUpdate: boolean) {
   const name = String(formData.get("name") ?? "");
-  const slug = String(formData.get("slug") ?? "");
   const category = String(formData.get("category") ?? "solar");
   const price = Number(formData.get("price"));
   const description = String(formData.get("description") ?? "");
@@ -28,7 +40,6 @@ function formToProductInput(formData: FormData, forUpdate: boolean): ProductInpu
 
   const base = {
     name,
-    slug,
     category: category as ProductInput["category"],
     price,
     description,
@@ -54,7 +65,11 @@ export async function createProductAction(
     return { error: "Not allowed" };
   }
   const raw = formToProductInput(formData, false);
-  const parsed = productInputSchema.safeParse({ ...raw, active: true });
+  const parsed = productInputSchema.safeParse({
+    ...raw,
+    slug: makeSlugFromName(raw.name),
+    active: true,
+  });
   if (!parsed.success) {
     return {
       error: parsed.error.flatten().formErrors[0] ?? "Check all fields",
@@ -76,7 +91,9 @@ export async function updateProductAction(
     return { error: "Not allowed" };
   }
   const raw = formToProductInput(formData, true);
-  const parsed = productInputSchema.safeParse(raw);
+  const parsed = productInputSchema
+    .omit({ slug: true })
+    .safeParse(raw);
   if (!parsed.success) {
     return {
       error: parsed.error.flatten().formErrors[0] ?? "Check all fields",
