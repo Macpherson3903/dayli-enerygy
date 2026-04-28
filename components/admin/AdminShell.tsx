@@ -6,14 +6,39 @@ import type { ReactNode } from "react";
 import type { AppRole } from "@/lib/types";
 import { clsx } from "clsx";
 import { UserButton } from "@clerk/nextjs";
-import { Package, ClipboardList, LayoutDashboard, ShoppingBag } from "lucide-react";
+import {
+  Package,
+  ClipboardList,
+  LayoutDashboard,
+  ShoppingBag,
+  Layers3,
+  PlusCircle,
+  FolderTree,
+} from "lucide-react";
 
-type Item = { href: string; label: string; roles: AppRole[]; icon: typeof Package };
+type Item = {
+  href: string;
+  label: string;
+  roles: AppRole[];
+  icon: typeof Package;
+  children?: Array<{ href: string; label: string }>;
+};
 
 const items: Item[] = [
   { href: "/admin/sales", label: "Sales & orders", roles: ["sales_admin"], icon: ClipboardList },
   { href: "/admin/sales/catalog", label: "Catalog (read-only)", roles: ["sales_admin"], icon: ShoppingBag },
-  { href: "/admin/inventory", label: "Inventory", roles: ["inventory_admin"], icon: Package },
+  {
+    href: "/admin/inventory/dashboard",
+    label: "Inventory",
+    roles: ["inventory_admin"],
+    icon: Package,
+    children: [
+      { href: "/admin/inventory/dashboard", label: "Dashboard" },
+      { href: "/admin/inventory/overview", label: "Overview" },
+      { href: "/admin/inventory/add", label: "Add inventory" },
+      { href: "/admin/inventory/categories", label: "Manage categories" },
+    ],
+  },
 ];
 
 export function AdminShell({
@@ -50,21 +75,57 @@ export function AdminShell({
           <nav className="rounded-2xl border border-gray-200 bg-white p-2 space-y-0.5">
             {visible.map((item) => {
               const Icon = item.icon;
-              const active = path === item.href || path.startsWith(item.href + "/");
+              const active = item.children
+                ? path.startsWith("/admin/inventory")
+                : path === item.href || path.startsWith(item.href + "/");
               return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className={clsx(
-                    "flex items-center gap-2 rounded-lg px-3 py-2 text-sm",
-                    active
-                      ? "bg-brand-700 text-white"
-                      : "text-gray-700 hover:bg-gray-100"
+                <div key={item.href}>
+                  <Link
+                    href={item.href}
+                    className={clsx(
+                      "flex items-center gap-2 rounded-lg px-3 py-2 text-sm",
+                      active
+                        ? "bg-brand-700 text-white"
+                        : "text-gray-700 hover:bg-gray-100"
+                    )}
+                  >
+                    <Icon className="w-4 h-4" />
+                    {item.label}
+                  </Link>
+                  {item.children && active && (
+                    <div className="mt-1 ml-6 space-y-0.5 border-l border-gray-200 pl-3">
+                      {item.children.map((child) => {
+                        const childActive = path === child.href;
+                        return (
+                          <Link
+                            key={child.href}
+                            href={child.href}
+                            className={clsx(
+                              "flex items-center gap-2 rounded-md px-2 py-1.5 text-xs",
+                              childActive
+                                ? "bg-brand-100 text-brand-800 font-medium"
+                                : "text-gray-600 hover:bg-gray-100"
+                            )}
+                          >
+                            {child.href.endsWith("/dashboard") && (
+                              <LayoutDashboard className="w-3.5 h-3.5" />
+                            )}
+                            {child.href.endsWith("/overview") && (
+                              <Layers3 className="w-3.5 h-3.5" />
+                            )}
+                            {child.href.endsWith("/add") && (
+                              <PlusCircle className="w-3.5 h-3.5" />
+                            )}
+                            {child.href.endsWith("/categories") && (
+                              <FolderTree className="w-3.5 h-3.5" />
+                            )}
+                            {child.label}
+                          </Link>
+                        );
+                      })}
+                    </div>
                   )}
-                >
-                  <Icon className="w-4 h-4" />
-                  {item.label}
-                </Link>
+                </div>
               );
             })}
           </nav>

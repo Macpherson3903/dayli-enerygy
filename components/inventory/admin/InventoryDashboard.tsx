@@ -3,7 +3,6 @@ import { ChartCard } from "@/components/charts/ChartCard";
 import { BreakdownBarChart } from "@/components/charts/BreakdownBarChart";
 import { DistributionPieChart } from "@/components/charts/DistributionPieChart";
 import type { ProductDoc } from "@/lib/types";
-import { CategoryManagerCard } from "./CategoryManagerCard";
 
 function getSummary(products: ProductDoc[]) {
   const total = products.length;
@@ -14,13 +13,7 @@ function getSummary(products: ProductDoc[]) {
   return { total, inStock, lowStock, outOfStock };
 }
 
-export function InventoryDashboard({
-  products,
-  categories,
-}: {
-  products: ProductDoc[];
-  categories: string[];
-}) {
+export function InventoryDashboard({ products }: { products: ProductDoc[] }) {
   const inventoryCharts = buildInventoryChartMetrics(products);
   const summary = getSummary(products);
 
@@ -58,7 +51,6 @@ export function InventoryDashboard({
           <BreakdownBarChart data={inventoryCharts.stockHealth} />
         </ChartCard>
       </div>
-      <CategoryManagerCard categories={categories} />
     </div>
   );
 }
