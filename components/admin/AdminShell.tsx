@@ -34,6 +34,7 @@ const items: Item[] = [
     children: [
       { href: "/admin/sales", label: "Dashboard" },
       { href: "/admin/sales/orders", label: "Orders" },
+      { href: "/admin/sales/bookings", label: "Bookings" },
       { href: "/admin/sales/users", label: "Users" },
     ],
   },
@@ -124,6 +125,9 @@ export function AdminShell({
                               <LayoutDashboard className="w-3.5 h-3.5" />
                             )}
                             {child.href.endsWith("/orders") && (
+                              <ClipboardList className="w-3.5 h-3.5" />
+                            )}
+                            {child.href.endsWith("/bookings") && (
                               <ClipboardList className="w-3.5 h-3.5" />
                             )}
                             {child.href.endsWith("/users") && (

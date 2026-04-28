@@ -50,6 +50,9 @@ export default function Footer() {
                             <Link href="/quotation" className="hover:text-white transition">Quotation</Link>
                         </li>
                         <li>
+                            <Link href="/installation-booking" className="hover:text-white transition">Installation Booking</Link>
+                        </li>
+                        <li>
                             <Link
                                 href={isAuthenticated ? "/dashboard" : "/account"}
                                 className="hover:text-white transition"

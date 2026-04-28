@@ -9,6 +9,15 @@ export type OrderStatus =
   | "fulfilled"
   | "cancelled";
 
+export type InstallationBookingStatus =
+  | "new"
+  | "contacted"
+  | "site_visit_scheduled"
+  | "quoted"
+  | "confirmed"
+  | "installed"
+  | "cancelled";
+
 export type ProductCategory = "solar" | "inverter" | "battery" | "all";
 
 export type ProductDoc = {
@@ -49,6 +58,37 @@ export type OrderDoc = {
     preferredTime?: string;
   };
   status: OrderStatus;
+  internalNotes: string;
+  userId: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+};
+
+export type InstallationBookingDoc = {
+  _id: ObjectId;
+  bookingNumber: string;
+  customer: {
+    name: string;
+    email: string;
+    phone: string;
+  };
+  site: {
+    address: string;
+    city: string;
+    state: string;
+    propertyType: "residential" | "commercial";
+    roofType: "pitched" | "flat" | "mixed" | "unknown";
+  };
+  schedule: {
+    preferredDate: string;
+    preferredTime: "morning" | "afternoon" | "evening" | "flexible";
+  };
+  details: {
+    electricityBillRange: "lt50k" | "50k-100k" | "100k-250k" | "gt250k" | "unknown";
+    message?: string;
+  };
+  consent: true;
+  status: InstallationBookingStatus;
   internalNotes: string;
   userId: string | null;
   createdAt: Date;

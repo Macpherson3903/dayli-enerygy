@@ -10,6 +10,12 @@ const from =
   `Dayli Energy <${process.env.HOSTINGER_SMTP_USER ?? "noreply@example.com"}>`;
 const adminTo = process.env.ORDER_NOTIFY_EMAIL;
 
+function getInstallationNotifyTo() {
+  const direct = process.env.INSTALLATION_NOTIFY_EMAIL?.trim();
+  if (direct) return direct;
+  return process.env.ORDER_NOTIFY_EMAIL?.trim() ?? "";
+}
+
 function getContactNotifyTo() {
   const direct = process.env.CONTACT_NOTIFY_EMAIL?.trim();
   if (direct) return direct;
@@ -125,4 +131,90 @@ export async function sendOrderConfirmationToCustomer(payload: {
 ${payload.appUrl}
 `,
   });
+}
+
+export async function sendInstallationBookingEmailToOps(payload: {
+  bookingNumber: string;
+  name: string;
+  email: string;
+  phone: string;
+  address: string;
+  city: string;
+  state: string;
+  propertyType: string;
+  roofType: string;
+  preferredDate: string;
+  preferredTime: string;
+  electricityBillRange: string;
+  message?: string;
+  appUrl: string;
+}): Promise<boolean> {
+  const transporter = getTransporter();
+  const to = getInstallationNotifyTo();
+  if (!transporter || !to) {
+    console.info(
+      "[email] Installation booking email skipped (Hostinger SMTP or INSTALLATION_NOTIFY_EMAIL / ORDER_NOTIFY_EMAIL not set)"
+    );
+    return false;
+  }
+
+  const text = [
+    `New installation booking ${payload.bookingNumber}`,
+    "",
+    `Name: ${payload.name}`,
+    `Email: ${payload.email}`,
+    `Phone: ${payload.phone}`,
+    `Address: ${payload.address}`,
+    `City: ${payload.city}`,
+    `State: ${payload.state}`,
+    `Property type: ${payload.propertyType}`,
+    `Roof type: ${payload.roofType}`,
+    `Preferred date: ${payload.preferredDate}`,
+    `Preferred time: ${payload.preferredTime}`,
+    `Estimated monthly bill: ${payload.electricityBillRange}`,
+    ...(payload.message ? ["", "Message:", payload.message] : []),
+    "",
+    `Submitted via ${payload.appUrl}/installation-booking`,
+  ].join("\n");
+
+  try {
+    await transporter.sendMail({
+      from,
+      to: [to],
+      replyTo: payload.email,
+      subject: `[Installation Booking] ${payload.bookingNumber}`,
+      text,
+    });
+    return true;
+  } catch {
+    console.error("[email] Installation booking failed to send");
+    return false;
+  }
+}
+
+export async function sendInstallationBookingConfirmationToCustomer(payload: {
+  to: string;
+  bookingNumber: string;
+  appUrl: string;
+}): Promise<boolean> {
+  const transporter = getTransporter();
+  if (!transporter) return false;
+
+  try {
+    await transporter.sendMail({
+      from,
+      to: [payload.to],
+      subject: `We received your installation request — ${payload.bookingNumber}`,
+      text: `Thank you. Your installation booking request ${payload.bookingNumber} has been received.
+
+Our team will contact you soon to confirm your site visit and installation details.
+
+Dayli Energy
+${payload.appUrl}`,
+    });
+    return true;
+  } catch {
+    console.error("[email] Installation booking confirmation failed to send");
+    return false;
+  }
 }

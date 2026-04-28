@@ -15,6 +15,7 @@ const BASE_ITEMS: NavItem[] = [
   { label: "Home", href: "/" },
   { label: "Shop", href: "/shop" },
   { label: "Quotation", href: "/quotation" },
+  { label: "Installation Booking", href: "/installation-booking" },
   { label: "About", href: "/about" },
   { label: "Contact", href: "/contact" },
 ];

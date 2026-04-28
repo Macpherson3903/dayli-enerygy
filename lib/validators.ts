@@ -60,6 +60,21 @@ export const orderStatusUpdateSchema = z.object({
   internalNotes: z.string().max(5000),
 });
 
+export const installationBookingStatusUpdateSchema = z.object({
+  status: z.enum(
+    [
+      "new",
+      "contacted",
+      "site_visit_scheduled",
+      "quoted",
+      "confirmed",
+      "installed",
+      "cancelled",
+    ] as const
+  ),
+  internalNotes: z.string().max(5000),
+});
+
 /** Public fields only; honeypot `website` is validated in the server action. */
 export const contactMessageSchema = z.object({
   name: z.string().trim().min(1).max(200),
@@ -76,6 +91,41 @@ export const contactMessageSchema = z.object({
   message: z.string().trim().min(10).max(5000),
 });
 
+export const installationBookingSchema = z.object({
+  customer: z.object({
+    name: z.string().trim().min(1).max(200),
+    email: z.string().trim().email().max(320),
+    phone: z.string().trim().min(5).max(50),
+  }),
+  site: z.object({
+    address: z.string().trim().min(3).max(400),
+    city: z.string().trim().min(2).max(120),
+    state: z.string().trim().min(2).max(120),
+    propertyType: z.enum(["residential", "commercial"] as const),
+    roofType: z.enum(["pitched", "flat", "mixed", "unknown"] as const),
+  }),
+  schedule: z.object({
+    preferredDate: z.string().trim().min(4).max(40),
+    preferredTime: z.enum(["morning", "afternoon", "evening", "flexible"] as const),
+  }),
+  details: z.object({
+    electricityBillRange: z.enum(
+      ["lt50k", "50k-100k", "100k-250k", "gt250k", "unknown"] as const
+    ),
+    message: z
+      .string()
+      .trim()
+      .max(5000)
+      .transform((s) => (s === "" ? undefined : s))
+      .optional(),
+  }),
+  consent: z
+    .boolean()
+    .refine((v) => v === true, { message: "You must consent to continue" }),
+  userId: z.string().nullable().optional(),
+});
+
 export type CreateOrderInput = z.infer<typeof createOrderSchema>;
 export type ContactMessageInput = z.infer<typeof contactMessageSchema>;
+export type InstallationBookingInput = z.infer<typeof installationBookingSchema>;
 export type ProductInput = z.infer<typeof productInputSchema>;

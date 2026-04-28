@@ -6,6 +6,7 @@ import Footer from "@/components/Footer";
 const links = [
   { href: "/account", label: "Overview" },
   { href: "/account/orders", label: "Orders" },
+  { href: "/account/bookings", label: "Bookings" },
 ];
 
 export default function DashboardLayout({ children }: { children: ReactNode }) {
