@@ -5,6 +5,11 @@ import { Card } from "@/components/ui/Card";
 import { OrderStatusBadge } from "@/components/ui/StatusBadge";
 import { ORDER_STATUS_LABEL, ORDER_STATUSES } from "@/lib/constants";
 import type { OrderStatus } from "@/lib/types";
+import { buildSalesChartMetrics } from "@/lib/analytics/sales";
+import { ChartCard } from "@/components/charts/ChartCard";
+import { TrendLineChart } from "@/components/charts/TrendLineChart";
+import { BreakdownBarChart } from "@/components/charts/BreakdownBarChart";
+import { DistributionPieChart } from "@/components/charts/DistributionPieChart";
 
 export const dynamic = "force-dynamic";
 
@@ -33,6 +38,7 @@ function StatusSummary({ orders }: { orders: { status: OrderStatus }[] }) {
 
 export default async function SalesAdminPage() {
   const orders = await listAllOrders();
+  const salesCharts = buildSalesChartMetrics(orders);
   const customers = (() => {
     const m = new Map<
       string,
@@ -65,6 +71,31 @@ export default async function SalesAdminPage() {
           Pipeline
         </h2>
         <StatusSummary orders={orders} />
+      </div>
+      <div>
+        <h2 className="text-sm font-medium text-gray-500 uppercase mb-2">
+          Dashboard insights
+        </h2>
+        <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
+          <ChartCard
+            title="Orders and users trend"
+            description="Daily totals based on order creation dates."
+          >
+            <TrendLineChart data={salesCharts.ordersAndCustomersByDay} />
+          </ChartCard>
+          <ChartCard
+            title="Order status counts"
+            description="Current pipeline distribution by status."
+          >
+            <BreakdownBarChart data={salesCharts.statusBreakdown} />
+          </ChartCard>
+          <ChartCard
+            title="Status distribution"
+            description="Relative share of each order status."
+          >
+            <DistributionPieChart data={salesCharts.statusBreakdown} />
+          </ChartCard>
+        </div>
       </div>
       <div>
         <h2 className="text-sm font-medium text-gray-500 uppercase mb-2">
