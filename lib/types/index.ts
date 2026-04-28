@@ -66,3 +66,20 @@ export type ProductPublic = {
   features: string[];
   stock: number;
 };
+
+export type CartLine = {
+  productId: string;
+  name: string;
+  price: number;
+  quantity: number;
+  image: string;
+  maxStock: number;
+};
+
+export type CartDoc = {
+  _id: ObjectId;
+  userId: string;
+  lines: CartLine[];
+  createdAt: Date;
+  updatedAt: Date;
+};

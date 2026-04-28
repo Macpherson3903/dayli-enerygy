@@ -6,20 +6,21 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from "react";
-import type { ProductPublic } from "@/lib/types";
+import { useUser } from "@clerk/nextjs";
+import {
+  addMyCartItemAction,
+  clearMyCartAction,
+  getMyCartAction,
+  mergeMyCartAction,
+  removeMyCartLineAction,
+  setMyCartQuantityAction,
+} from "@/app/actions/cart";
+import type { CartLine, ProductPublic } from "@/lib/types";
 
 const STORAGE = "dayli-energy-cart";
-
-export type CartLine = {
-  productId: string;
-  name: string;
-  price: number;
-  quantity: number;
-  image: string;
-  maxStock: number;
-};
 
 type CartState = { lines: CartLine[] };
 
@@ -53,21 +54,88 @@ function saveToStorage(s: CartState) {
   localStorage.setItem(STORAGE, JSON.stringify(s));
 }
 
+function clearStorage() {
+  localStorage.removeItem(STORAGE);
+}
+
 export function CartProvider({ children }: { children: React.ReactNode }) {
+  const { isLoaded: authLoaded, isSignedIn } = useUser();
   const [lines, setLines] = useState<CartLine[]>([]);
   const [ready, setReady] = useState(false);
+  const hydratedRef = useRef(false);
+  const signedInRef = useRef(false);
 
-  // Client-only: hydrate from localStorage once (cannot read window on server).
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional hydration
-    setLines(load().lines);
-    setReady(true);
-  }, []);
+    if (!authLoaded || hydratedRef.current) return;
+    hydratedRef.current = true;
+    const localLines = load().lines;
+    if (!isSignedIn) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional one-time hydration
+      setLines(localLines);
+      setReady(true);
+      return;
+    }
+
+    let cancelled = false;
+    void (async () => {
+      try {
+        const remote = await getMyCartAction();
+        if (cancelled) return;
+        if (localLines.length > 0) {
+          const merged = await mergeMyCartAction(localLines);
+          if (cancelled) return;
+          setLines(merged.lines);
+          clearStorage();
+          return;
+        }
+        setLines(remote.lines);
+      } catch {
+        // Fallback to local cart when remote sync fails.
+        setLines(localLines);
+      } finally {
+        if (!cancelled) {
+          setReady(true);
+        }
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [authLoaded, isSignedIn]);
+
+  useEffect(() => {
+    if (!authLoaded || !ready || !hydratedRef.current) return;
+    if (signedInRef.current === isSignedIn) return;
+    signedInRef.current = isSignedIn;
+    if (!isSignedIn) {
+      const localLines = load().lines;
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional auth transition hydration
+      setLines(localLines);
+      return;
+    }
+    let cancelled = false;
+    void (async () => {
+      try {
+        const remote = await getMyCartAction();
+        if (!cancelled) {
+          setLines(remote.lines);
+          clearStorage();
+        }
+      } catch {
+        // Keep current in-memory cart if remote fetch fails.
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [authLoaded, isSignedIn, ready]);
 
   useEffect(() => {
     if (!ready) return;
+    if (isSignedIn) return;
     saveToStorage({ lines });
-  }, [lines, ready]);
+  }, [lines, ready, isSignedIn]);
 
   const addItem = useCallback((p: ProductPublic, qty: number) => {
     if (p.stock < 1) return;
@@ -101,7 +169,14 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         },
       ];
     });
-  }, []);
+    if (isSignedIn) {
+      void addMyCartItemAction(p, qty)
+        .then((next) => setLines(next.lines))
+        .catch(() => {
+          // Keep optimistic local state on sync failure.
+        });
+    }
+  }, [isSignedIn]);
 
   const setQuantity = useCallback((productId: string, quantity: number) => {
     setLines((prev) => {
@@ -115,13 +190,34 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         l.productId === productId ? { ...l, quantity: nq } : l
       );
     });
-  }, []);
+    if (isSignedIn) {
+      void setMyCartQuantityAction(productId, quantity)
+        .then((next) => setLines(next.lines))
+        .catch(() => {
+          // Keep optimistic local state on sync failure.
+        });
+    }
+  }, [isSignedIn]);
 
   const removeLine = useCallback((productId: string) => {
     setLines((prev) => prev.filter((l) => l.productId !== productId));
-  }, []);
+    if (isSignedIn) {
+      void removeMyCartLineAction(productId)
+        .then((next) => setLines(next.lines))
+        .catch(() => {
+          // Keep optimistic local state on sync failure.
+        });
+    }
+  }, [isSignedIn]);
 
-  const clear = useCallback(() => setLines([]), []);
+  const clear = useCallback(() => {
+    setLines([]);
+    if (isSignedIn) {
+      void clearMyCartAction().catch(() => {
+        // Keep UI cleared; remote cart can be refreshed later.
+      });
+    }
+  }, [isSignedIn]);
 
   const itemCount = useMemo(
     () => lines.reduce((a, b) => a + b.quantity, 0),

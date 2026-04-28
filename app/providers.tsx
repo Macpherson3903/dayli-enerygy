@@ -6,10 +6,10 @@ import type { ReactNode } from "react";
 
 export function Providers({ children }: { children: ReactNode }) {
   return (
-    <CartProvider>
-      <ClerkProvider signInUrl="/sign-in" signUpUrl="/sign-up">
+    <ClerkProvider signInUrl="/sign-in" signUpUrl="/sign-up">
+      <CartProvider>
         {children}
-      </ClerkProvider>
-    </CartProvider>
+      </CartProvider>
+    </ClerkProvider>
   );
 }
