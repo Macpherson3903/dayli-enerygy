@@ -52,6 +52,16 @@ export default async function SalesAdminPage() {
     .slice()
     .sort((a, b) => (b.createdAt ?? 0) - (a.createdAt ?? 0))
     .slice(0, 5);
+  const newOrdersCount = orders.filter((order) => order.status === "new").length;
+  const fulfilledOrdersCount = orders.filter(
+    (order) => order.status === "fulfilled"
+  ).length;
+  const summaryBreakdown = [
+    { label: "Orders", value: totalOrders },
+    { label: "Users", value: totalUsers },
+    { label: "New orders", value: newOrdersCount },
+    { label: "Fulfilled", value: fulfilledOrdersCount },
+  ];
 
   return (
     <div className="space-y-10">
@@ -70,15 +80,11 @@ export default async function SalesAdminPage() {
         </Card>
         <Card>
           <p className="text-xs uppercase text-gray-500">New orders</p>
-          <p className="text-3xl font-semibold mt-1">
-            {orders.filter((order) => order.status === "new").length}
-          </p>
+          <p className="text-3xl font-semibold mt-1">{newOrdersCount}</p>
         </Card>
         <Card>
           <p className="text-xs uppercase text-gray-500">Fulfilled orders</p>
-          <p className="text-3xl font-semibold mt-1">
-            {orders.filter((order) => order.status === "fulfilled").length}
-          </p>
+          <p className="text-3xl font-semibold mt-1">{fulfilledOrdersCount}</p>
         </Card>
       </div>
       <div>
@@ -90,6 +96,25 @@ export default async function SalesAdminPage() {
       <div>
         <h2 className="text-sm font-medium text-gray-500 uppercase mb-2">
           Dashboard insights
+        </h2>
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
+          <ChartCard
+            title="Website summary metrics"
+            description="Orders, users, and conversion stage totals."
+          >
+            <BreakdownBarChart data={summaryBreakdown} />
+          </ChartCard>
+          <ChartCard
+            title="Summary distribution"
+            description="Relative share of top-level summary totals."
+          >
+            <DistributionPieChart data={summaryBreakdown} />
+          </ChartCard>
+        </div>
+      </div>
+      <div>
+        <h2 className="text-sm font-medium text-gray-500 uppercase mb-2">
+          Sales trend and pipeline
         </h2>
         <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
           <ChartCard
