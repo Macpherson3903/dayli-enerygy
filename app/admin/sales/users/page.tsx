@@ -3,6 +3,11 @@ import { PageHeader } from "@/components/ui/PageHeader";
 
 export const dynamic = "force-dynamic";
 
+function formatTimestamp(value: number | null | undefined, fallback: string) {
+  if (!value) return fallback;
+  return new Date(value).toLocaleString();
+}
+
 export default async function SalesUsersPage() {
   const client = await clerkClient();
   const users = await client.users.getUserList({
@@ -49,10 +54,10 @@ export default async function SalesUsersPage() {
                   )}
                 </td>
                 <td className="px-4 py-2">
-                  {user.createdAt?.toLocaleString() ?? "N/A"}
+                  {formatTimestamp(user.createdAt, "N/A")}
                 </td>
                 <td className="px-4 py-2">
-                  {user.lastSignInAt?.toLocaleString() ?? "Never"}
+                  {formatTimestamp(user.lastSignInAt, "Never")}
                 </td>
               </tr>
             ))}

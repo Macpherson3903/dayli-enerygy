@@ -12,6 +12,11 @@ import { clerkClient } from "@clerk/nextjs/server";
 
 export const dynamic = "force-dynamic";
 
+function formatTimestamp(value: number | null | undefined): string {
+  if (!value) return "N/A";
+  return new Date(value).toLocaleString();
+}
+
 function StatusSummary({ orders }: { orders: { status: OrderStatus }[] }) {
   const counts: Record<OrderStatus, number> = {
     new: 0,
@@ -45,7 +50,7 @@ export default async function SalesAdminPage() {
   const recentOrders = orders.slice(0, 5);
   const recentUsers = users.data
     .slice()
-    .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
+    .sort((a, b) => (b.createdAt ?? 0) - (a.createdAt ?? 0))
     .slice(0, 5);
 
   return (
@@ -158,7 +163,7 @@ export default async function SalesAdminPage() {
                     {u.emailAddresses[0]?.emailAddress ?? "N/A"}
                   </td>
                   <td className="px-4 py-2">
-                    {u.createdAt.toLocaleString()}
+                    {formatTimestamp(u.createdAt)}
                   </td>
                 </tr>
               ))}
