@@ -14,6 +14,7 @@ import {
   Layers3,
   PlusCircle,
   FolderTree,
+  Users,
 } from "lucide-react";
 
 type Item = {
@@ -25,7 +26,17 @@ type Item = {
 };
 
 const items: Item[] = [
-  { href: "/admin/sales", label: "Sales & orders", roles: ["sales_admin"], icon: ClipboardList },
+  {
+    href: "/admin/sales",
+    label: "Sales",
+    roles: ["sales_admin"],
+    icon: ClipboardList,
+    children: [
+      { href: "/admin/sales", label: "Dashboard" },
+      { href: "/admin/sales/orders", label: "Orders" },
+      { href: "/admin/sales/users", label: "Users" },
+    ],
+  },
   { href: "/admin/sales/catalog", label: "Catalog (read-only)", roles: ["sales_admin"], icon: ShoppingBag },
   {
     href: "/admin/inventory/dashboard",
@@ -76,7 +87,9 @@ export function AdminShell({
             {visible.map((item) => {
               const Icon = item.icon;
               const active = item.children
-                ? path.startsWith("/admin/inventory")
+                ? item.href.startsWith("/admin/inventory")
+                  ? path.startsWith("/admin/inventory")
+                  : path.startsWith(item.href)
                 : path === item.href || path.startsWith(item.href + "/");
               return (
                 <div key={item.href}>
@@ -107,6 +120,15 @@ export function AdminShell({
                                 : "text-gray-600 hover:bg-gray-100"
                             )}
                           >
+                            {child.href === "/admin/sales" && (
+                              <LayoutDashboard className="w-3.5 h-3.5" />
+                            )}
+                            {child.href.endsWith("/orders") && (
+                              <ClipboardList className="w-3.5 h-3.5" />
+                            )}
+                            {child.href.endsWith("/users") && (
+                              <Users className="w-3.5 h-3.5" />
+                            )}
                             {child.href.endsWith("/dashboard") && (
                               <LayoutDashboard className="w-3.5 h-3.5" />
                             )}

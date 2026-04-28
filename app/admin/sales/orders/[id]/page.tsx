@@ -82,10 +82,10 @@ export default async function SalesOrderPage({
       />
       <p>
         <Link
-          href="/admin/sales"
+          href="/admin/sales/orders"
           className="text-sm text-brand-700 font-medium hover:underline"
         >
-          Back to sales
+          Back to orders
         </Link>
       </p>
     </div>
