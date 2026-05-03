@@ -2,6 +2,7 @@ import Navbar from "@/components/Navbar";
 import Hero from "@/components/Hero";
 import TrustBar from "@/components/TrustBar";
 import FeaturedProducts from "@/components/FeaturedProducts";
+import FeaturedPackages from "@/components/FeaturedPackages";
 import HowItWorks from "@/components/HowItWorks";
 import WhyDayli from "@/components/WhyDayli";
 import FAQ from "@/components/FAQ";
@@ -17,6 +18,7 @@ export default function Home() {
       <Hero />
       <TrustBar />
       <FeaturedProducts />
+      <FeaturedPackages />
       <HowItWorks />
       <WhyDayli />
       <FinalCTA />

@@ -8,7 +8,7 @@ export default function Hero() {
       <div className="absolute inset-0 -z-10 md:hidden">
         <Image
           src="/heroImg.png"
-          alt="Solar installation background"
+          alt=""
           fill
           sizes="100vw"
           className="object-cover object-center"
@@ -20,7 +20,7 @@ export default function Hero() {
       <div className="absolute inset-0 -z-10 hidden md:block">
         <Image
           src="/solarRoof.png"
-          alt="Solar background"
+          alt=""
           fill
           priority
           sizes="100vw"
@@ -29,41 +29,25 @@ export default function Hero() {
         <div className="absolute inset-0 bg-[#0B5D3B]/80" />
       </div>
 
-      <div className="mx-auto max-w-7xl px-6 py-20 md:py-28">
-        <div className="grid items-center gap-12 md:grid-cols-2">
-          {/* Text */}
-          <div className="max-w-xl">
-            <h1 className="text-4xl font-bold leading-tight tracking-tight sm:text-5xl">
-              Power Your Life with Reliable Solar Energy
-            </h1>
+      <div className="mx-auto max-w-7xl px-6 py-24 sm:py-28 md:py-32 lg:py-36">
+        <div className="mx-auto max-w-3xl text-center">
+          <h1 className="text-balance text-4xl font-bold leading-[1.1] tracking-tight sm:text-5xl lg:text-6xl">
+            Power Your Life with Reliable Solar Energy
+          </h1>
 
-            <p className="mt-5 text-base text-gray-200 sm:text-lg">
-              Affordable solar panels, inverters, and batteries for homes and
-              businesses. Built for efficiency, reliability, and long-term
-              savings.
-            </p>
+          <p className="mx-auto mt-6 max-w-2xl text-pretty text-base leading-relaxed text-white/90 sm:mt-7 sm:text-lg">
+            Affordable solar panels, inverters, and batteries for homes and
+            businesses. Built for efficiency, reliability, and long-term
+            savings.
+          </p>
 
-            <div className="mt-8">
-              <Link
-                href="/shop"
-                className="inline-flex items-center justify-center rounded-md bg-[#38C172] px-6 py-3 text-sm font-medium shadow-md transition hover:bg-[#2fa863] focus:outline-none focus:ring-2 focus:ring-white/50"
-              >
-                Browse Products
-              </Link>
-            </div>
-          </div>
-
-          {/* Image (desktop only) */}
-          <div className="relative hidden w-full md:block">
-            <div className="relative h-[420px] w-full overflow-hidden rounded-xl shadow-2xl">
-              <Image
-                src="/heroImg.png"
-                alt="Solar panel installation"
-                fill
-                sizes="(min-width: 768px) 50vw, 100vw"
-                className="object-cover"
-              />
-            </div>
+          <div className="mt-10 sm:mt-12">
+            <Link
+              href="/order"
+              className="inline-flex min-h-11 min-w-[10rem] items-center justify-center rounded-md bg-[#38C172] px-8 py-3.5 text-sm font-medium shadow-lg shadow-black/15 transition hover:bg-[#2fa863] focus:outline-none focus:ring-2 focus:ring-white/50 focus:ring-offset-2 focus:ring-offset-[#0B5D3B]"
+            >
+              Browse Products
+            </Link>
           </div>
         </div>
       </div>

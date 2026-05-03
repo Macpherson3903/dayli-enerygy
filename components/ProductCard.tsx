@@ -17,9 +17,9 @@ export default function ProductCard({
 
     const handleClick = () => {
         if (product?.slug) {
-            router.push(`/shop/${encodeURIComponent(product.slug)}`);
+            router.push(`/order/${encodeURIComponent(product.slug)}`);
         } else {
-            router.push("/shop");
+            router.push("/order");
         }
     };
 
@@ -51,7 +51,7 @@ export default function ProductCard({
                 {/* Category badge */}
                 {product?.category && (
                     <span className="absolute top-3 left-3 text-xs bg-white/90 backdrop-blur px-2 py-1 rounded-md capitalize shadow-sm">
-                        {product.category}
+                        {product.itemKind === "package" ? "Package" : product.category}
                     </span>
                 )}
             </div>

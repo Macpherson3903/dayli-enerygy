@@ -3,7 +3,6 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useAuth } from "@clerk/nextjs";
-import { FaInstagram, FaFacebookF, FaLinkedinIn, FaGlobe } from "react-icons/fa";
 import { Mail, Phone, MapPin } from "lucide-react";
 
 export default function Footer() {
@@ -12,7 +11,7 @@ export default function Footer() {
 
     return (
         <footer className="bg-[#0B5D3B] text-white px-6 py-12">
-            <div className="max-w-6xl mx-auto grid gap-10 md:grid-cols-4">
+            <div className="max-w-6xl mx-auto grid gap-10 md:grid-cols-3">
 
                 {/* Brand */}
                 <div>
@@ -30,6 +29,9 @@ export default function Footer() {
                     <p className="mt-3 text-sm text-white/80 leading-relaxed">
                         Reliable solar, inverter, and battery solutions powering homes and businesses worldwide.
                     </p>
+                    <p className="mt-4 text-sm text-white/70">
+                        We deliver worldwide 🌍
+                    </p>
                 </div>
 
                 {/* Quick Links */}
@@ -41,16 +43,13 @@ export default function Footer() {
                             <Link href="/" className="hover:text-white transition">Home</Link>
                         </li>
                         <li>
-                            <Link href="/shop" className="hover:text-white transition">Shop</Link>
+                            <Link href="/order" className="hover:text-white transition">Order</Link>
                         </li>
                         <li>
                             <Link href="/about" className="hover:text-white transition">About</Link>
                         </li>
                         <li>
-                            <Link href="/quotation" className="hover:text-white transition">Quotation</Link>
-                        </li>
-                        <li>
-                            <Link href="/installation-booking" className="hover:text-white transition">Installation Booking</Link>
+                            <Link href="/installation-booking" className="hover:text-white transition">Quotation & installation</Link>
                         </li>
                         <li>
                             <Link
@@ -92,30 +91,6 @@ export default function Footer() {
                             referrerPolicy="no-referrer-when-downgrade"
                         />
                     </div>
-                </div>
-
-                {/* Socials */}
-                <div>
-                    <h3 className="text-sm font-semibold mb-4">Socials</h3>
-
-                    <div className="flex gap-4 items-center text-lg">
-                        <a href="#" className="hover:opacity-70 transition">
-                            <FaInstagram />
-                        </a>
-                        <a href="#" className="hover:opacity-70 transition">
-                            <FaFacebookF />
-                        </a>
-                        <a href="#" className="hover:opacity-70 transition">
-                            <FaLinkedinIn />
-                        </a>
-                        <a href="#" className="hover:opacity-70 transition">
-                            <FaGlobe />
-                        </a>
-                    </div>
-
-                    <p className="mt-6 text-sm text-white/70">
-                        We deliver worldwide 🌍
-                    </p>
                 </div>
             </div>
 

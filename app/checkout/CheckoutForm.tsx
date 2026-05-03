@@ -26,13 +26,21 @@ export function CheckoutForm() {
   );
 
   useEffect(() => {
-    if (user?.primaryEmailAddress?.emailAddress) {
-      const el = document.querySelector<HTMLInputElement>(
-        'input[name="email"]'
-      );
-      if (el && !el.value) {
-        el.value = user.primaryEmailAddress.emailAddress;
-      }
+    if (!user) return;
+    const emailEl = document.querySelector<HTMLInputElement>('input[name="email"]');
+    const nameEl = document.querySelector<HTMLInputElement>('input[name="name"]');
+    const phoneEl = document.querySelector<HTMLInputElement>('input[name="phone"]');
+    if (emailEl && !emailEl.value && user.primaryEmailAddress?.emailAddress) {
+      emailEl.value = user.primaryEmailAddress.emailAddress;
+    }
+    if (nameEl && !nameEl.value) {
+      const full =
+        user.fullName?.trim() ||
+        [user.firstName, user.lastName].filter(Boolean).join(" ").trim();
+      if (full) nameEl.value = full;
+    }
+    if (phoneEl && !phoneEl.value && user.primaryPhoneNumber?.phoneNumber) {
+      phoneEl.value = user.primaryPhoneNumber.phoneNumber;
     }
   }, [user]);
 
@@ -49,7 +57,7 @@ export function CheckoutForm() {
         <EmptyState
           title="Cart is empty"
           message="You have no items to request."
-          action={{ label: "Browse shop", href: "/shop" }}
+          action={{ label: "Browse products", href: "/order" }}
         />
       </div>
     );
@@ -70,7 +78,7 @@ export function CheckoutForm() {
       <div>
         <PageHeader
           title="Complete your order request"
-          description="No online payment. Our team will contact you to confirm details, installation, and next steps."
+          description="You’re signed in — this order will be saved to your account. No online payment. Our team will contact you to confirm details. A confirmation email is sent to the address below when SMTP is configured."
         />
         {state?.error && (
           <p className="mb-4 text-sm text-red-600" role="alert">
@@ -165,11 +173,11 @@ export function CheckoutForm() {
           </div>
         </Card>
         <p className="text-xs text-gray-500 mt-4">
-          Not ready to sign in? You can still submit.{" "}
-          <Link href="/sign-up" className="text-brand-700 hover:underline">
-            Create an account
-          </Link>{" "}
-          later to track order status.
+          Track this order anytime under{" "}
+          <Link href="/account/orders" className="text-brand-700 hover:underline">
+            My orders
+          </Link>
+          .
         </p>
       </div>
     </div>

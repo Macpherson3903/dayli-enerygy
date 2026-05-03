@@ -107,7 +107,7 @@ export default function WhyDayli() {
                     </p>
 
                     <Link
-                        href="/shop"
+                        href="/order"
                         className="inline-block px-6 py-3 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition"
                     >
                         Browse Products

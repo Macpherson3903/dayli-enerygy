@@ -1,4 +1,8 @@
-import type { InstallationBookingStatus, OrderStatus } from "@/lib/types";
+import type {
+  InstallationBookingStatus,
+  OrderStatus,
+  ProductAgentInquiryStatus,
+} from "@/lib/types";
 
 export const ORDER_STATUSES: OrderStatus[] = [
   "new",
@@ -37,6 +41,21 @@ export const INSTALLATION_BOOKING_STATUS_LABEL: Record<
   confirmed: "Confirmed",
   installed: "Installed",
   cancelled: "Cancelled",
+};
+
+export const PRODUCT_AGENT_INQUIRY_STATUSES: ProductAgentInquiryStatus[] = [
+  "new",
+  "in_progress",
+  "resolved",
+];
+
+export const PRODUCT_AGENT_INQUIRY_STATUS_LABEL: Record<
+  ProductAgentInquiryStatus,
+  string
+> = {
+  new: "New",
+  in_progress: "In progress",
+  resolved: "Resolved",
 };
 
 export const CATEGORIES = ["all", "solar", "inverter", "battery"] as const;

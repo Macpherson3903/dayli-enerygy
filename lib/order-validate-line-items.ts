@@ -1,4 +1,5 @@
 import { getProductById } from "@/lib/db/products";
+import { getPackageById } from "@/lib/db/packages";
 import type { CreateOrderInput } from "@/lib/validators";
 
 export async function assertLineItemsValid(
@@ -6,16 +7,32 @@ export async function assertLineItemsValid(
 ): Promise<void> {
   for (const line of data.lineItems) {
     const p = await getProductById(line.productId);
-    if (!p || !p.active) {
+    if (p?.active) {
+      if (line.quantity > p.stock) {
+        throw new Error(
+          `Not enough stock for ${p.name} (available: ${p.stock})`
+        );
+      }
+      if (p.price !== line.price) {
+        throw new Error(
+          `Price changed for ${p.name}. Please refresh and try again.`
+        );
+      }
+      continue;
+    }
+    const pkg = await getPackageById(line.productId);
+    if (!pkg || !pkg.active) {
       throw new Error(`Product not available: ${line.name}`);
     }
-    if (line.quantity > p.stock) {
+    if (line.quantity > pkg.stock) {
       throw new Error(
-        `Not enough stock for ${p.name} (available: ${p.stock})`
+        `Not enough stock for ${pkg.name} (available: ${pkg.stock})`
       );
     }
-    if (p.price !== line.price) {
-      throw new Error(`Price changed for ${p.name}. Please refresh and try again.`);
+    if (pkg.price !== line.price) {
+      throw new Error(
+        `Price changed for ${pkg.name}. Please refresh and try again.`
+      );
     }
   }
 }

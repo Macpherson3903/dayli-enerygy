@@ -26,3 +26,24 @@ body {
   margin-inline: auto;
   padding-inline: 1.5rem;
 }
+
+@page {
+  margin: 12mm;
+}
+
+@media print {
+  html,
+  body {
+    background: #fff !important;
+    height: auto !important;
+    overflow: visible !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  /* Long admin booking / proposal layouts: avoid flex/height clipping multi-page output */
+  .booking-print-root {
+    overflow: visible !important;
+    max-height: none !important;
+  }
+}

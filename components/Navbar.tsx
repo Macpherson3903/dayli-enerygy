@@ -13,9 +13,12 @@ import type { NavItem } from "./navbar/types";
 
 const BASE_ITEMS: NavItem[] = [
   { label: "Home", href: "/" },
-  { label: "Shop", href: "/shop" },
-  { label: "Quotation", href: "/quotation" },
-  { label: "Installation Booking", href: "/installation-booking" },
+  { label: "Order", href: "/order" },
+  { label: "Quotation & installation", href: "/installation-booking" },
+  {
+    label: "Training",
+    href: "https://www.glitecast.com/course/solar-pv-installation",
+  },
   { label: "About", href: "/about" },
   { label: "Contact", href: "/contact" },
 ];

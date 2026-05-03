@@ -2,9 +2,16 @@ import { NextResponse } from "next/server";
 import { headers } from "next/headers";
 import { auth } from "@clerk/nextjs/server";
 import { rateLimitCheck } from "@/lib/rate-limit";
-import { installationBookingSchema } from "@/lib/validators";
-import { createInstallationBooking } from "@/lib/db/installation-bookings";
 import {
+  installationBookingSchema,
+  parseQuotationAppliancesJson,
+} from "@/lib/validators";
+import {
+  createInstallationBooking,
+  deleteInstallationBookingById,
+} from "@/lib/db/installation-bookings";
+import {
+  formatInstallationBookingCustomerCopy,
   sendInstallationBookingConfirmationToCustomer,
   sendInstallationBookingEmailToOps,
 } from "@/lib/email";
@@ -19,16 +26,25 @@ function getAppUrl() {
 const BOOKING_MAX_PER_WINDOW = 3;
 const FUNCTION_NAME = "submitInstallationBooking";
 
+/** Obscure name to reduce password-manager autofill (do not use `website`). */
+const HONEYPOT_FIELD = "field_hp_check";
+
 export async function POST(request: Request) {
+  let bookingIdToRollback: string | null = null;
+
   try {
     const formData = await request.formData();
-    const honeypot = String(formData.get("website") ?? "").trim();
+    const honeypot = String(formData.get(HONEYPOT_FIELD) ?? "").trim();
     if (honeypot !== "") {
-      return NextResponse.json({
-        success: true,
-        functionRan: FUNCTION_NAME,
-        message: "Request accepted.",
-      });
+      return NextResponse.json(
+        {
+          success: false,
+          functionRan: FUNCTION_NAME,
+          message:
+            "We couldn’t submit your request. If a password manager or browser extension is auto-filling hidden fields, try again with autofill disabled for this page.",
+        },
+        { status: 400 }
+      );
     }
 
     const h = await headers();
@@ -68,6 +84,10 @@ export async function POST(request: Request) {
       details: {
         electricityBillRange: String(formData.get("electricityBillRange") ?? ""),
         message: String(formData.get("message") ?? ""),
+        quotationSummary: String(formData.get("quotationSummary") ?? ""),
+        quotationAppliances: parseQuotationAppliancesJson(
+          String(formData.get("quotationAppliancesJson") ?? "")
+        ),
       },
       consent: formData.get("consent") === "on" || formData.get("consent") === "true",
       userId: userId ?? null,
@@ -92,9 +112,29 @@ export async function POST(request: Request) {
     }
 
     const saved = await createInstallationBooking(parsed.data);
+    bookingIdToRollback = saved._id.toString();
+
     const appUrl = getAppUrl();
 
-    await sendInstallationBookingEmailToOps({
+    const customerEmailText = formatInstallationBookingCustomerCopy({
+      bookingNumber: saved.bookingNumber,
+      appUrl,
+      name: parsed.data.customer.name,
+      email: parsed.data.customer.email,
+      phone: parsed.data.customer.phone,
+      address: parsed.data.site.address,
+      city: parsed.data.site.city,
+      state: parsed.data.site.state,
+      propertyType: parsed.data.site.propertyType,
+      roofType: parsed.data.site.roofType,
+      preferredDate: parsed.data.schedule.preferredDate,
+      preferredTime: parsed.data.schedule.preferredTime,
+      electricityBillRange: parsed.data.details.electricityBillRange,
+      message: parsed.data.details.message,
+      quotationSummary: parsed.data.details.quotationSummary,
+    });
+
+    const opsOk = await sendInstallationBookingEmailToOps({
       bookingNumber: saved.bookingNumber,
       name: parsed.data.customer.name,
       email: parsed.data.customer.email,
@@ -108,21 +148,46 @@ export async function POST(request: Request) {
       preferredTime: parsed.data.schedule.preferredTime,
       electricityBillRange: parsed.data.details.electricityBillRange,
       message: parsed.data.details.message,
+      quotationSummary: parsed.data.details.quotationSummary,
       appUrl,
     });
 
-    await sendInstallationBookingConfirmationToCustomer({
+    const custOk = await sendInstallationBookingConfirmationToCustomer({
       to: parsed.data.customer.email,
       bookingNumber: saved.bookingNumber,
-      appUrl,
+      text: customerEmailText,
     });
+
+    if (!opsOk || !custOk) {
+      await deleteInstallationBookingById(bookingIdToRollback);
+      bookingIdToRollback = null;
+      return NextResponse.json(
+        {
+          success: false,
+          functionRan: FUNCTION_NAME,
+          message:
+            "We could not send the confirmation emails, so your booking was not saved. Please verify SMTP settings (host, port, user, password) and try again, or contact us by phone.",
+        },
+        { status: 503 }
+      );
+    }
+
+    bookingIdToRollback = null;
 
     return NextResponse.json({
       success: true,
       functionRan: FUNCTION_NAME,
+      bookingNumber: saved.bookingNumber,
       message: `Thank you. Your booking request (${saved.bookingNumber}) has been submitted.`,
     });
   } catch {
+    if (bookingIdToRollback) {
+      try {
+        await deleteInstallationBookingById(bookingIdToRollback);
+      } catch {
+        // best-effort rollback
+      }
+    }
     return NextResponse.json(
       {
         success: false,

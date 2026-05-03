@@ -68,6 +68,12 @@ export async function listAllOrders() {
     .toArray();
 }
 
+export async function countOrdersByStatus(status: OrderStatus): Promise<number> {
+  await ensureOrderIndexes();
+  const db = await getDb();
+  return db.collection(COL).countDocuments({ status });
+}
+
 export async function updateOrderById(
   id: string,
   patch: { status?: OrderStatus; internalNotes?: string }

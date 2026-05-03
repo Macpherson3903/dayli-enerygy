@@ -3,7 +3,6 @@
 import { useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { useAuth, SignInButton } from "@clerk/nextjs";
 import { useCart } from "@/context/CartContext";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -11,7 +10,6 @@ import Footer from "@/components/Footer";
 function ConfirmationInner() {
   const search = useSearchParams();
   const orderNumber = search.get("orderNumber");
-  const { isSignedIn, isLoaded: authLoaded } = useAuth();
   const { clear, ready } = useCart();
 
   useEffect(() => {
@@ -41,23 +39,14 @@ function ConfirmationInner() {
           View my account
         </Link>
         <Link
-          href="/shop"
+          href="/order"
           className="inline-flex items-center justify-center rounded-lg border border-gray-200 bg-white px-5 py-2.5 text-sm font-medium text-gray-800 hover:bg-gray-50"
         >
           Continue shopping
         </Link>
-        {authLoaded && !isSignedIn && (
-          <SignInButton mode="modal">
-            <span className="inline-flex items-center justify-center rounded-lg bg-brand-700 px-5 py-2.5 text-sm font-medium text-white">
-              Create account to track orders
-            </span>
-          </SignInButton>
-        )}
-        {authLoaded && isSignedIn && (
-          <span className="text-sm text-gray-600 self-center">
-            You are signed in
-          </span>
-        )}
+        <span className="text-sm text-gray-600 self-center">
+          View order status anytime in your account.
+        </span>
       </div>
     </div>
   );

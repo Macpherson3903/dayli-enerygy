@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
+import { useAuth, SignInButton, SignUpButton } from "@clerk/nextjs";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { useCart } from "@/context/CartContext";
@@ -10,9 +11,13 @@ import { PageHeader } from "@/components/ui/PageHeader";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Card } from "@/components/ui/Card";
 
+const requestOrderBtnCls =
+  "inline-flex w-full items-center justify-center rounded-lg bg-brand-700 px-6 py-2.5 text-sm font-medium text-white hover:bg-brand-900 sm:w-auto";
+
 export default function CartPage() {
   const { lines, subtotal, setQuantity, removeLine, itemCount, ready } =
     useCart();
+  const { isLoaded: authLoaded, isSignedIn } = useAuth();
 
   return (
     <>
@@ -20,15 +25,15 @@ export default function CartPage() {
       <div className="px-4 md:px-8 max-w-4xl mx-auto py-10 min-h-[50vh]">
         <PageHeader
           title="Your cart"
-          description="Request a quote — our team will confirm by phone or email. No online payment on this site."
+          description="Request a quote — sign in or create an account to continue to checkout so we can link your order to your profile. No online payment on this site."
         />
         {!ready ? (
           <p className="text-sm text-gray-500">Loading cart…</p>
         ) : itemCount === 0 ? (
           <EmptyState
             title="Your cart is empty"
-            message="Browse the shop to add solar panels, inverters, and batteries."
-            action={{ label: "Go to shop", href: "/shop" }}
+            message="Browse products to add solar panels, inverters, and batteries to your cart."
+            action={{ label: "Go to Order", href: "/order" }}
           />
         ) : (
           <div className="space-y-4">
@@ -92,12 +97,41 @@ export default function CartPage() {
                 <span className="text-gray-600">Subtotal: </span>
                 <span className="font-bold">₦{subtotal.toLocaleString()}</span>
               </p>
-              <Link
-                href="/checkout"
-                className="inline-flex items-center justify-center rounded-lg bg-brand-700 px-6 py-2.5 text-sm font-medium text-white hover:bg-brand-900 w-full sm:w-auto"
-              >
-                Request order
-              </Link>
+              <div className="flex w-full flex-col items-stretch gap-2 sm:w-auto sm:items-end">
+                {!authLoaded ? (
+                  <button
+                    type="button"
+                    disabled
+                    className={`${requestOrderBtnCls} cursor-wait opacity-70`}
+                  >
+                    Loading…
+                  </button>
+                ) : isSignedIn ? (
+                  <Link href="/checkout" className={requestOrderBtnCls}>
+                    Request order
+                  </Link>
+                ) : (
+                  <>
+                    <SignUpButton mode="modal" forceRedirectUrl="/checkout">
+                      <button type="button" className={requestOrderBtnCls}>
+                        Request order
+                      </button>
+                    </SignUpButton>
+                    <p className="text-center text-xs text-gray-600 sm:text-right">
+                      <SignInButton mode="modal" forceRedirectUrl="/checkout">
+                        <button
+                          type="button"
+                          className="font-medium text-brand-700 hover:underline"
+                        >
+                          Sign in
+                        </button>
+                      </SignInButton>
+                      {" · "}
+                      New here? Use Request order to create an account, then you’ll go to checkout.
+                    </p>
+                  </>
+                )}
+              </div>
             </div>
           </div>
         )}

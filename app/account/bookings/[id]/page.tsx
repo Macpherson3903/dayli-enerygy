@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { currentUser } from "@clerk/nextjs/server";
 import { getInstallationBookingByIdForUser } from "@/lib/db/installation-bookings";
+import { BookingLoadEstimateSection } from "@/components/installation/BookingLoadEstimateSection";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Card } from "@/components/ui/Card";
 import { InstallationBookingStatusBadge } from "@/components/ui/StatusBadge";
@@ -63,10 +64,13 @@ export default async function AccountBookingDetailPage({
             <span className="font-medium">Preferred time: </span>
             {booking.schedule.preferredTime}
           </p>
-          <p className="mt-2 text-sm text-gray-700">
-            <span className="font-medium">Estimated bill: </span>
-            {booking.details.electricityBillRange}
-          </p>
+          {booking.details.electricityBillRange !== "unknown" ? (
+            <p className="mt-2 text-sm text-gray-700">
+              <span className="font-medium">Estimated bill: </span>
+              {booking.details.electricityBillRange}
+            </p>
+          ) : null}
+          <BookingLoadEstimateSection booking={booking} heading="Your load estimate" />
           {booking.details.message && (
             <p className="mt-2 whitespace-pre-line text-sm text-gray-700">
               <span className="font-medium">Your notes: </span>

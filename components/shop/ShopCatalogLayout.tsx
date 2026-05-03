@@ -8,11 +8,13 @@ export default function ShopCatalogLayout({
   category,
   setCategory,
   categories,
+  filterLabel = "Category",
   children,
 }: {
   category: string;
   setCategory: (cat: string) => void;
   categories: string[];
+  filterLabel?: string;
   children: ReactNode;
 }) {
   return (
@@ -21,6 +23,7 @@ export default function ShopCatalogLayout({
         category={category}
         setCategory={setCategory}
         categories={categories}
+        filterLabel={filterLabel}
       />
       <div className="md:col-span-3">{children}</div>
     </div>

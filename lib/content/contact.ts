@@ -29,14 +29,14 @@ export type ContactChannel = {
 export const contactChannels: ContactChannel[] = [
   {
     label: "Email",
-    value: "hello@daylienergy.com",
-    href: "mailto:hello@daylienergy.com",
+    value: "support@daylienergy.com",
+    href: "mailto:support@daylienergy.com",
     hint: "We typically respond within one business day.",
   },
   {
     label: "Phone",
-    value: "+234 (0) 000 000 0000",
-    href: "tel:+2340000000000",
+    value: "+234 707 811 6598",
+    href: "tel:+2347078116598",
     hint: "Weekdays, 9:00–17:00 WAT.",
   },
 ];

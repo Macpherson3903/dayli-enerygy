@@ -58,7 +58,7 @@ export const metadata: Metadata = {
     url: "https://daylienergy.com",
     title: "Dayli Energy Solutions | Solar Energy Store",
     description:
-      "Shop premium solar panels, inverters, and batteries for reliable energy solutions in Nigeria.",
+      "Premium solar panels, inverters, and batteries for reliable energy solutions in Nigeria.",
     siteName: "Dayli Energy Solutions",
     images: [
       {
@@ -100,8 +100,12 @@ export default function RootLayout({
     <html
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      suppressHydrationWarning
     >
-      <body className="min-h-screen flex flex-col bg-white text-gray-900">
+      <body
+        className="min-h-screen flex flex-col bg-white text-gray-900"
+        suppressHydrationWarning
+      >
         <Providers>{children}</Providers>
       </body>
     </html>

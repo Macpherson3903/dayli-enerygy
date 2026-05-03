@@ -3,6 +3,7 @@ import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 const isAuthRoute = createRouteMatcher([
   "/account(.*)",
   "/admin(.*)",
+  "/checkout(.*)",
 ]);
 
 export default clerkMiddleware(async (auth, request) => {

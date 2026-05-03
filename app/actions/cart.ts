@@ -4,6 +4,7 @@ import { ObjectId } from "mongodb";
 import { auth } from "@clerk/nextjs/server";
 import { clearCartForUser, getCartForUser, replaceCartForUser } from "@/lib/db/cart";
 import { getProductById } from "@/lib/db/products";
+import { getPackageById } from "@/lib/db/packages";
 import type { CartLine, ProductPublic } from "@/lib/types";
 
 type CartPayload = { lines: CartLine[] };
@@ -55,15 +56,28 @@ async function hydrateFromProductOrFallback(
   if (product.stock < 1) return null;
   if (ObjectId.isValid(product.id)) {
     const dbProduct = await getProductById(product.id);
-    if (!dbProduct || !dbProduct.active || dbProduct.stock < 1) return null;
-    return {
-      productId: dbProduct._id.toString(),
-      name: dbProduct.name,
-      price: dbProduct.price,
-      image: dbProduct.image,
-      maxStock: dbProduct.stock,
-      quantity: 1,
-    };
+    if (dbProduct?.active && dbProduct.stock >= 1) {
+      return {
+        productId: dbProduct._id.toString(),
+        name: dbProduct.name,
+        price: dbProduct.price,
+        image: dbProduct.image,
+        maxStock: dbProduct.stock,
+        quantity: 1,
+      };
+    }
+    const dbPkg = await getPackageById(product.id);
+    if (dbPkg?.active && dbPkg.stock >= 1) {
+      return {
+        productId: dbPkg._id.toString(),
+        name: dbPkg.name,
+        price: dbPkg.price,
+        image: dbPkg.image,
+        maxStock: dbPkg.stock,
+        quantity: 1,
+      };
+    }
+    return null;
   }
   return {
     productId: product.id,

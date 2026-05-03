@@ -31,7 +31,7 @@ export default function ContactPage() {
           description="Get help with product recommendations, quotes, delivery timelines, and technical guidance from the Dayli Energy team."
           backgroundImageUrl="https://images.unsplash.com/photo-1466611653911-95081537e5b7?auto=format&fit=crop&w=1920&q=80"
           primaryCta={{ label: "Send a Message", href: "#contact-form" }}
-          secondaryCta={{ label: "Browse Products", href: "/shop" }}
+          secondaryCta={{ label: "Browse Products", href: "/order" }}
         />
         <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:px-8 lg:py-14">
           <h2 className="text-2xl font-bold text-gray-900">Talk to our support specialists</h2>

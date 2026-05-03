@@ -6,10 +6,12 @@ import { Input, Textarea } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { useStatusMessage } from "@/context/StatusMessageContext";
+import type { ProposalApplianceRow } from "@/lib/types";
 
 type BookingFormState = {
   error?: string;
   success?: boolean;
+  bookingNumber?: string;
   fieldErrors?: Record<string, string>;
 };
 
@@ -58,10 +60,28 @@ function SelectField(props: {
   );
 }
 
-export function InstallationBookingForm() {
+export type InstallationBookingFormProps = {
+  /** When true, shows the load-estimate field (paired with the quotation calculator above). */
+  showQuotationBlock?: boolean;
+  quotationSummary?: string;
+  /** Structured rows from the calculator when the client clicked &quot;Add estimate&quot;. */
+  quotationAppliances?: ProposalApplianceRow[];
+  onQuotationSummaryChange?: (value: string) => void;
+  onBookingSuccess?: () => void;
+};
+
+export function InstallationBookingForm({
+  showQuotationBlock = false,
+  quotationSummary = "",
+  quotationAppliances = [],
+  onQuotationSummaryChange,
+  onBookingSuccess,
+}: InstallationBookingFormProps = {}) {
   const { user } = useUser();
   const { showStatusMessage } = useStatusMessage();
   const formRef = useRef<HTMLFormElement>(null);
+  const onBookingSuccessRef = useRef(onBookingSuccess);
+  onBookingSuccessRef.current = onBookingSuccess;
   const [state, setState] = useState<BookingFormState>({});
   const [pending, setPending] = useState(false);
 
@@ -73,7 +93,9 @@ export function InstallationBookingForm() {
   }, [user]);
 
   useEffect(() => {
-    if (state?.success) formRef.current?.reset();
+    if (!state?.success) return;
+    formRef.current?.reset();
+    onBookingSuccessRef.current?.();
   }, [state?.success]);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -89,21 +111,24 @@ export function InstallationBookingForm() {
       });
       const data = (await response.json()) as {
         success?: boolean;
+        bookingNumber?: string;
         message?: string;
         functionRan?: string;
         fieldErrors?: Record<string, string>;
       };
 
-      const statusMessage = data.functionRan
-        ? `${data.functionRan}: ${data.message ?? "Completed"}`
-        : data.message;
-      if (statusMessage) {
-        showStatusMessage(statusMessage, data.success ? "success" : "error");
-      }
+      const ok =
+        Boolean(data.success) &&
+        typeof data.bookingNumber === "string" &&
+        data.bookingNumber.length > 0;
+
+      const toastText = data.message?.trim() || (ok ? "Booking submitted." : "Request failed.");
+      showStatusMessage(toastText, ok ? "success" : "error");
 
       setState({
-        success: Boolean(data.success),
-        error: data.success ? undefined : data.message ?? "Request failed.",
+        success: ok,
+        bookingNumber: ok ? data.bookingNumber : undefined,
+        error: ok ? undefined : data.message ?? "Request failed.",
         fieldErrors: data.fieldErrors ?? {},
       });
     } catch {
@@ -124,20 +149,24 @@ export function InstallationBookingForm() {
 
   return (
     <Card>
-      <h2 className="text-xl font-bold text-gray-900">Installation details</h2>
+      <h2 className="text-xl font-bold text-gray-900">Installation booking</h2>
       <p className="mb-6 mt-1 text-sm text-gray-600">
-        Fields marked with an asterisk are required.
+        {showQuotationBlock
+          ? "Add your load estimate if you used the calculator, then complete your details. Fields marked with an asterisk are required."
+          : "Fields marked with an asterisk are required."}
       </p>
 
-      {state?.success && (
+      {state?.success && state.bookingNumber ? (
         <div
           className="mb-4 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-900"
           role="status"
           aria-live="polite"
         >
-          Thank you. Your booking request has been sent.
+          Thank you. Your booking request{" "}
+          <span className="font-semibold">{state.bookingNumber}</span> has been submitted. You
+          should receive a confirmation email shortly.
         </div>
-      )}
+      ) : null}
 
       {state?.error && !state.success && (
         <p className="mb-4 text-sm text-red-600" role="alert">
@@ -154,16 +183,43 @@ export function InstallationBookingForm() {
           className="pointer-events-none absolute left-0 top-0 h-px w-px overflow-hidden opacity-0"
           aria-hidden="true"
         >
-          <label htmlFor="installation-website">Company website</label>
+          <label htmlFor="installation-hp">Leave blank</label>
           <input
-            id="installation-website"
+            id="installation-hp"
             type="text"
-            name="website"
+            name="field_hp_check"
             tabIndex={-1}
             autoComplete="off"
             defaultValue=""
           />
         </div>
+
+        {showQuotationBlock ? (
+          <div className="rounded-xl border border-gray-200 bg-gray-50/80 p-4 sm:p-5">
+            <h3 className="text-sm font-semibold text-gray-900">Your load estimate</h3>
+            <p className="mt-1 text-sm text-gray-600">
+              Use the calculator above, then click &quot;Add this estimate to my booking
+              request&quot; to fill this box. You can edit the text before submitting.
+            </p>
+            <input type="hidden" name="quotationSummary" value={quotationSummary} readOnly />
+            <input
+              type="hidden"
+              name="quotationAppliancesJson"
+              value={JSON.stringify(quotationAppliances)}
+              readOnly
+            />
+            <div className="mt-4">
+              <Textarea
+                label="Estimate summary (optional)"
+                rows={8}
+                value={quotationSummary}
+                onChange={(e) => onQuotationSummaryChange?.(e.target.value)}
+                error={fe["details.quotationSummary"]}
+                placeholder="Your appliance totals will appear here, or describe your needs in your own words."
+              />
+            </div>
+          </div>
+        ) : null}
 
         <Input label="Full name" name="name" required autoComplete="name" error={fe["customer.name"]} />
         <Input
@@ -240,20 +296,6 @@ export function InstallationBookingForm() {
             ]}
           />
         </div>
-
-        <SelectField
-          label="Estimated monthly electricity bill"
-          name="electricityBillRange"
-          required
-          error={fe["details.electricityBillRange"]}
-          options={[
-            { value: "lt50k", label: "Below N50,000" },
-            { value: "50k-100k", label: "N50,000 - N100,000" },
-            { value: "100k-250k", label: "N100,000 - N250,000" },
-            { value: "gt250k", label: "Above N250,000" },
-            { value: "unknown", label: "Not sure" },
-          ]}
-        />
 
         <Textarea
           label="Additional notes"

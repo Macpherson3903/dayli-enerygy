@@ -31,7 +31,7 @@ export const aboutHero = {
     "Dayli Energy Solutions helps homes and businesses transition to dependable solar power with quality products, practical guidance, and long-term support.",
   primaryCta: {
     label: "Browse Products",
-    href: "/shop",
+    href: "/order",
   },
   secondaryCta: {
     label: "Contact Our Team",

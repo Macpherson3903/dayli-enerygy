@@ -22,19 +22,39 @@ export default function NavItems({
       }
     >
       {items.map((item) => {
+        const external =
+          item.href.startsWith("http://") || item.href.startsWith("https://");
         const active =
-          pathname === item.href ||
-          (item.href !== "/" && pathname.startsWith(item.href));
+          !external &&
+          (pathname === item.href ||
+            (item.href !== "/" && pathname.startsWith(item.href)));
+        const className = `rounded-md px-3 py-2 text-sm font-medium transition ${
+          active
+            ? "bg-brand-900 text-white"
+            : "text-gray-700 hover:bg-gray-100"
+        }`;
+
+        if (external) {
+          return (
+            <a
+              key={item.href}
+              href={item.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={onItemClick}
+              className={className}
+            >
+              {item.label}
+            </a>
+          );
+        }
+
         return (
           <Link
             key={item.href}
             href={item.href}
             onClick={onItemClick}
-            className={`rounded-md px-3 py-2 text-sm font-medium transition ${
-              active
-                ? "bg-brand-900 text-white"
-                : "text-gray-700 hover:bg-gray-100"
-            }`}
+            className={className}
             aria-current={active ? "page" : undefined}
           >
             {item.label}

@@ -45,10 +45,10 @@ export function ContactChannels() {
       <p className="mt-4 text-xs text-gray-500">
         Prefer to browse first?{" "}
         <Link
-          href="/shop"
+          href="/order"
           className="font-medium text-brand-800 hover:text-brand-900 underline-offset-2 hover:underline"
         >
-          Visit the shop
+          Browse products
         </Link>
         .
       </p>

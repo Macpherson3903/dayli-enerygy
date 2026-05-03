@@ -51,7 +51,7 @@ export default async function AccountPage() {
         <EmptyState
           title="No orders yet"
           message="When you submit a request, it will appear here while you are signed in."
-          action={{ label: "Go to shop", href: "/shop" }}
+          action={{ label: "Browse products", href: "/order" }}
         />
       ) : (
         <div className="space-y-3">

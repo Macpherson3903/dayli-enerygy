@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { PageHeader } from "@/components/ui/PageHeader";
-import { InstallationBookingForm } from "@/components/installation/InstallationBookingForm";
+import { InstallationQuoteBookingFlow } from "@/components/installation/InstallationQuoteBookingFlow";
 import {
   installationBookingHeader,
   installationBookingSeo,
@@ -13,7 +13,7 @@ export const metadata: Metadata = {
   description: installationBookingSeo.description,
   keywords: installationBookingSeo.keywords,
   openGraph: {
-    title: "Installation Booking | Dayli Energy Solutions",
+    title: "Quotation & installation | Dayli Energy Solutions",
     description: installationBookingSeo.description,
     type: "website",
     url: "/installation-booking",
@@ -31,7 +31,7 @@ export default function InstallationBookingPage() {
             description={installationBookingHeader.description}
           />
           <div className="mt-8">
-            <InstallationBookingForm />
+            <InstallationQuoteBookingFlow />
           </div>
         </div>
       </main>

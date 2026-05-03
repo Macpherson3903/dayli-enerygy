@@ -10,6 +10,7 @@ import {
   addInventoryCategory,
   removeInventoryCategory,
 } from "@/lib/db/products";
+import { isCatalogSlugTaken } from "@/lib/db/catalog-slugs";
 
 function makeSlugFromName(name: string): string {
   const base = name
@@ -79,9 +80,12 @@ export async function createProductAction(
       error: parsed.error.flatten().formErrors[0] ?? "Check all fields",
     };
   }
+  if (await isCatalogSlugTaken(parsed.data.slug)) {
+    return { error: "That URL slug is already used by a product or package" };
+  }
   await createProduct(parsed.data);
   revalidatePath("/admin/inventory");
-  revalidatePath("/shop");
+  revalidatePath("/order");
   revalidatePath("/");
   return { ok: true as const };
 }
@@ -105,7 +109,7 @@ export async function addInventoryCategoryAction(
   revalidatePath("/admin/inventory/dashboard");
   revalidatePath("/admin/inventory/add");
   revalidatePath("/admin/inventory");
-  revalidatePath("/shop");
+  revalidatePath("/order");
   return { ok: true as const };
 }
 
@@ -128,7 +132,7 @@ export async function removeInventoryCategoryAction(
   revalidatePath("/admin/inventory/dashboard");
   revalidatePath("/admin/inventory/add");
   revalidatePath("/admin/inventory");
-  revalidatePath("/shop");
+  revalidatePath("/order");
   return { ok: true as const };
 }
 
@@ -151,8 +155,8 @@ export async function updateProductAction(
   }
   await updateProduct(productId, parsed.data);
   revalidatePath("/admin/inventory");
-  revalidatePath("/shop");
-  revalidatePath(`/shop/${productId}`);
+  revalidatePath("/order");
+  revalidatePath(`/order/${productId}`);
   revalidatePath("/");
   return { ok: true as const };
 }
@@ -163,7 +167,7 @@ export async function deleteProductAction(productId: string) {
   }
   await deleteProduct(productId);
   revalidatePath("/admin/inventory");
-  revalidatePath("/shop");
+  revalidatePath("/order");
   revalidatePath("/");
   return { ok: true as const };
 }

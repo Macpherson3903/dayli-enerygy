@@ -44,6 +44,13 @@ export async function submitOrderRequest(
   }
 
   const { userId } = await auth();
+  if (!userId) {
+    return {
+      error:
+        "You must be signed in to submit an order. Use Sign up or Sign in on the cart page.",
+    };
+  }
+
   const raw = {
     lineItems,
     contact: {
@@ -56,7 +63,7 @@ export async function submitOrderRequest(
         String(formData.get("preferredTime") ?? "") || undefined,
     },
     consent: formData.get("consent") === "on" || formData.get("consent") === "true",
-    userId: userId ?? null,
+    userId,
   };
 
   const parsed = createOrderSchema.safeParse(raw);

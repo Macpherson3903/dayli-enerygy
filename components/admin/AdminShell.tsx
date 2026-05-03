@@ -4,8 +4,9 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
 import type { AppRole } from "@/lib/types";
+import type { SalesNavBadgeCounts } from "@/lib/admin/sales-nav-badges";
 import { clsx } from "clsx";
-import { UserButton } from "@clerk/nextjs";
+import { ClerkLoaded, UserButton } from "@clerk/nextjs";
 import {
   Package,
   ClipboardList,
@@ -15,6 +16,7 @@ import {
   PlusCircle,
   FolderTree,
   Users,
+  MessageCircle,
 } from "lucide-react";
 
 type Item = {
@@ -35,6 +37,7 @@ const items: Item[] = [
       { href: "/admin/sales", label: "Dashboard" },
       { href: "/admin/sales/orders", label: "Orders" },
       { href: "/admin/sales/bookings", label: "Bookings" },
+      { href: "/admin/sales/product-inquiries", label: "Product inquiries" },
       { href: "/admin/sales/users", label: "Users" },
     ],
   },
@@ -47,25 +50,54 @@ const items: Item[] = [
     children: [
       { href: "/admin/inventory/dashboard", label: "Dashboard" },
       { href: "/admin/inventory/overview", label: "Overview" },
+      { href: "/admin/inventory/packages", label: "Packages" },
+      { href: "/admin/inventory/package-categories", label: "Package categories" },
       { href: "/admin/inventory/add", label: "Add inventory" },
       { href: "/admin/inventory/categories", label: "Manage categories" },
     ],
   },
 ];
 
+function NavAttentionBadge({
+  count,
+  variant = "default",
+}: {
+  count: number;
+  variant?: "default" | "onDark";
+}) {
+  if (count < 1) return null;
+  const label = count > 99 ? "99+" : String(count);
+  return (
+    <span
+      className={clsx(
+        "ml-auto inline-flex min-h-[1.25rem] min-w-[1.25rem] items-center justify-center rounded-full px-1 text-[10px] font-bold leading-none",
+        variant === "onDark"
+          ? "bg-white/95 text-brand-800 shadow-sm"
+          : "bg-amber-600 text-white"
+      )}
+      aria-label={`${count} unattended`}
+    >
+      {label}
+    </span>
+  );
+}
+
 export function AdminShell({
   role,
+  salesNavBadges,
   children,
 }: {
   role: AppRole;
+  /** New order / booking counts for sales sidebar (Mongo-backed). */
+  salesNavBadges?: SalesNavBadgeCounts;
   children: ReactNode;
 }) {
   const path = usePathname() || "";
   const visible = items.filter((i) => i.roles.includes(role));
 
   return (
-    <div className="min-h-screen flex flex-col bg-gray-50">
-      <header className="bg-white border-b border-gray-200 z-20">
+    <div className="min-h-screen flex flex-col bg-gray-50 print:min-h-0 print:overflow-visible print:bg-white">
+      <header className="bg-white border-b border-gray-200 z-20 print:hidden">
         <div className="max-w-7xl mx-auto px-4 h-14 flex items-center justify-between">
           <Link
             href="/"
@@ -78,12 +110,14 @@ export function AdminShell({
             <Link href="/" className="text-sm text-gray-600 hover:text-gray-900">
               View site
             </Link>
-            <UserButton />
+            <ClerkLoaded>
+              <UserButton />
+            </ClerkLoaded>
           </div>
         </div>
       </header>
-      <div className="flex-1 max-w-7xl mx-auto w-full px-4 py-6 flex flex-col md:flex-row gap-8">
-        <aside className="w-full md:w-56 shrink-0">
+      <div className="flex-1 max-w-7xl mx-auto w-full px-4 py-6 flex flex-col md:flex-row gap-8 print:max-w-none print:mx-0 print:overflow-visible print:px-4 print:py-2 print:gap-0">
+        <aside className="w-full md:w-56 shrink-0 print:hidden">
           <nav className="rounded-2xl border border-gray-200 bg-white p-2 space-y-0.5">
             {visible.map((item) => {
               const Icon = item.icon;
@@ -92,6 +126,12 @@ export function AdminShell({
                   ? path.startsWith("/admin/inventory")
                   : path.startsWith(item.href)
                 : path === item.href || path.startsWith(item.href + "/");
+              const salesAttentionTotal =
+                salesNavBadges && item.href === "/admin/sales"
+                  ? salesNavBadges.newOrders +
+                    salesNavBadges.newBookings +
+                    salesNavBadges.newProductInquiries
+                  : 0;
               return (
                 <div key={item.href}>
                   <Link
@@ -103,13 +143,32 @@ export function AdminShell({
                         : "text-gray-700 hover:bg-gray-100"
                     )}
                   >
-                    <Icon className="w-4 h-4" />
-                    {item.label}
+                    <Icon className="w-4 h-4 shrink-0" />
+                    <span className="flex-1 truncate">{item.label}</span>
+                    {item.href === "/admin/sales" && salesAttentionTotal > 0 ? (
+                      <NavAttentionBadge
+                        count={salesAttentionTotal}
+                        variant={active ? "onDark" : "default"}
+                      />
+                    ) : null}
                   </Link>
                   {item.children && active && (
                     <div className="mt-1 ml-6 space-y-0.5 border-l border-gray-200 pl-3">
                       {item.children.map((child) => {
                         const childActive = path === child.href;
+                        const childBadge =
+                          salesNavBadges && child.href.endsWith("/orders")
+                            ? salesNavBadges.newOrders
+                            : salesNavBadges && child.href.endsWith("/bookings")
+                              ? salesNavBadges.newBookings
+                              : salesNavBadges &&
+                                  child.href.endsWith("/product-inquiries")
+                                ? salesNavBadges.newProductInquiries
+                                : salesNavBadges && child.href === "/admin/sales"
+                                  ? salesNavBadges.newOrders +
+                                    salesNavBadges.newBookings +
+                                    salesNavBadges.newProductInquiries
+                                  : 0;
                         return (
                           <Link
                             key={child.href}
@@ -130,6 +189,9 @@ export function AdminShell({
                             {child.href.endsWith("/bookings") && (
                               <ClipboardList className="w-3.5 h-3.5" />
                             )}
+                            {child.href.endsWith("/product-inquiries") && (
+                              <MessageCircle className="w-3.5 h-3.5" />
+                            )}
                             {child.href.endsWith("/users") && (
                               <Users className="w-3.5 h-3.5" />
                             )}
@@ -145,7 +207,10 @@ export function AdminShell({
                             {child.href.endsWith("/categories") && (
                               <FolderTree className="w-3.5 h-3.5" />
                             )}
-                            {child.label}
+                            <span className="flex-1 truncate">{child.label}</span>
+                            {childBadge > 0 ? (
+                              <NavAttentionBadge count={childBadge} />
+                            ) : null}
                           </Link>
                         );
                       })}
@@ -156,7 +221,9 @@ export function AdminShell({
             })}
           </nav>
         </aside>
-        <div className="flex-1 min-w-0">{children}</div>
+        <div className="flex-1 min-w-0 print:w-full print:min-h-0 print:overflow-visible">
+          {children}
+        </div>
       </div>
     </div>
   );

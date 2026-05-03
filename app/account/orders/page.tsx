@@ -24,7 +24,7 @@ export default async function OrdersPage() {
         <EmptyState
           title="No orders"
           message="You have not placed an order while signed in yet."
-          action={{ label: "Go to shop", href: "/shop" }}
+          action={{ label: "Browse products", href: "/order" }}
         />
       ) : (
         <ul className="space-y-3" role="list">

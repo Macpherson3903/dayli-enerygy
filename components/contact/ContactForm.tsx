@@ -6,10 +6,15 @@ import { Input, Textarea } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { useStatusMessage } from "@/context/StatusMessageContext";
+import { CONTACT_HONEYPOT_FIELD } from "@/lib/contact-honeypot";
 
 type ContactFormState = {
   error?: string;
   success?: boolean;
+  /** Server message after successful submit (e.g. confirmation email notice) */
+  successMessage?: string;
+  /** Inquiry id when the server saved the row but returned an error (e.g. email 502) */
+  reference?: string;
   fieldErrors?: Record<string, string>;
 };
 
@@ -54,24 +59,38 @@ export function ContactForm() {
         success?: boolean;
         message?: string;
         functionRan?: string;
+        reference?: string;
         fieldErrors?: Record<string, string>;
       };
 
-      const statusMessage = data.functionRan
-        ? `${data.functionRan}: ${data.message ?? "Completed"}`
-        : data.message;
-      if (statusMessage) {
-        showStatusMessage(statusMessage, data.success ? "success" : "error");
+      /** Real saves always return a DEC-… reference; never treat success without it. */
+      const verifiedSuccess =
+        response.ok &&
+        data.success === true &&
+        typeof data.reference === "string" &&
+        data.reference.length > 0;
+
+      const toastText =
+        data.message && data.reference && !verifiedSuccess
+          ? `${data.message} Reference: ${data.reference}.`
+          : data.message;
+
+      if (toastText) {
+        showStatusMessage(toastText, verifiedSuccess ? "success" : "error");
       }
 
       setState({
-        success: Boolean(data.success),
-        error: data.success ? undefined : data.message ?? "Request failed.",
+        success: verifiedSuccess,
+        error: verifiedSuccess
+          ? undefined
+          : (data.message ?? "Request failed."),
+        successMessage: verifiedSuccess ? data.message : undefined,
+        reference: data.reference,
         fieldErrors: data.fieldErrors ?? {},
       });
     } catch {
       showStatusMessage(
-        "submitContactMessage: Network error. Please try again.",
+        "Network error. Please try again.",
         "error"
       );
       setState({
@@ -92,20 +111,26 @@ export function ContactForm() {
         Fields marked with an asterisk are required.
       </p>
 
-      {state?.success && (
+      {state?.success && state.successMessage && (
         <div
           className="mb-4 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-900"
           role="status"
           aria-live="polite"
         >
-          Thank you. Your message has been sent. We will reply soon.
+          {state.successMessage}
         </div>
       )}
 
       {state?.error && !state.success && (
-        <p className="mb-4 text-sm text-red-600" role="alert">
-          {state.error}
-        </p>
+        <div className="mb-4 space-y-1" role="alert">
+          <p className="text-sm text-red-600">{state.error}</p>
+          {state.reference ? (
+            <p className="text-sm text-gray-700">
+              Your reference:{" "}
+              <span className="font-mono font-medium">{state.reference}</span>
+            </p>
+          ) : null}
+        </div>
       )}
 
       <form
@@ -117,11 +142,9 @@ export function ContactForm() {
           className="pointer-events-none absolute left-0 top-0 h-px w-px overflow-hidden opacity-0"
           aria-hidden="true"
         >
-          <label htmlFor="contact-website">Company website</label>
           <input
-            id="contact-website"
             type="text"
-            name="website"
+            name={CONTACT_HONEYPOT_FIELD}
             tabIndex={-1}
             autoComplete="off"
             defaultValue=""

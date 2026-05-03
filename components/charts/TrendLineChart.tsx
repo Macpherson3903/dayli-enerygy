@@ -49,8 +49,16 @@ export function TrendLineChart({
         <Line
           type="monotone"
           dataKey="customers"
-          name="Users"
+          name="Unique order emails"
           stroke={CHART_COLORS[1]}
+          strokeWidth={2}
+          dot={false}
+        />
+        <Line
+          type="monotone"
+          dataKey="bookings"
+          name="Install bookings"
+          stroke={CHART_COLORS[2]}
           strokeWidth={2}
           dot={false}
         />

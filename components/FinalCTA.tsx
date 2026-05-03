@@ -23,7 +23,7 @@ export default function FinalCTA() {
 
                 <div className="mt-8 flex justify-center">
                     <Link
-                        href="/shop"
+                        href="/order"
                         className="w-full sm:w-auto bg-[#38C172] hover:bg-[#2faa63] transition-colors px-6 py-3 rounded-md font-medium text-white shadow-md focus:outline-none focus:ring-2 focus:ring-white/60"
                     >
                         Browse Products
