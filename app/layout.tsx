@@ -62,7 +62,7 @@ export const metadata: Metadata = {
     siteName: "Dayli Energy Solutions",
     images: [
       {
-        url: "/og-image.jpg", // place in /public
+        url: "/logo.png", // place in /public
         width: 1200,
         height: 630,
         alt: "Dayli Energy Solutions",
