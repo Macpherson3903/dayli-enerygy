@@ -67,9 +67,7 @@ export default function ProductDetailClient({
               ₦{product.price.toLocaleString()}
             </p>
             <p className="text-sm text-gray-500 mt-1">
-              {inStock
-                ? `${product.stock} in stock`
-                : "Currently out of stock"}
+              {inStock ? "In stock" : "Currently out of stock"}
             </p>
             <p className="text-gray-600 mt-4 leading-relaxed">
               {product.description}

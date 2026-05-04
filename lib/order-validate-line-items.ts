@@ -10,7 +10,7 @@ export async function assertLineItemsValid(
     if (p?.active) {
       if (line.quantity > p.stock) {
         throw new Error(
-          `Not enough stock for ${p.name} (available: ${p.stock})`
+          `Not enough stock for ${p.name}. Reduce the quantity in your cart or remove the item and try again.`
         );
       }
       if (p.price !== line.price) {
@@ -26,7 +26,7 @@ export async function assertLineItemsValid(
     }
     if (line.quantity > pkg.stock) {
       throw new Error(
-        `Not enough stock for ${pkg.name} (available: ${pkg.stock})`
+        `Not enough stock for ${pkg.name}. Reduce the quantity in your cart or remove the item and try again.`
       );
     }
     if (pkg.price !== line.price) {
