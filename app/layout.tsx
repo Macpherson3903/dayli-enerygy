@@ -75,7 +75,7 @@ export const metadata: Metadata = {
     title: "Dayli Energy Solutions",
     description:
       "Solar panels, inverters & batteries for sustainable energy solutions in Nigeria.",
-    images: ["/og-image.jpg"],
+    images: ["/logo.png"],
   },
 
   icons: {
