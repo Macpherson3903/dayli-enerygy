@@ -3,24 +3,21 @@ import Image from "next/image";
 
 export default function BrandLogo({
   onClick,
-  showText = true,
+  priority = false,
 }: {
   onClick?: () => void;
-  showText?: boolean;
+  priority?: boolean;
 }) {
   return (
-    <Link href="/" className="flex items-center gap-2" onClick={onClick}>
+    <Link href="/" className="flex items-center" onClick={onClick}>
       <Image
         src="/logo.png"
         alt="Dayli Energy"
-        width={80}
-        height={26}
-        className="h-7 w-auto object-contain"
-        priority
+        width={375}
+        height={96}
+        className="h-[4.125rem] w-auto object-contain sm:h-[4.5rem]"
+        priority={priority}
       />
-      {showText && (
-        <span className="text-base font-bold text-brand-900">Dayli Energy</span>
-      )}
     </Link>
   );
 }

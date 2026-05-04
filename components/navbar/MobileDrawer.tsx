@@ -55,7 +55,7 @@ export default function MobileDrawer({
           >
             <div className="flex h-full flex-col overflow-y-auto">
               <div className="flex items-center justify-between border-b border-gray-200 px-4 py-3">
-                <BrandLogo onClick={onClose} showText />
+                <BrandLogo onClick={onClose} />
                 <button
                   type="button"
                   className="rounded-md p-2 text-gray-700 hover:bg-gray-100"

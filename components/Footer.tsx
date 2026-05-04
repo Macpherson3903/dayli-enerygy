@@ -1,9 +1,9 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { useAuth } from "@clerk/nextjs";
 import { Mail, Phone, MapPin } from "lucide-react";
+import BrandLogo from "@/components/navbar/BrandLogo";
 
 export default function Footer() {
     const { isSignedIn } = useAuth();
@@ -15,16 +15,7 @@ export default function Footer() {
 
                 {/* Brand */}
                 <div>
-                    <div className="flex items-center gap-2">
-                        <Image
-                            src="/logo.png"
-                            alt="Dayli Energy Logo"
-                            width={40}
-                            height={40}
-                            className="rounded-sm"
-                        />
-                        <h2 className="text-lg font-semibold">Dayli Energy</h2>
-                    </div>
+                    <BrandLogo />
 
                     <p className="mt-3 text-sm text-white/80 leading-relaxed">
                         Reliable solar, inverter, and battery solutions powering homes and businesses worldwide.
