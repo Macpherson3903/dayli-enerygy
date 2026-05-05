@@ -16,7 +16,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://daylienergy.com"), // update when domain is ready
+  metadataBase: new URL("https://daylienergy.com"),
 
   title: {
     default: "Dayli Energy Solutions | Solar Panels, Inverters & Batteries",
@@ -25,6 +25,9 @@ export const metadata: Metadata = {
 
   description:
     "Dayli Energy Solutions provides high-quality solar panels, inverters, and battery systems for reliable and sustainable energy across Nigeria.",
+  alternates: {
+    canonical: "/",
+  },
 
   keywords: [
     "solar panels Nigeria",
@@ -79,9 +82,12 @@ export const metadata: Metadata = {
   },
 
   icons: {
-    icon: "/favicon.ico",
+    icon: [
+      { url: "/favicon.ico" },
+      { url: "/logo.png", type: "image/png", sizes: "512x512" },
+    ],
     shortcut: "/favicon.ico",
-    apple: "/apple-touch-icon.png",
+    apple: [{ url: "/logo.png", sizes: "512x512" }],
   },
 };
 
@@ -96,6 +102,23 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const websiteJsonLd = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Organization",
+        name: "Dayli Energy Solutions",
+        url: "https://daylienergy.com",
+        logo: "https://daylienergy.com/logo.png",
+      },
+      {
+        "@type": "WebSite",
+        name: "Dayli Energy Solutions",
+        url: "https://daylienergy.com",
+      },
+    ],
+  };
+
   return (
     <html
       lang="en"
@@ -106,6 +129,10 @@ export default function RootLayout({
         className="min-h-screen flex flex-col bg-white text-gray-900"
         suppressHydrationWarning
       >
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd) }}
+        />
         <Providers>{children}</Providers>
       </body>
     </html>
