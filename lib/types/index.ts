@@ -94,7 +94,10 @@ export type ProductDoc = {
   slug: string;
   category: string;
   brand?: string;
-  price: number;
+  priceMin: number;
+  priceMax: number;
+  /** @deprecated Legacy single price — migrated to priceMin/priceMax on read. */
+  price?: number;
   description: string;
   shortDescription?: string;
   image: string;
@@ -112,7 +115,10 @@ export type PackageDoc = {
   slug: string;
   /** Package taxonomy for storefront filters (e.g. residential, commercial). */
   category: string;
-  price: number;
+  priceMin: number;
+  priceMax: number;
+  /** @deprecated Legacy single price — migrated to priceMin/priceMax on read. */
+  price?: number;
   description: string;
   shortDescription?: string;
   image: string;
@@ -237,7 +243,8 @@ export type ProductPublic = {
   slug: string;
   category: string;
   brand?: string;
-  price: number;
+  priceMin: number;
+  priceMax: number;
   description: string;
   shortDescription?: string;
   image: string;

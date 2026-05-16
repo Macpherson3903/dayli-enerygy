@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { PackageDoc } from "@/lib/types";
+import { formatPriceRange, priceBoundsFromDoc } from "@/lib/pricing";
 
 export function PackagesOverviewTable({ packages }: { packages: PackageDoc[] }) {
   return (
@@ -37,7 +38,9 @@ export function PackagesOverviewTable({ packages }: { packages: PackageDoc[] }) 
                 {pkg.category?.trim() || "general"}
               </td>
               <td className="px-4 py-3 font-mono text-xs">{pkg.slug}</td>
-              <td className="px-4 py-3">₦{pkg.price.toLocaleString()}</td>
+              <td className="px-4 py-3">
+                {formatPriceRange(priceBoundsFromDoc(pkg))}
+              </td>
               <td className="px-4 py-3">{pkg.stock}</td>
               <td className="px-4 py-3">{pkg.featured ? "Yes" : "No"}</td>
               <td className="px-4 py-3">{pkg.active ? "Yes" : "No"}</td>

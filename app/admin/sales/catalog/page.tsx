@@ -1,5 +1,6 @@
 import { getProductsForSalesView } from "@/lib/db/products";
 import { getPackagesForSalesView } from "@/lib/db/packages";
+import { formatPriceRange, priceBoundsFromDoc } from "@/lib/pricing";
 import { PageHeader } from "@/components/ui/PageHeader";
 
 export const dynamic = "force-dynamic";
@@ -37,7 +38,7 @@ export default async function SalesCatalogPage() {
               <tr className="border-b border-gray-200 bg-gray-50">
                 <th className="px-4 py-2 font-medium">Name</th>
                 <th className="px-4 py-2 font-medium">Category</th>
-                <th className="px-4 py-2 font-medium">Price (₦)</th>
+                <th className="px-4 py-2 font-medium">Price range</th>
                 <th className="px-4 py-2 font-medium">Stock</th>
                 <th className="px-4 py-2 font-medium">Status</th>
               </tr>
@@ -50,7 +51,9 @@ export default async function SalesCatalogPage() {
                 >
                   <td className="px-4 py-2 font-medium">{p.name}</td>
                   <td className="px-4 py-2 capitalize">{p.category}</td>
-                  <td className="px-4 py-2">{p.price.toLocaleString()}</td>
+                  <td className="px-4 py-2">
+                    {formatPriceRange(priceBoundsFromDoc(p))}
+                  </td>
                   <td className="px-4 py-2">{p.stock}</td>
                   <td className="px-4 py-2">
                     <ActiveBadge active={p.active} />
@@ -70,7 +73,7 @@ export default async function SalesCatalogPage() {
                 <th className="px-4 py-2 font-medium">Name</th>
                 <th className="px-4 py-2 font-medium">Category</th>
                 <th className="px-4 py-2 font-medium">Slug</th>
-                <th className="px-4 py-2 font-medium">Price (₦)</th>
+                <th className="px-4 py-2 font-medium">Price range</th>
                 <th className="px-4 py-2 font-medium">Stock</th>
                 <th className="px-4 py-2 font-medium">Featured</th>
                 <th className="px-4 py-2 font-medium">Status</th>
@@ -87,7 +90,9 @@ export default async function SalesCatalogPage() {
                     {p.category?.trim() || "general"}
                   </td>
                   <td className="px-4 py-2 font-mono text-xs">{p.slug}</td>
-                  <td className="px-4 py-2">{p.price.toLocaleString()}</td>
+                  <td className="px-4 py-2">
+                    {formatPriceRange(priceBoundsFromDoc(p))}
+                  </td>
                   <td className="px-4 py-2">{p.stock}</td>
                   <td className="px-4 py-2">{p.featured ? "Yes" : "No"}</td>
                   <td className="px-4 py-2">

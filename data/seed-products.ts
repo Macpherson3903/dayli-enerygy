@@ -4,7 +4,8 @@ export type SeedProduct = {
   name: string;
   slug: string;
   category: Exclude<ProductCategory, "all"> | string;
-  price: number;
+  priceMin: number;
+  priceMax: number;
   image: string;
   shortDescription: string;
   description: string;
@@ -17,7 +18,8 @@ export const SEED_PRODUCTS: SeedProduct[] = [
     name: "Solar Panel 300W",
     slug: "solar-panel-300w",
     category: "solar",
-    price: 120_000,
+    priceMin: 100_000,
+    priceMax: 150_000,
     image: "/solarRoof.png",
     shortDescription: "High efficiency solar panel",
     description:
@@ -34,7 +36,8 @@ export const SEED_PRODUCTS: SeedProduct[] = [
     name: "Inverter 5kVA",
     slug: "inverter-5kva",
     category: "inverter",
-    price: 350_000,
+    priceMin: 320_000,
+    priceMax: 400_000,
     image: "/inverter.png",
     shortDescription: "Reliable inverter system",
     description:
@@ -51,7 +54,8 @@ export const SEED_PRODUCTS: SeedProduct[] = [
     name: "Lithium Battery 200Ah",
     slug: "lithium-battery-200ah",
     category: "battery",
-    price: 500_000,
+    priceMin: 450_000,
+    priceMax: 550_000,
     image: "/battery.png",
     shortDescription: "Long-lasting battery storage",
     description: "Long-lasting lithium battery for energy storage systems.",

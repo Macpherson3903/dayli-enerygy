@@ -5,6 +5,7 @@ import { updateProductAction } from "@/app/actions/products";
 import { Input, Textarea } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
 import { ImageUrlField } from "./ImageUrlField";
+import { PriceRangeFields } from "./PriceRangeFields";
 import { useStatusMessage } from "@/context/StatusMessageContext";
 
 const initial: { error?: string; ok?: boolean } | undefined = undefined;
@@ -19,7 +20,8 @@ export function ProductEditForm({
     name: string;
     category: string;
     brand?: string;
-    price: number;
+    priceMin: number;
+    priceMax: number;
     description: string;
     shortDescription?: string;
     image: string;
@@ -92,14 +94,9 @@ export function ProductEditForm({
         label="Brand (optional)"
         defaultValue={product.brand ?? ""}
       />
-      <Input
-        name="price"
-        label="Price (₦)"
-        type="number"
-        min={0}
-        step={1}
-        defaultValue={product.price}
-        required
+      <PriceRangeFields
+        priceMin={product.priceMin}
+        priceMax={product.priceMax}
       />
       <Textarea
         name="description"

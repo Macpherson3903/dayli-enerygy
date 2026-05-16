@@ -6,6 +6,7 @@ import { clearCartForUser, getCartForUser, replaceCartForUser } from "@/lib/db/c
 import { getProductById } from "@/lib/db/products";
 import { getPackageById } from "@/lib/db/packages";
 import type { CartLine, ProductPublic } from "@/lib/types";
+import { cartUnitPrice, priceBoundsFromDoc } from "@/lib/pricing";
 
 type CartPayload = { lines: CartLine[] };
 
@@ -60,7 +61,7 @@ async function hydrateFromProductOrFallback(
       return {
         productId: dbProduct._id.toString(),
         name: dbProduct.name,
-        price: dbProduct.price,
+        price: cartUnitPrice(priceBoundsFromDoc(dbProduct)),
         image: dbProduct.image,
         maxStock: dbProduct.stock,
         quantity: 1,
@@ -71,7 +72,7 @@ async function hydrateFromProductOrFallback(
       return {
         productId: dbPkg._id.toString(),
         name: dbPkg.name,
-        price: dbPkg.price,
+        price: cartUnitPrice(priceBoundsFromDoc(dbPkg)),
         image: dbPkg.image,
         maxStock: dbPkg.stock,
         quantity: 1,
@@ -82,7 +83,7 @@ async function hydrateFromProductOrFallback(
   return {
     productId: product.id,
     name: product.name,
-    price: product.price,
+    price: cartUnitPrice({ priceMin: product.priceMin, priceMax: product.priceMax }),
     image: product.image,
     maxStock: product.stock,
     quantity: 1,

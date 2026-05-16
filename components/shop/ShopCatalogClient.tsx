@@ -8,6 +8,11 @@ import ShopToolbar from "@/components/shop/ShopToolbar";
 import ProductGrid from "@/components/shop/ProductGrid";
 import ProductCard from "@/components/ProductCard";
 import type { ProductPublic } from "@/lib/types";
+import {
+  catalogItemMatchesPriceFilter,
+  parseCatalogPriceFilterId,
+  type CatalogPriceFilterId,
+} from "@/lib/pricing";
 import { motion } from "framer-motion";
 import { clsx } from "clsx";
 
@@ -39,6 +44,7 @@ export default function ShopCatalogClient({
 
   const category = searchParams.get("category") || "all";
   const pkgCategory = searchParams.get("pkgCategory") || "all";
+  const priceFilter = parseCatalogPriceFilterId(searchParams.get("price"));
   const rawPage = Number.parseInt(searchParams.get("page") || "1", 10);
   const page = Number.isNaN(rawPage) || rawPage < 1 ? 1 : rawPage;
 
@@ -96,6 +102,20 @@ export default function ShopCatalogClient({
     [replaceParams]
   );
 
+  const setPriceFilter = useCallback(
+    (id: CatalogPriceFilterId) => {
+      replaceParams((params) => {
+        if (id === "all") {
+          params.delete("price");
+        } else {
+          params.set("price", id);
+        }
+        params.delete("page");
+      });
+    },
+    [replaceParams]
+  );
+
   const [sort, setSort] = useState("default");
   const [search, setSearch] = useState("");
   const categories = useMemo(
@@ -130,13 +150,21 @@ export default function ShopCatalogClient({
       const q = search.toLowerCase();
       result = result.filter((p) => p.name.toLowerCase().includes(q));
     }
+    if (priceFilter !== "all") {
+      result = result.filter((p) =>
+        catalogItemMatchesPriceFilter(
+          { priceMin: p.priceMin, priceMax: p.priceMax },
+          priceFilter
+        )
+      );
+    }
     if (sort === "low") {
-      result = [...result].sort((a, b) => a.price - b.price);
+      result = [...result].sort((a, b) => a.priceMin - b.priceMin);
     } else if (sort === "high") {
-      result = [...result].sort((a, b) => b.price - a.price);
+      result = [...result].sort((a, b) => b.priceMax - a.priceMax);
     }
     return result;
-  }, [initialProducts, category, sort, search]);
+  }, [initialProducts, category, sort, search, priceFilter]);
 
   const filteredPackages = useMemo(() => {
     let result = initialPackages;
@@ -150,13 +178,21 @@ export default function ShopCatalogClient({
       const q = search.toLowerCase();
       result = result.filter((p) => p.name.toLowerCase().includes(q));
     }
+    if (priceFilter !== "all") {
+      result = result.filter((p) =>
+        catalogItemMatchesPriceFilter(
+          { priceMin: p.priceMin, priceMax: p.priceMax },
+          priceFilter
+        )
+      );
+    }
     if (sort === "low") {
-      result = [...result].sort((a, b) => a.price - b.price);
+      result = [...result].sort((a, b) => a.priceMin - b.priceMin);
     } else if (sort === "high") {
-      result = [...result].sort((a, b) => b.price - a.price);
+      result = [...result].sort((a, b) => b.priceMax - a.priceMax);
     }
     return result;
-  }, [initialPackages, pkgCategory, search, sort]);
+  }, [initialPackages, pkgCategory, search, sort, priceFilter]);
 
   const activeList =
     catalogTab === "packages" ? filteredPackages : filteredProducts;
@@ -329,6 +365,8 @@ export default function ShopCatalogClient({
             setCategory={setCategory}
             categories={categories}
             filterLabel="Product category"
+            priceFilter={priceFilter}
+            setPriceFilter={setPriceFilter}
           >
             <ProductGrid products={paginatedActive} />
             {paginationNav}
@@ -339,6 +377,8 @@ export default function ShopCatalogClient({
             setCategory={setPackageCategory}
             categories={packageCategoryOptions}
             filterLabel="Package category"
+            priceFilter={priceFilter}
+            setPriceFilter={setPriceFilter}
           >
             <ProductGrid products={paginatedActive} />
             {paginationNav}

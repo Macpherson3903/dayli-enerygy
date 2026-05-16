@@ -30,7 +30,8 @@ function formToPackageInput(formData: FormData, forUpdate: boolean) {
   const name = String(formData.get("name") ?? "");
   const category = String(formData.get("category") ?? "").trim();
   const slugRaw = String(formData.get("slug") ?? "").trim();
-  const price = Number(formData.get("price"));
+  const priceMin = Number(formData.get("priceMin"));
+  const priceMax = Number(formData.get("priceMax"));
   const description = String(formData.get("description") ?? "");
   const shortRaw = String(formData.get("shortDescription") ?? "");
   const image = String(formData.get("image") ?? "");
@@ -54,7 +55,8 @@ function formToPackageInput(formData: FormData, forUpdate: boolean) {
     name,
     category,
     slug: slugRaw || makeSlugFromName(name),
-    price,
+    priceMin,
+    priceMax,
     description,
     image,
     features,

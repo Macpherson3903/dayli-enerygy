@@ -33,7 +33,8 @@ export const productInputSchema = z.object({
     .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/),
   category: z.string().trim().min(1),
   brand: z.string().trim().max(120).optional(),
-  price: z.number().nonnegative(),
+  priceMin: z.number().nonnegative(),
+  priceMax: z.number().nonnegative(),
   description: z.string().min(1),
   shortDescription: z.string().max(500).optional(),
   image: z
@@ -46,6 +47,9 @@ export const productInputSchema = z.object({
   features: z.array(z.string()).default([]),
   stock: z.number().int().nonnegative(),
   active: z.boolean().default(true),
+}).refine((d) => d.priceMin <= d.priceMax, {
+  message: "Maximum price must be greater than or equal to minimum price",
+  path: ["priceMax"],
 });
 
 export const packageInputSchema = z.object({
@@ -60,7 +64,8 @@ export const packageInputSchema = z.object({
     .min(1)
     .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/)
     .transform((s) => s.trim().toLowerCase()),
-  price: z.number().nonnegative(),
+  priceMin: z.number().nonnegative(),
+  priceMax: z.number().nonnegative(),
   description: z.string().min(1),
   shortDescription: z.string().max(500).optional(),
   image: z
@@ -75,6 +80,9 @@ export const packageInputSchema = z.object({
   stock: z.number().int().nonnegative(),
   active: z.boolean().default(true),
   featured: z.boolean().default(false),
+}).refine((d) => d.priceMin <= d.priceMax, {
+  message: "Maximum price must be greater than or equal to minimum price",
+  path: ["priceMax"],
 });
 
 export const orderStatusUpdateSchema = z.object({

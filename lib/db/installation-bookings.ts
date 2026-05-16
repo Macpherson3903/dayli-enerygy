@@ -246,6 +246,18 @@ export async function getInstallationBookingByProposalToken(token: string) {
   });
 }
 
+/** Public proposal page: excludes expired tokens (impure time check stays in data layer). */
+export async function getInstallationBookingByProposalTokenForDisplay(
+  token: string
+) {
+  const booking = await getInstallationBookingByProposalToken(token);
+  const expiresAt = booking?.proposal?.approval?.tokenExpiresAt;
+  if (!expiresAt || expiresAt.getTime() <= Date.now()) {
+    return null;
+  }
+  return booking;
+}
+
 export type ApproveProposalResult =
   | { ok: true }
   | { ok: false; reason: "not_found" | "not_sent" | "expired" | "already_approved" };

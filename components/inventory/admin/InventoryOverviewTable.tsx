@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { ProductDoc } from "@/lib/types";
+import { formatPriceRange, priceBoundsFromDoc } from "@/lib/pricing";
 
 export function InventoryOverviewTable({ products }: { products: ProductDoc[] }) {
   return (
@@ -34,7 +35,9 @@ export function InventoryOverviewTable({ products }: { products: ProductDoc[] })
               <td className="px-4 py-3 font-medium">{product.name}</td>
               <td className="px-4 py-3 capitalize">{product.category}</td>
               <td className="px-4 py-3">{product.brand ?? "-"}</td>
-              <td className="px-4 py-3">₦{product.price.toLocaleString()}</td>
+              <td className="px-4 py-3">
+                {formatPriceRange(priceBoundsFromDoc(product))}
+              </td>
               <td className="px-4 py-3">{product.stock}</td>
               <td className="px-4 py-3">{product.active ? "Yes" : "No"}</td>
               <td className="px-4 py-3">

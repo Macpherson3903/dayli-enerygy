@@ -7,6 +7,7 @@ import { motion } from "framer-motion";
 import { useAuth, SignInButton } from "@clerk/nextjs";
 import { useCart } from "@/context/CartContext";
 import type { ProductPublic } from "@/lib/types";
+import { formatPriceRange } from "@/lib/pricing";
 import { Button } from "@/components/ui/Button";
 import { ProductAgentModal } from "@/components/shop/ProductAgentModal";
 
@@ -64,10 +65,19 @@ export default function ProductDetailClient({
               {product.name}
             </h1>
             <p className="text-2xl font-bold text-green-700 mt-4">
-              ₦{product.price.toLocaleString()}
+              {formatPriceRange({
+                priceMin: product.priceMin,
+                priceMax: product.priceMax,
+              })}
             </p>
             <p className="text-sm text-gray-500 mt-1">
               {inStock ? "In stock" : "Currently out of stock"}
+              {product.priceMin !== product.priceMax ? (
+                <span className="block">
+                  Cart uses the starting price (₦
+                  {product.priceMin.toLocaleString()}); final quote may vary.
+                </span>
+              ) : null}
             </p>
             <p className="text-gray-600 mt-4 leading-relaxed">
               {product.description}
@@ -188,7 +198,10 @@ export default function ProductDetailClient({
                 >
                   <p className="font-medium">{item.name}</p>
                   <p className="text-sm text-gray-500 mt-1">
-                    ₦{item.price.toLocaleString()}
+                    {formatPriceRange({
+                      priceMin: item.priceMin,
+                      priceMax: item.priceMax,
+                    })}
                   </p>
                 </div>
               ))}

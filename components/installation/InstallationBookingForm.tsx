@@ -81,9 +81,12 @@ export function InstallationBookingForm({
   const { showStatusMessage } = useStatusMessage();
   const formRef = useRef<HTMLFormElement>(null);
   const onBookingSuccessRef = useRef(onBookingSuccess);
-  onBookingSuccessRef.current = onBookingSuccess;
   const [state, setState] = useState<BookingFormState>({});
   const [pending, setPending] = useState(false);
+
+  useEffect(() => {
+    onBookingSuccessRef.current = onBookingSuccess;
+  }, [onBookingSuccess]);
 
   useEffect(() => {
     const email = user?.primaryEmailAddress?.emailAddress;

@@ -6,6 +6,7 @@ import { Input, Textarea } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { ImageUrlField } from "./ImageUrlField";
+import { PriceRangeFields } from "./PriceRangeFields";
 import { useStatusMessage } from "@/context/StatusMessageContext";
 
 const initial: { error?: string; ok?: boolean } | undefined = undefined;
@@ -65,14 +66,7 @@ export function ProductCreateForm({ categories }: { categories: string[] }) {
           </select>
         </div>
         <Input name="brand" label="Brand (optional)" />
-        <Input
-          name="price"
-          label="Price (₦)"
-          type="number"
-          min={0}
-          step={1}
-          required
-        />
+        <PriceRangeFields />
         <Textarea name="description" label="Description" required rows={4} />
         <Textarea
           name="shortDescription"

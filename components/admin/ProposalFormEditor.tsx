@@ -77,10 +77,6 @@ function LoadDetailsEditDialog({
   const derived = patchApplianceRow(draft, {});
 
   useEffect(() => {
-    setDraft(patchApplianceRow(initialRow, {}));
-  }, [initialRow]);
-
-  useEffect(() => {
     function onKey(e: KeyboardEvent) {
       if (e.key === "Escape") onClose();
     }
@@ -206,7 +202,14 @@ export function ProposalFormEditor({
 }) {
   const { showStatusMessage } = useStatusMessage();
   const [payload, setPayload] = useState<ProposalPayload>(initialPayload);
+  const [prevInitialPayload, setPrevInitialPayload] =
+    useState<ProposalPayload>(initialPayload);
   const [loadEditIndex, setLoadEditIndex] = useState<number | null>(null);
+
+  if (initialPayload !== prevInitialPayload) {
+    setPrevInitialPayload(initialPayload);
+    setPayload(initialPayload);
+  }
 
   const [saveState, saveAction, savePending] = useActionState(
     saveProposalDraftAction,
@@ -218,10 +221,6 @@ export function ProposalFormEditor({
   );
 
   const locked = approvalStatus === "sent" || approvalStatus === "approved";
-
-  useEffect(() => {
-    setPayload(initialPayload);
-  }, [initialPayload]);
 
   useEffect(() => {
     if (!saveState) return;

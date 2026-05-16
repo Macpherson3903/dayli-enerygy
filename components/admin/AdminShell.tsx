@@ -15,6 +15,7 @@ import {
   Layers3,
   PlusCircle,
   FolderTree,
+  Boxes,
   Users,
   MessageCircle,
 } from "lucide-react";
@@ -51,8 +52,9 @@ const items: Item[] = [
       { href: "/admin/inventory/dashboard", label: "Dashboard" },
       { href: "/admin/inventory/overview", label: "Overview" },
       { href: "/admin/inventory/packages", label: "Packages" },
+      { href: "/admin/inventory/packages/add", label: "Add package" },
       { href: "/admin/inventory/package-categories", label: "Package categories" },
-      { href: "/admin/inventory/add", label: "Add inventory" },
+      { href: "/admin/inventory/add", label: "Add product" },
       { href: "/admin/inventory/categories", label: "Manage categories" },
     ],
   },
@@ -201,10 +203,19 @@ export function AdminShell({
                             {child.href.endsWith("/overview") && (
                               <Layers3 className="w-3.5 h-3.5" />
                             )}
-                            {child.href.endsWith("/add") && (
+                            {child.href === "/admin/inventory/packages" && (
+                              <Boxes className="w-3.5 h-3.5" />
+                            )}
+                            {child.href.endsWith("/packages/add") && (
+                              <PlusCircle className="w-3.5 h-3.5" />
+                            )}
+                            {child.href === "/admin/inventory/add" && (
                               <PlusCircle className="w-3.5 h-3.5" />
                             )}
                             {child.href.endsWith("/categories") && (
+                              <FolderTree className="w-3.5 h-3.5" />
+                            )}
+                            {child.href.endsWith("/package-categories") && (
                               <FolderTree className="w-3.5 h-3.5" />
                             )}
                             <span className="flex-1 truncate">{child.label}</span>

@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { ChartViewport } from "@/components/charts/ChartViewport";
 
 type ChartCardProps = {
   title: string;
@@ -13,7 +14,9 @@ export function ChartCard({ title, description, children }: ChartCardProps) {
         <h3 className="text-sm font-semibold text-gray-900">{title}</h3>
         <p className="text-xs text-gray-500 mt-1">{description}</p>
       </header>
-      <div className="h-64">{children}</div>
+      <div className="h-64 w-full min-w-0">
+        <ChartViewport>{children}</ChartViewport>
+      </div>
     </section>
   );
 }

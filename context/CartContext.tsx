@@ -153,7 +153,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
                 quantity: nq,
                 maxStock: p.stock,
                 image: p.image,
-                price: p.price,
+                price: p.priceMin,
                 name: p.name,
               }
             : l
@@ -164,7 +164,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         {
           productId: p.id,
           name: p.name,
-          price: p.price,
+          price: p.priceMin,
           quantity: q,
           image: p.image,
           maxStock: p.stock,

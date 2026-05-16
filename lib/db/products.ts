@@ -3,6 +3,7 @@ import { getDb } from "@/lib/mongodb";
 import type { ProductDoc, ProductPublic } from "@/lib/types";
 import { SEED_PRODUCTS, type SeedProduct } from "@/data/seed-products";
 import type { ProductInput } from "@/lib/validators";
+import { normalizePriceBounds, priceBoundsFromDoc } from "@/lib/pricing";
 
 function isMongoUnreachableError(e: unknown): boolean {
   if (!e || typeof e !== "object") return false;
@@ -24,12 +25,14 @@ function shouldUsePublicSeedFallback(): boolean {
 
 /** Stable public shape from seed file when DB is offline (development only). */
 function seedProductToPublic(s: SeedProduct): ProductPublic {
+  const { priceMin, priceMax } = normalizePriceBounds(s.priceMin, s.priceMax);
   return {
     id: `seed:${s.slug}`,
     name: s.name,
     slug: s.slug,
     category: s.category,
-    price: s.price,
+    priceMin,
+    priceMax,
     description: s.description,
     shortDescription: s.shortDescription,
     image: s.image,
@@ -47,13 +50,15 @@ const CATEGORY_COL = "inventoryCategories";
 const DEFAULT_CATEGORIES = ["solar", "inverter", "battery"];
 
 function toPublic(p: ProductDoc): ProductPublic {
+  const { priceMin, priceMax } = priceBoundsFromDoc(p);
   return {
     id: p._id.toString(),
     name: p.name,
     slug: p.slug,
     category: p.category,
     brand: p.brand,
-    price: p.price,
+    priceMin,
+    priceMax,
     description: p.description,
     shortDescription: p.shortDescription,
     image: p.image,
@@ -73,11 +78,14 @@ export async function seedProductsIfEmpty() {
   const n = await db.collection(COL).countDocuments();
   if (n > 0) return;
   const now = new Date();
-  const docs = SEED_PRODUCTS.map((s) => ({
+  const docs = SEED_PRODUCTS.map((s) => {
+    const { priceMin, priceMax } = normalizePriceBounds(s.priceMin, s.priceMax);
+    return {
     name: s.name,
     slug: s.slug,
     category: s.category,
-    price: s.price,
+    priceMin,
+    priceMax,
     brand: undefined,
     description: s.description,
     shortDescription: s.shortDescription,
@@ -87,7 +95,8 @@ export async function seedProductsIfEmpty() {
     active: true,
     createdAt: now,
     updatedAt: now,
-  }));
+  };
+  });
   if (docs.length) await db.collection(COL).insertMany(docs);
 }
 
@@ -212,12 +221,17 @@ export async function getProductPublicBySlug(
 export async function createProduct(input: ProductInput) {
   const db = await getDb();
   const now = new Date();
+  const { priceMin, priceMax } = normalizePriceBounds(
+    input.priceMin,
+    input.priceMax
+  );
   const doc: Omit<ProductDoc, "_id"> = {
     name: input.name,
     slug: input.slug,
     category: input.category,
     brand: input.brand,
-    price: input.price,
+    priceMin,
+    priceMax,
     description: input.description,
     shortDescription: input.shortDescription,
     image: input.image,

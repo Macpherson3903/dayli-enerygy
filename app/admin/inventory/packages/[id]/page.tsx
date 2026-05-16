@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getPackageById, getPackageCategories } from "@/lib/db/packages";
+import { priceBoundsFromDoc } from "@/lib/pricing";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { PackageEditForm } from "@/components/inventory/PackageEditForm";
 import { DeletePackageButton } from "@/components/inventory/DeletePackageButton";
@@ -23,6 +24,7 @@ export default async function EditPackagePage({
   const category =
     pkg.category?.trim().toLowerCase() ||
     (categories[0] ?? "general");
+  const { priceMin, priceMax } = priceBoundsFromDoc(pkg);
   return (
     <div className="max-w-2xl space-y-4">
       <PageHeader
@@ -38,7 +40,8 @@ export default async function EditPackagePage({
           name: pkg.name,
           slug: pkg.slug,
           category,
-          price: pkg.price,
+          priceMin,
+          priceMax,
           description: pkg.description,
           shortDescription: pkg.shortDescription,
           image: pkg.image,

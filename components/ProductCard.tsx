@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { clsx } from "clsx";
 import type { ProductPublic } from "@/lib/types";
+import { formatPriceRange } from "@/lib/pricing";
 
 export default function ProductCard({
   product,
@@ -72,9 +73,12 @@ export default function ProductCard({
 
                 {/* Footer */}
                 <div className="mt-4 flex items-center justify-between">
-                    {product?.price && (
+                    {(product?.priceMin != null || product?.priceMax != null) && (
                         <p className="font-bold text-green-700">
-                            ₦{product.price.toLocaleString()}
+                            {formatPriceRange({
+                              priceMin: product.priceMin,
+                              priceMax: product.priceMax,
+                            })}
                         </p>
                     )}
 

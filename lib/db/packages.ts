@@ -3,6 +3,7 @@ import { getDb } from "@/lib/mongodb";
 import type { PackageDoc, ProductPublic } from "@/lib/types";
 import { SEED_PACKAGES, type SeedPackage } from "@/data/seed-packages";
 import type { PackageInput } from "@/lib/validators";
+import { normalizePriceBounds, priceBoundsFromDoc } from "@/lib/pricing";
 
 function isMongoUnreachableError(e: unknown): boolean {
   if (!e || typeof e !== "object") return false;
@@ -33,12 +34,14 @@ export const DEFAULT_PACKAGE_CATEGORIES = [
 ] as const;
 
 function seedPackageToPublic(s: SeedPackage): ProductPublic {
+  const { priceMin, priceMax } = normalizePriceBounds(s.priceMin, s.priceMax);
   return {
     id: `seed-pkg:${s.slug}`,
     name: s.name,
     slug: s.slug,
     category: s.category,
-    price: s.price,
+    priceMin,
+    priceMax,
     description: s.description,
     shortDescription: s.shortDescription,
     image: s.image,
@@ -70,12 +73,14 @@ function packageCategoryOrDefault(p: PackageDoc): string {
 }
 
 function toPublic(p: PackageDoc): ProductPublic {
+  const { priceMin, priceMax } = priceBoundsFromDoc(p);
   return {
     id: p._id.toString(),
     name: p.name,
     slug: p.slug,
     category: packageCategoryOrDefault(p),
-    price: p.price,
+    priceMin,
+    priceMax,
     description: p.description,
     shortDescription: p.shortDescription,
     image: p.image,
@@ -117,11 +122,14 @@ export async function seedPackagesIfEmpty() {
   const n = await db.collection(COL).countDocuments();
   if (n > 0) return;
   const now = new Date();
-  const docs = SEED_PACKAGES.map((s) => ({
+  const docs = SEED_PACKAGES.map((s) => {
+    const { priceMin, priceMax } = normalizePriceBounds(s.priceMin, s.priceMax);
+    return {
     name: s.name,
     slug: s.slug,
     category: s.category.trim().toLowerCase(),
-    price: s.price,
+    priceMin,
+    priceMax,
     description: s.description,
     shortDescription: s.shortDescription,
     image: s.image,
@@ -132,7 +140,8 @@ export async function seedPackagesIfEmpty() {
     featured: s.featured,
     createdAt: now,
     updatedAt: now,
-  }));
+  };
+  });
   if (docs.length) await db.collection(COL).insertMany(docs);
 }
 
@@ -256,11 +265,16 @@ export async function getPackageForPdp(
 export async function createPackage(input: PackageInput) {
   const db = await getDb();
   const now = new Date();
+  const { priceMin, priceMax } = normalizePriceBounds(
+    input.priceMin,
+    input.priceMax
+  );
   const doc: Omit<PackageDoc, "_id"> = {
     name: input.name,
     slug: input.slug,
     category: input.category,
-    price: input.price,
+    priceMin,
+    priceMax,
     description: input.description,
     shortDescription: input.shortDescription,
     image: input.image,

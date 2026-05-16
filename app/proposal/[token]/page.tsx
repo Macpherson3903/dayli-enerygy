@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { getInstallationBookingByProposalToken } from "@/lib/db/installation-bookings";
+import { getInstallationBookingByProposalTokenForDisplay } from "@/lib/db/installation-bookings";
 import { ProposalPayloadReadOnly } from "@/components/proposal/ProposalPayloadReadOnly";
 import { ProposalApproveClient } from "./ProposalApproveClient";
 
@@ -15,7 +15,7 @@ export default async function PublicProposalPage({
 }) {
   const { token: raw } = await params;
   const token = decodeURIComponent(raw);
-  const booking = await getInstallationBookingByProposalToken(token);
+  const booking = await getInstallationBookingByProposalTokenForDisplay(token);
   const approval = booking?.proposal?.approval;
   const data = booking?.proposal?.data;
 
@@ -45,13 +45,6 @@ export default async function PublicProposalPage({
   }
 
   if (approval.status !== "sent") {
-    notFound();
-  }
-
-  const exp = approval.tokenExpiresAt
-    ? new Date(approval.tokenExpiresAt).getTime()
-    : 0;
-  if (!exp || exp <= Date.now()) {
     notFound();
   }
 
