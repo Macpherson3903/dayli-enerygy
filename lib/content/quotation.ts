@@ -115,7 +115,7 @@ export function computeQuotationRow(
   quantity: number,
   hoursPerDay: number
 ): QuotationComputedRow {
-  const safeQuantity = Number.isFinite(quantity) ? Math.max(0, Math.floor(quantity)) : 0;
+  const safeQuantity = Number.isFinite(quantity) ? Math.max(0, quantity) : 0;
   const rawHours = Number.isFinite(hoursPerDay) ? hoursPerDay : 0;
   const safeHours = Math.max(0, Math.min(24, rawHours));
   const peakLoad = safeQuantity * appliance.watts;
@@ -142,12 +142,16 @@ export function formatQuotationSummaryText(
     lines.push("(No appliance quantities entered — totals are zero.)", "");
   } else {
     for (const r of used) {
+      const qty =
+        Math.abs(r.quantity - Math.round(r.quantity)) < 1e-6
+          ? String(Math.round(r.quantity))
+          : String(Number(r.quantity.toFixed(2)));
       const h =
         Math.abs(r.hoursPerDay - Math.round(r.hoursPerDay)) < 1e-6
           ? String(Math.round(r.hoursPerDay))
           : String(Number(r.hoursPerDay.toFixed(2)));
       lines.push(
-        `• ${r.name}: qty ${r.quantity}, ${h} h/day → peak ${r.peakLoad.toLocaleString()} W, daily ${r.dailyEnergy.toLocaleString()} Wh`
+        `• ${r.name}: qty ${qty}, ${h} h/day → peak ${r.peakLoad.toLocaleString()} W, daily ${r.dailyEnergy.toLocaleString()} Wh`
       );
     }
     lines.push("");

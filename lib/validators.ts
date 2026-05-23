@@ -163,7 +163,7 @@ export const productAgentInquirySchema = z.object({
 
 const proposalApplianceRowSchema = z.object({
   name: z.string().trim().max(200),
-  quantity: z.number().int().min(0).max(1_000_000),
+  quantity: z.number().nonnegative().max(1_000_000),
   watts: z.number().nonnegative().max(1e9),
   peakLoad: z.number().nonnegative().max(1e9),
   hoursPerDay: z.number().nonnegative().max(24),

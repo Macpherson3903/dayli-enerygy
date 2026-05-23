@@ -26,18 +26,20 @@ function formatNumber(value: number): string {
   return value.toLocaleString();
 }
 
-function parseQuantityInput(raw: string | undefined): number {
-  const t = raw?.trim();
-  if (!t) return 0;
-  const n = Number.parseInt(t, 10);
-  return Number.isNaN(n) ? 0 : Math.max(0, n);
-}
+/** Allows typing whole numbers and decimals (e.g. 1, 0.5, 12.25). */
+const DECIMAL_INPUT_RE = /^\d*\.?\d*$/;
 
-function parseHoursInput(raw: string | undefined): number {
+function parseDecimalInput(
+  raw: string | undefined,
+  options?: { max?: number }
+): number {
   const t = raw?.trim();
   if (!t) return 0;
   const n = Number.parseFloat(t);
-  return Number.isNaN(n) ? 0 : Math.max(0, Math.min(24, n));
+  if (Number.isNaN(n)) return 0;
+  let v = Math.max(0, n);
+  if (options?.max != null) v = Math.min(options.max, v);
+  return v;
 }
 
 export function QuotationCalculator({
@@ -51,8 +53,8 @@ export function QuotationCalculator({
     return quotationAppliances.map((appliance) =>
       computeQuotationRow(
         appliance,
-        parseQuantityInput(quantityInputs[appliance.id]),
-        parseHoursInput(hoursInputs[appliance.id])
+        parseDecimalInput(quantityInputs[appliance.id]),
+        parseDecimalInput(hoursInputs[appliance.id], { max: 24 })
       )
     );
   }, [quantityInputs, hoursInputs]);
@@ -72,29 +74,37 @@ export function QuotationCalculator({
     <div className="space-y-4">
       <Card className="overflow-hidden p-0">
         <div className="overflow-x-auto">
-          <table className="min-w-full text-sm">
+          <table className="min-w-full border-collapse border-2 border-gray-300 text-sm">
             <caption className="sr-only">
               Appliance list: enter quantity and hours per day for each item you use.
             </caption>
             <thead className="bg-gray-50 text-left text-gray-700">
               <tr>
-                <th className="px-4 py-3 font-semibold">Appliance</th>
-                <th className="px-4 py-3 font-semibold">Quantity</th>
-                <th className="px-4 py-3 font-semibold">Hours / day</th>
+                <th className="border-2 border-gray-300 px-4 py-3 font-semibold">
+                  Appliance
+                </th>
+                <th className="border-2 border-gray-300 px-4 py-3 font-semibold">
+                  Quantity
+                </th>
+                <th className="border-2 border-gray-300 px-4 py-3 font-semibold">
+                  Hours / day
+                </th>
               </tr>
             </thead>
             <tbody>
               {rows.map((row) => (
-                <tr key={row.id} className="border-t border-gray-100 align-middle">
-                  <td className="px-4 py-3 text-gray-900">{row.name}</td>
-                  <td className="px-4 py-3">
+                <tr key={row.id} className="align-middle bg-white even:bg-gray-50/50">
+                  <td className="border-2 border-gray-300 px-4 py-3 text-gray-900">
+                    {row.name}
+                  </td>
+                  <td className="border-2 border-gray-300 px-4 py-3">
                     <input
                       type="text"
-                      inputMode="numeric"
+                      inputMode="decimal"
                       value={quantityInputs[row.id] ?? ""}
                       onChange={(event) => {
                         const v = event.target.value;
-                        if (v === "" || /^\d+$/.test(v)) {
+                        if (v === "" || DECIMAL_INPUT_RE.test(v)) {
                           setQuantityInputs((prev) => ({ ...prev, [row.id]: v }));
                         }
                       }}
@@ -102,14 +112,14 @@ export function QuotationCalculator({
                       aria-label={`${row.name} quantity`}
                     />
                   </td>
-                  <td className="px-4 py-3">
+                  <td className="border-2 border-gray-300 px-4 py-3">
                     <input
                       type="text"
                       inputMode="decimal"
                       value={hoursInputs[row.id] ?? ""}
                       onChange={(event) => {
                         const v = event.target.value;
-                        if (v === "" || /^\d*\.?\d*$/.test(v)) {
+                        if (v === "" || DECIMAL_INPUT_RE.test(v)) {
                           setHoursInputs((prev) => ({ ...prev, [row.id]: v }));
                         }
                       }}
