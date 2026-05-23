@@ -4,13 +4,23 @@ import { contactChannels, contactHours } from "@/lib/content/contact";
 import { Card } from "@/components/ui/Card";
 
 function ChannelRow({ channel }: { channel: ContactChannel }) {
+  const linkClass =
+    "text-sm font-medium text-brand-800 hover:text-brand-900 underline-offset-2 hover:underline";
   const body = channel.href ? (
-    <Link
-      href={channel.href}
-      className="text-sm font-medium text-brand-800 hover:text-brand-900 underline-offset-2 hover:underline"
-    >
-      {channel.value}
-    </Link>
+    channel.external ? (
+      <a
+        href={channel.href}
+        target="_blank"
+        rel="noopener noreferrer"
+        className={linkClass}
+      >
+        {channel.value}
+      </a>
+    ) : (
+      <Link href={channel.href} className={linkClass}>
+        {channel.value}
+      </Link>
+    )
   ) : (
     <p className="text-sm font-medium text-gray-900">{channel.value}</p>
   );

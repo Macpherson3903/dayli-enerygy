@@ -1,5 +1,9 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import {
+  BUSINESS_ADDRESS_DISPLAY,
+  WHATSAPP_DISPLAY,
+} from "@/lib/content/business";
 import { Providers } from "./providers";
 import "./globals.css";
 
@@ -110,6 +114,15 @@ export default function RootLayout({
         name: "Dayli Energy Solutions",
         url: "https://daylienergy.com",
         logo: "https://daylienergy.com/logo.png",
+        email: "support@daylienergy.com",
+        telephone: WHATSAPP_DISPLAY,
+        address: {
+          "@type": "PostalAddress",
+          streetAddress: BUSINESS_ADDRESS_DISPLAY,
+          addressLocality: "Port Harcourt",
+          addressRegion: "Rivers State",
+          addressCountry: "NG",
+        },
       },
       {
         "@type": "WebSite",

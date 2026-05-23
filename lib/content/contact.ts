@@ -19,27 +19,42 @@ export const contactHeader = {
     "Have a question about products, pricing, or installation? Send a message and our team will get back to you as soon as possible.",
 };
 
-import { WHATSAPP_DISPLAY, WHATSAPP_URL } from "@/lib/content/whatsapp";
+import {
+  BUSINESS_ADDRESS_DISPLAY,
+  businessMapsLinkUrl,
+  WHATSAPP_DISPLAY,
+  WHATSAPP_URL,
+} from "@/lib/content/business";
 
 export type ContactChannel = {
   label: string;
   value: string;
   href?: string;
   hint?: string;
+  /** Open link in a new tab (e.g. Google Maps, WhatsApp). */
+  external?: boolean;
 };
 
 export const contactChannels: ContactChannel[] = [
   {
-    label: "Email",
-    value: "support@daylienergy.com",
-    href: "mailto:support@daylienergy.com",
-    hint: "We typically respond within one business day.",
+    label: "Office",
+    value: BUSINESS_ADDRESS_DISPLAY,
+    href: businessMapsLinkUrl(),
+    external: true,
+    hint: "Port Harcourt showroom — tap to open in Google Maps.",
   },
   {
     label: "WhatsApp",
     value: WHATSAPP_DISPLAY,
     href: WHATSAPP_URL,
+    external: true,
     hint: "Chat with us anytime — we typically reply within a few hours.",
+  },
+  {
+    label: "Email",
+    value: "support@daylienergy.com",
+    href: "mailto:support@daylienergy.com",
+    hint: "We typically respond within one business day.",
   },
 ];
 

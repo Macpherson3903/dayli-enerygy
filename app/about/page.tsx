@@ -41,6 +41,8 @@ export default function AboutPage() {
           url={aboutJsonLd.url}
           logo={aboutJsonLd.logo}
           contactEmail={aboutJsonLd.contactEmail}
+          telephone={aboutJsonLd.telephone}
+          address={aboutJsonLd.address}
           description={aboutSeo.description}
         />
         <AboutHero

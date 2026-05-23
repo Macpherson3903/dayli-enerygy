@@ -1,3 +1,8 @@
+import {
+  BUSINESS_ADDRESS_DISPLAY,
+  WHATSAPP_DISPLAY,
+} from "@/lib/content/business";
+
 export type AboutValue = {
   title: string;
   description: string;
@@ -112,4 +117,6 @@ export const aboutJsonLd = {
   url: "https://daylienergy.com/about",
   logo: "https://daylienergy.com/logo.png",
   contactEmail: "support@daylienergy.com",
+  telephone: WHATSAPP_DISPLAY,
+  address: BUSINESS_ADDRESS_DISPLAY,
 };

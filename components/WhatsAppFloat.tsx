@@ -1,7 +1,7 @@
 "use client";
 
 import { WhatsAppIcon } from "@/components/icons/WhatsAppIcon";
-import { WHATSAPP_DISPLAY, WHATSAPP_URL } from "@/lib/content/whatsapp";
+import { WHATSAPP_DISPLAY, WHATSAPP_URL } from "@/lib/content/business";
 
 /**
  * Fixed WhatsApp chat launcher — viewport bottom-right, outside centered max-width layouts.

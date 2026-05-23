@@ -3,6 +3,8 @@ type AboutJsonLdProps = {
   url: string;
   logo: string;
   contactEmail: string;
+  telephone: string;
+  address: string;
   description: string;
 };
 
@@ -11,6 +13,8 @@ export default function AboutJsonLd({
   url,
   logo,
   contactEmail,
+  telephone,
+  address,
   description,
 }: AboutJsonLdProps) {
   const schema = {
@@ -22,6 +26,14 @@ export default function AboutJsonLd({
         url: "https://daylienergy.com",
         logo,
         email: contactEmail,
+        telephone,
+        address: {
+          "@type": "PostalAddress",
+          streetAddress: address,
+          addressLocality: "Port Harcourt",
+          addressRegion: "Rivers State",
+          addressCountry: "NG",
+        },
       },
       {
         "@type": "WebPage",

@@ -5,7 +5,13 @@ import { useAuth } from "@clerk/nextjs";
 import { Mail, MapPin } from "lucide-react";
 import BrandLogo from "@/components/navbar/BrandLogo";
 import { WhatsAppIcon } from "@/components/icons/WhatsAppIcon";
-import { WHATSAPP_DISPLAY, WHATSAPP_URL } from "@/lib/content/whatsapp";
+import {
+  BUSINESS_ADDRESS_DISPLAY,
+  businessMapsEmbedUrl,
+  businessMapsLinkUrl,
+  WHATSAPP_DISPLAY,
+  WHATSAPP_URL,
+} from "@/lib/content/business";
 
 export default function Footer() {
     const { isSignedIn } = useAuth();
@@ -61,8 +67,15 @@ export default function Footer() {
 
                     <ul className="space-y-3 text-sm text-white/80 mb-4">
                         <li className="flex items-start gap-2">
-                            <MapPin size={16} className="mt-0.5" />
-                            Plot 11 New Jerusalem City Estate, Igbo Etche Road, Rivers State, Nigeria
+                            <MapPin size={16} className="mt-0.5 shrink-0" />
+                            <a
+                                href={businessMapsLinkUrl()}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="hover:text-white transition underline-offset-2 hover:underline"
+                            >
+                                {BUSINESS_ADDRESS_DISPLAY}
+                            </a>
                         </li>
 
                         <li className="flex items-center gap-2">
@@ -85,7 +98,8 @@ export default function Footer() {
 
                     <div className="w-full h-40 rounded-lg overflow-hidden border border-white/20">
                         <iframe
-                            src="https://www.google.com/maps/embed?pb=!1m16!1m12!1m3!1d63607.42143555327!2d6.988471945136079!3d4.861665849137844!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!2m1!1sPlot%2011%20New%20Jerusalem%20City%20Estate%2C%20Igbo%20Etche%20Road%2C%20Rivers%20State%2C%20Nigeria!5e0!3m2!1sen!2sng!4v1777294236574!5m2!1sen!2sng"
+                            src={businessMapsEmbedUrl()}
+                            title="Dayli Energy Solutions — Port Harcourt office"
                             className="w-full h-full"
                             loading="lazy"
                             referrerPolicy="no-referrer-when-downgrade"
