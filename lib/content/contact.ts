@@ -19,6 +19,8 @@ export const contactHeader = {
     "Have a question about products, pricing, or installation? Send a message and our team will get back to you as soon as possible.",
 };
 
+import { WHATSAPP_DISPLAY, WHATSAPP_URL } from "@/lib/content/whatsapp";
+
 export type ContactChannel = {
   label: string;
   value: string;
@@ -34,10 +36,10 @@ export const contactChannels: ContactChannel[] = [
     hint: "We typically respond within one business day.",
   },
   {
-    label: "Phone",
-    value: "+234 707 811 6598",
-    href: "tel:+2347078116598",
-    hint: "Weekdays, 9:00–17:00 WAT.",
+    label: "WhatsApp",
+    value: WHATSAPP_DISPLAY,
+    href: WHATSAPP_URL,
+    hint: "Chat with us anytime — we typically reply within a few hours.",
   },
 ];
 

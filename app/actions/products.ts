@@ -2,13 +2,18 @@
 
 import { revalidatePath } from "next/cache";
 import { getAppRole } from "@/lib/auth/roles";
-import { productInputSchema, type ProductInput } from "@/lib/validators";
+import {
+  firstZodErrorMessage,
+  productInputSchema,
+  type ProductInput,
+} from "@/lib/validators";
 import {
   createProduct,
   updateProduct,
   deleteProduct,
   addInventoryCategory,
   removeInventoryCategory,
+  renameInventoryCategory,
 } from "@/lib/db/products";
 import { isCatalogSlugTaken } from "@/lib/db/catalog-slugs";
 
@@ -78,14 +83,19 @@ export async function createProductAction(
     active: true,
   });
   if (!parsed.success) {
-    return {
-      error: parsed.error.flatten().formErrors[0] ?? "Check all fields",
-    };
+    return { error: firstZodErrorMessage(parsed.error) };
   }
   if (await isCatalogSlugTaken(parsed.data.slug)) {
     return { error: "That URL slug is already used by a product or package" };
   }
-  await createProduct(parsed.data);
+  try {
+    await createProduct(parsed.data);
+  } catch (error) {
+    return {
+      error:
+        error instanceof Error ? error.message : "Unable to create product",
+    };
+  }
   revalidatePath("/admin/inventory");
   revalidatePath("/order");
   revalidatePath("/");
@@ -108,6 +118,7 @@ export async function addInventoryCategoryAction(
   } catch (error) {
     return { error: error instanceof Error ? error.message : "Unable to add category" };
   }
+  revalidatePath("/admin/inventory/categories");
   revalidatePath("/admin/inventory/dashboard");
   revalidatePath("/admin/inventory/add");
   revalidatePath("/admin/inventory");
@@ -131,6 +142,40 @@ export async function removeInventoryCategoryAction(
   } catch (error) {
     return { error: error instanceof Error ? error.message : "Unable to remove category" };
   }
+  revalidatePath("/admin/inventory/categories");
+  revalidatePath("/admin/inventory/dashboard");
+  revalidatePath("/admin/inventory/add");
+  revalidatePath("/admin/inventory");
+  revalidatePath("/order");
+  return { ok: true as const };
+}
+
+export async function renameInventoryCategoryAction(
+  _prev: { error?: string; ok?: boolean } | undefined,
+  formData: FormData
+) {
+  if ((await getAppRole()) !== "inventory_admin") {
+    return { error: "Not allowed" };
+  }
+  const from = String(formData.get("fromCategory") ?? "");
+  const toRaw = String(formData.get("toCategory") ?? "").trim().toLowerCase();
+  if (!from.trim() || !toRaw) {
+    return { error: "Enter a new category name" };
+  }
+  if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(toRaw)) {
+    return {
+      error: "Use lowercase letters, numbers, and hyphens only (e.g. off-grid)",
+    };
+  }
+  try {
+    await renameInventoryCategory(from, toRaw);
+  } catch (error) {
+    return {
+      error:
+        error instanceof Error ? error.message : "Unable to rename category",
+    };
+  }
+  revalidatePath("/admin/inventory/categories");
   revalidatePath("/admin/inventory/dashboard");
   revalidatePath("/admin/inventory/add");
   revalidatePath("/admin/inventory");
@@ -151,12 +196,18 @@ export async function updateProductAction(
     .omit({ slug: true })
     .safeParse(raw);
   if (!parsed.success) {
+    return { error: firstZodErrorMessage(parsed.error) };
+  }
+  try {
+    await updateProduct(productId, parsed.data);
+  } catch (error) {
     return {
-      error: parsed.error.flatten().formErrors[0] ?? "Check all fields",
+      error:
+        error instanceof Error ? error.message : "Unable to update product",
     };
   }
-  await updateProduct(productId, parsed.data);
   revalidatePath("/admin/inventory");
+  revalidatePath(`/admin/inventory/${productId}`);
   revalidatePath("/order");
   revalidatePath(`/order/${productId}`);
   revalidatePath("/");

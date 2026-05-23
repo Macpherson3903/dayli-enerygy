@@ -36,12 +36,12 @@ export default async function EditProductPage({
           brand: p.brand,
           priceMin,
           priceMax,
-          description: p.description,
+          description: p.description ?? "",
           shortDescription: p.shortDescription,
-          image: p.image,
-          features: p.features,
-          stock: p.stock,
-          active: p.active,
+          image: p.image ?? "",
+          features: Array.isArray(p.features) ? p.features : [],
+          stock: p.stock ?? 0,
+          active: p.active ?? true,
         }}
         categories={Array.from(new Set([...categories, p.category]))}
       />

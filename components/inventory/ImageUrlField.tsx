@@ -11,7 +11,7 @@ export function ImageUrlField({
   label?: string;
   defaultValue?: string;
 }) {
-  const [value, setValue] = useState(defaultValue);
+  const [value, setValue] = useState(defaultValue ?? "");
   const [status, setStatus] = useState<"idle" | "uploading" | "error">("idle");
   const [err, setErr] = useState("");
 
@@ -39,7 +39,7 @@ export function ImageUrlField({
   return (
     <div className="space-y-2">
       <p className="block text-sm font-medium text-gray-700">{label}</p>
-      <input type="hidden" name={name} value={value} readOnly />
+      <input type="hidden" name={name} value={value ?? ""} readOnly />
       {err && <p className="text-sm text-red-600">{err}</p>}
       <div className="flex flex-wrap items-center gap-2">
         <input

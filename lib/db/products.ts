@@ -47,7 +47,19 @@ function seedProductsAsPublic(): ProductPublic[] {
 
 const COL = "products";
 const CATEGORY_COL = "inventoryCategories";
-const DEFAULT_CATEGORIES = ["solar", "inverter", "battery"];
+export const DEFAULT_INVENTORY_CATEGORIES = [
+  "solar",
+  "inverter",
+  "battery",
+] as const;
+
+const DEFAULT_CATEGORIES: string[] = [...DEFAULT_INVENTORY_CATEGORIES];
+
+export type InventoryCategoryRow = {
+  name: string;
+  productCount: number;
+  isBuiltIn: boolean;
+};
 
 function toPublic(p: ProductDoc): ProductPublic {
   const { priceMin, priceMax } = priceBoundsFromDoc(p);
@@ -249,6 +261,13 @@ export async function createProduct(input: ProductInput) {
 }
 
 export async function getInventoryCategories(): Promise<string[]> {
+  const rows = await getInventoryCategoriesWithUsage();
+  return rows.map((r) => r.name);
+}
+
+export async function getInventoryCategoriesWithUsage(): Promise<
+  InventoryCategoryRow[]
+> {
   const db = await getDb();
   const docs = await db
     .collection<{ name: string }>(CATEGORY_COL)
@@ -261,13 +280,29 @@ export async function getInventoryCategories(): Promise<string[]> {
     .project({ _id: 0, category: 1 })
     .toArray();
   const productCategories = products.map((p) => p.category).filter(Boolean);
-  return Array.from(
+  const names = Array.from(
     new Set([
       ...DEFAULT_CATEGORIES,
       ...docs.map((d) => d.name),
       ...productCategories,
     ])
   ).sort((a, b) => a.localeCompare(b));
+
+  const agg = await db
+    .collection(COL)
+    .aggregate<{ _id: string; count: number }>([
+      { $group: { _id: "$category", count: { $sum: 1 } } },
+    ])
+    .toArray();
+  const countBy = new Map(agg.map((r) => [r._id, r.count]));
+
+  return names.map((name) => ({
+    name,
+    productCount: countBy.get(name) ?? 0,
+    isBuiltIn: (DEFAULT_INVENTORY_CATEGORIES as readonly string[]).includes(
+      name as (typeof DEFAULT_INVENTORY_CATEGORIES)[number]
+    ),
+  }));
 }
 
 export async function addInventoryCategory(name: string) {
@@ -284,12 +319,39 @@ export async function addInventoryCategory(name: string) {
 export async function removeInventoryCategory(name: string) {
   const trimmed = name.trim().toLowerCase();
   if (!trimmed) throw new Error("Category name is required");
+  if ((DEFAULT_INVENTORY_CATEGORIES as readonly string[]).includes(trimmed)) {
+    throw new Error("Cannot remove a built-in category");
+  }
   const db = await getDb();
   const inUse = await db.collection(COL).countDocuments({ category: trimmed });
   if (inUse > 0) {
     throw new Error("Cannot remove a category that has products");
   }
   await db.collection(CATEGORY_COL).deleteOne({ name: trimmed });
+}
+
+export async function renameInventoryCategory(from: string, to: string) {
+  const fromN = from.trim().toLowerCase();
+  const toN = to.trim().toLowerCase();
+  if (!fromN || !toN) throw new Error("Category name is required");
+  if (fromN === toN) return;
+  const db = await getDb();
+  const clash = await db.collection(COL).countDocuments({ category: toN });
+  if (clash > 0) {
+    throw new Error(
+      "Target category name is already in use. Choose another name."
+    );
+  }
+  await db.collection(COL).updateMany(
+    { category: fromN },
+    { $set: { category: toN, updatedAt: new Date() } }
+  );
+  await db.collection(CATEGORY_COL).deleteOne({ name: fromN });
+  await db.collection(CATEGORY_COL).updateOne(
+    { name: toN },
+    { $setOnInsert: { name: toN, createdAt: new Date() } },
+    { upsert: true }
+  );
 }
 
 export async function updateProduct(

@@ -33,6 +33,12 @@ export const DEFAULT_PACKAGE_CATEGORIES = [
   "commercial",
 ] as const;
 
+export type PackageCategoryRow = {
+  name: string;
+  packageCount: number;
+  isBuiltIn: boolean;
+};
+
 function seedPackageToPublic(s: SeedPackage): ProductPublic {
   const { priceMin, priceMax } = normalizePriceBounds(s.priceMin, s.priceMax);
   return {
@@ -324,6 +330,13 @@ export async function getPackagesForSalesView(): Promise<PackageDoc[]> {
 }
 
 export async function getPackageCategories(): Promise<string[]> {
+  const rows = await getPackageCategoriesWithUsage();
+  return rows.map((r) => r.name);
+}
+
+export async function getPackageCategoriesWithUsage(): Promise<
+  PackageCategoryRow[]
+> {
   await ensurePackageIndexes();
   await seedPackagesIfEmpty();
   await migrateLegacyPackageCategories();
@@ -341,13 +354,29 @@ export async function getPackageCategories(): Promise<string[]> {
   const fromPkgs = pkgs
     .map((p) => p.category)
     .filter((c): c is string => Boolean(c && String(c).trim()));
-  return Array.from(
+  const names = Array.from(
     new Set([
       ...DEFAULT_PACKAGE_CATEGORIES,
       ...docs.map((d) => d.name),
       ...fromPkgs.map((c) => c.trim().toLowerCase()),
     ])
   ).sort((a, b) => a.localeCompare(b));
+
+  const agg = await db
+    .collection(COL)
+    .aggregate<{ _id: string; count: number }>([
+      { $group: { _id: "$category", count: { $sum: 1 } } },
+    ])
+    .toArray();
+  const countBy = new Map(agg.map((r) => [r._id, r.count]));
+
+  return names.map((name) => ({
+    name,
+    packageCount: countBy.get(name) ?? 0,
+    isBuiltIn: (DEFAULT_PACKAGE_CATEGORIES as readonly string[]).includes(
+      name as (typeof DEFAULT_PACKAGE_CATEGORIES)[number]
+    ),
+  }));
 }
 
 export async function addPackageCategory(name: string) {

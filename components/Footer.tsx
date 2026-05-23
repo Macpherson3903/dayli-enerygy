@@ -2,8 +2,10 @@
 
 import Link from "next/link";
 import { useAuth } from "@clerk/nextjs";
-import { Mail, Phone, MapPin } from "lucide-react";
+import { Mail, MapPin } from "lucide-react";
 import BrandLogo from "@/components/navbar/BrandLogo";
+import { WhatsAppIcon } from "@/components/icons/WhatsAppIcon";
+import { WHATSAPP_DISPLAY, WHATSAPP_URL } from "@/lib/content/whatsapp";
 
 export default function Footer() {
     const { isSignedIn } = useAuth();
@@ -64,8 +66,15 @@ export default function Footer() {
                         </li>
 
                         <li className="flex items-center gap-2">
-                            <Phone size={16} />
-                            +234 707 811 6598
+                            <WhatsAppIcon className="h-4 w-4 shrink-0" />
+                            <a
+                                href={WHATSAPP_URL}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="hover:text-white transition underline-offset-2 hover:underline"
+                            >
+                                {WHATSAPP_DISPLAY}
+                            </a>
                         </li>
 
                         <li className="flex items-center gap-2">

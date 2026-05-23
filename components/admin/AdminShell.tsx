@@ -53,9 +53,8 @@ const items: Item[] = [
       { href: "/admin/inventory/overview", label: "Overview" },
       { href: "/admin/inventory/packages", label: "Packages" },
       { href: "/admin/inventory/packages/add", label: "Add package" },
-      { href: "/admin/inventory/package-categories", label: "Package categories" },
       { href: "/admin/inventory/add", label: "Add product" },
-      { href: "/admin/inventory/categories", label: "Manage categories" },
+      { href: "/admin/inventory/categories", label: "Categories" },
     ],
   },
 ];
@@ -213,9 +212,6 @@ export function AdminShell({
                               <PlusCircle className="w-3.5 h-3.5" />
                             )}
                             {child.href.endsWith("/categories") && (
-                              <FolderTree className="w-3.5 h-3.5" />
-                            )}
-                            {child.href.endsWith("/package-categories") && (
                               <FolderTree className="w-3.5 h-3.5" />
                             )}
                             <span className="flex-1 truncate">{child.label}</span>

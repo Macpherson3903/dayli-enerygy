@@ -20,8 +20,8 @@ const steps = [
         icon: ClipboardList,
     },
     {
-        title: "Confirm via Email",
-        desc: "We confirm details and pricing with you via email.",
+        title: "Confirm Order",
+        desc: "We confirm details and pricing with you.",
         icon: Mail,
     },
     {

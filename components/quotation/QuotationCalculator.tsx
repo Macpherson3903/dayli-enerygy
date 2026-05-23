@@ -26,28 +26,36 @@ function formatNumber(value: number): string {
   return value.toLocaleString();
 }
 
-function defaultHoursState(): Record<string, number> {
-  return Object.fromEntries(quotationAppliances.map((a) => [a.id, a.defaultHoursPerDay]));
+function parseQuantityInput(raw: string | undefined): number {
+  const t = raw?.trim();
+  if (!t) return 0;
+  const n = Number.parseInt(t, 10);
+  return Number.isNaN(n) ? 0 : Math.max(0, n);
+}
+
+function parseHoursInput(raw: string | undefined): number {
+  const t = raw?.trim();
+  if (!t) return 0;
+  const n = Number.parseFloat(t);
+  return Number.isNaN(n) ? 0 : Math.max(0, Math.min(24, n));
 }
 
 export function QuotationCalculator({
   onApplyEstimate,
   applyEstimateLabel = "Add this estimate to my booking request",
 }: QuotationCalculatorProps = {}) {
-  const [quantities, setQuantities] = useState<Record<string, number>>({});
-  const [hoursByAppliance, setHoursByAppliance] = useState<Record<string, number>>(
-    defaultHoursState
-  );
+  const [quantityInputs, setQuantityInputs] = useState<Record<string, string>>({});
+  const [hoursInputs, setHoursInputs] = useState<Record<string, string>>({});
 
   const rows = useMemo<QuotationComputedRow[]>(() => {
     return quotationAppliances.map((appliance) =>
       computeQuotationRow(
         appliance,
-        quantities[appliance.id] ?? 0,
-        hoursByAppliance[appliance.id] ?? appliance.defaultHoursPerDay
+        parseQuantityInput(quantityInputs[appliance.id]),
+        parseHoursInput(hoursInputs[appliance.id])
       )
     );
-  }, [quantities, hoursByAppliance]);
+  }, [quantityInputs, hoursInputs]);
 
   const totals = useMemo(() => {
     return rows.reduce(
@@ -81,15 +89,14 @@ export function QuotationCalculator({
                   <td className="px-4 py-3 text-gray-900">{row.name}</td>
                   <td className="px-4 py-3">
                     <input
-                      type="number"
-                      min={0}
-                      step={1}
+                      type="text"
                       inputMode="numeric"
-                      value={row.quantity}
+                      value={quantityInputs[row.id] ?? ""}
                       onChange={(event) => {
-                        const parsed = Number.parseInt(event.target.value, 10);
-                        const next = Number.isNaN(parsed) ? 0 : Math.max(0, parsed);
-                        setQuantities((prev) => ({ ...prev, [row.id]: next }));
+                        const v = event.target.value;
+                        if (v === "" || /^\d+$/.test(v)) {
+                          setQuantityInputs((prev) => ({ ...prev, [row.id]: v }));
+                        }
                       }}
                       className="w-24 rounded-md border border-gray-300 px-2 py-1.5 text-sm text-gray-900 outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-200"
                       aria-label={`${row.name} quantity`}
@@ -97,18 +104,14 @@ export function QuotationCalculator({
                   </td>
                   <td className="px-4 py-3">
                     <input
-                      type="number"
-                      min={0}
-                      max={24}
-                      step={0.25}
+                      type="text"
                       inputMode="decimal"
-                      value={hoursByAppliance[row.id] ?? row.defaultHoursPerDay}
+                      value={hoursInputs[row.id] ?? ""}
                       onChange={(event) => {
-                        const parsed = Number.parseFloat(event.target.value);
-                        const next = Number.isNaN(parsed)
-                          ? 0
-                          : Math.max(0, Math.min(24, parsed));
-                        setHoursByAppliance((prev) => ({ ...prev, [row.id]: next }));
+                        const v = event.target.value;
+                        if (v === "" || /^\d*\.?\d*$/.test(v)) {
+                          setHoursInputs((prev) => ({ ...prev, [row.id]: v }));
+                        }
                       }}
                       className="w-28 rounded-md border border-gray-300 px-2 py-1.5 text-sm text-gray-900 outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-200"
                       aria-label={`${row.name} hours per day`}

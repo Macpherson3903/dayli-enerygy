@@ -2,7 +2,10 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import ShopCatalogClient from "@/components/shop/ShopCatalogClient";
 import { PageHero } from "@/components/ui/PageHero";
-import { getProductsPublic } from "@/lib/db/products";
+import {
+  getInventoryCategories,
+  getProductsPublic,
+} from "@/lib/db/products";
 import { getPackagesPublic, getPackageCategories } from "@/lib/db/packages";
 import type { ProductPublic } from "@/lib/types";
 
@@ -24,11 +27,13 @@ function pickRandomSpotlight<T extends ProductPublic>(
 }
 
 export default async function OrderCatalogPage() {
-  const [products, packages, packageCategories] = await Promise.all([
-    getProductsPublic(),
-    getPackagesPublic(),
-    getPackageCategories(),
-  ]);
+  const [products, packages, productCategories, packageCategories] =
+    await Promise.all([
+      getProductsPublic(),
+      getPackagesPublic(),
+      getInventoryCategories(),
+      getPackageCategories(),
+    ]);
   const spotlightProducts = pickRandomSpotlight(products, 3);
   const spotlightPackages = pickRandomSpotlight(packages, 3);
 
@@ -47,6 +52,7 @@ export default async function OrderCatalogPage() {
         <ShopCatalogClient
           initialProducts={products}
           initialPackages={packages}
+          productCategories={productCategories}
           packageCategories={packageCategories}
           spotlightProducts={spotlightProducts}
           spotlightPackages={spotlightPackages}

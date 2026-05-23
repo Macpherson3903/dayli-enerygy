@@ -98,7 +98,7 @@ export async function createPackageAction(
   await createPackage(parsed.data);
   revalidatePath("/admin/inventory");
   revalidatePath("/admin/inventory/packages");
-  revalidatePath("/admin/inventory/package-categories");
+  revalidatePath("/admin/inventory/categories");
   revalidatePath("/order");
   revalidatePath("/");
   return { ok: true as const };
@@ -127,7 +127,7 @@ export async function updatePackageAction(
   await updatePackage(packageId, parsed.data);
   revalidatePath("/admin/inventory");
   revalidatePath("/admin/inventory/packages");
-  revalidatePath("/admin/inventory/package-categories");
+  revalidatePath("/admin/inventory/categories");
   revalidatePath("/order");
   revalidatePath(`/order/${packageId}`);
   revalidatePath(`/order/${parsed.data.slug}`);
@@ -142,7 +142,7 @@ export async function deletePackageAction(packageId: string) {
   await deletePackage(packageId);
   revalidatePath("/admin/inventory");
   revalidatePath("/admin/inventory/packages");
-  revalidatePath("/admin/inventory/package-categories");
+  revalidatePath("/admin/inventory/categories");
   revalidatePath("/order");
   revalidatePath("/");
   return { ok: true as const };
@@ -167,7 +167,7 @@ export async function addPackageCategoryAction(
         error instanceof Error ? error.message : "Unable to add category",
     };
   }
-  revalidatePath("/admin/inventory/package-categories");
+  revalidatePath("/admin/inventory/categories");
   revalidatePath("/admin/inventory/packages");
   revalidatePath("/admin/inventory/packages/add");
   revalidatePath("/order");
@@ -194,7 +194,7 @@ export async function removePackageCategoryAction(
         error instanceof Error ? error.message : "Unable to remove category",
     };
   }
-  revalidatePath("/admin/inventory/package-categories");
+  revalidatePath("/admin/inventory/categories");
   revalidatePath("/admin/inventory/packages");
   revalidatePath("/order");
   revalidatePath("/");
@@ -226,7 +226,7 @@ export async function renamePackageCategoryAction(
         error instanceof Error ? error.message : "Unable to rename category",
     };
   }
-  revalidatePath("/admin/inventory/package-categories");
+  revalidatePath("/admin/inventory/categories");
   revalidatePath("/admin/inventory/packages");
   revalidatePath("/order");
   revalidatePath("/");

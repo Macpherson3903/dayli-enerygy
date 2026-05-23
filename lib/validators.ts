@@ -1,4 +1,16 @@
-import { z } from "zod";
+import { z, type ZodError } from "zod";
+
+/** First human-readable message from a Zod error (form-level or field-level). */
+export function firstZodErrorMessage(
+  error: ZodError,
+  fallback = "Check all fields"
+): string {
+  const flat = error.flatten();
+  const fieldMsg = Object.values(flat.fieldErrors)
+    .flat()
+    .find((m): m is string => typeof m === "string" && m.length > 0);
+  return flat.formErrors[0] ?? fieldMsg ?? fallback;
+}
 
 export const lineItemSchema = z.object({
   productId: z.string().min(1),

@@ -12,7 +12,6 @@ import MobileDrawer from "./navbar/MobileDrawer";
 import type { NavItem } from "./navbar/types";
 
 const BASE_ITEMS: NavItem[] = [
-  { label: "Home", href: "/" },
   { label: "Order", href: "/order" },
   { label: "Quotation & installation", href: "/installation-booking" },
   {

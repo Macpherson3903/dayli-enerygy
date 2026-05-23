@@ -24,13 +24,16 @@ export type CatalogTab = "products" | "packages";
 export default function ShopCatalogClient({
   initialProducts,
   initialPackages = [],
+  productCategories = [],
   packageCategories = [],
   spotlightProducts = [],
   spotlightPackages = [],
 }: {
   initialProducts: ProductPublic[];
   initialPackages?: ProductPublic[];
-  /** Distinct package category slugs for Packages tab sidebar */
+  /** Admin + catalog product category slugs for Products tab sidebar */
+  productCategories?: string[];
+  /** Admin + catalog package category slugs for Packages tab sidebar */
   packageCategories?: string[];
   spotlightProducts?: ProductPublic[];
   spotlightPackages?: ProductPublic[];
@@ -118,16 +121,14 @@ export default function ShopCatalogClient({
 
   const [sort, setSort] = useState("default");
   const [search, setSearch] = useState("");
-  const categories = useMemo(
-    () =>
-      [
-        "all",
-        ...Array.from(
-          new Set(initialProducts.map((p) => p.category))
-        ).sort((a, b) => a.localeCompare(b)),
-      ],
-    [initialProducts]
-  );
+  const categories = useMemo(() => {
+    const merged = new Set<string>([
+      ...productCategories,
+      ...initialProducts.map((p) => p.category).filter(Boolean),
+    ]);
+    merged.delete("all");
+    return ["all", ...Array.from(merged).sort((a, b) => a.localeCompare(b))];
+  }, [productCategories, initialProducts]);
 
   const packageCategoryOptions = useMemo(() => {
     const merged = new Set<string>([

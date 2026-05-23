@@ -26,6 +26,8 @@ export default function ProductDetailClient({
   const [agentOpen, setAgentOpen] = useState(false);
   const agentReturnUrl = pathname && pathname !== "" ? pathname : "/order";
   const isPackage = product.itemKind === "package";
+  const backHref = isPackage ? "/order?tab=packages" : "/order";
+  const backLabel = isPackage ? "Back to packages" : "Back to products";
 
   return (
     <>
@@ -165,10 +167,10 @@ export default function ProductDetailClient({
               <Button
                 type="button"
                 variant="secondary"
-                onClick={() => router.push("/order")}
+                onClick={() => router.push(backHref)}
                 className="px-6 py-3"
               >
-                Back to products
+                {backLabel}
               </Button>
             </div>
           </motion.div>
@@ -194,15 +196,26 @@ export default function ProductDetailClient({
                       );
                     }
                   }}
-                  className="cursor-pointer border rounded-xl p-4 hover:shadow-md transition"
+                  className="flex cursor-pointer items-center gap-3 overflow-hidden rounded-xl border p-4 hover:shadow-md transition"
                 >
-                  <p className="font-medium">{item.name}</p>
-                  <p className="text-sm text-gray-500 mt-1">
-                    {formatPriceRange({
-                      priceMin: item.priceMin,
-                      priceMax: item.priceMax,
-                    })}
-                  </p>
+                  <div className="min-w-0 flex-1">
+                    <p className="font-medium line-clamp-2">{item.name}</p>
+                    <p className="mt-1 text-sm text-gray-500">
+                      {formatPriceRange({
+                        priceMin: item.priceMin,
+                        priceMax: item.priceMax,
+                      })}
+                    </p>
+                  </div>
+                  <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-lg bg-gray-100">
+                    <Image
+                      src={item.image || "/placeholder.jpg"}
+                      alt=""
+                      fill
+                      sizes="64px"
+                      className="object-cover"
+                    />
+                  </div>
                 </div>
               ))}
             </div>

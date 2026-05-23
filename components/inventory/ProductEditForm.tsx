@@ -122,7 +122,7 @@ export function ProductEditForm({
         name="features"
         label="Features (one per line)"
         rows={4}
-        defaultValue={product.features.join("\n")}
+        defaultValue={(product.features ?? []).join("\n")}
       />
       <Input
         name="stock"
