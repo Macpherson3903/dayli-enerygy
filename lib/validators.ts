@@ -40,7 +40,7 @@ export const createOrderSchema = z.object({
 const productPriceRangeRefine = {
   check: (d: { priceMin: number; priceMax: number }) => d.priceMin <= d.priceMax,
   message: "Maximum price must be greater than or equal to minimum price",
-  path: ["priceMax"] as const,
+  path: ["priceMax"],
 };
 
 const productInputFieldsSchema = z.object({
