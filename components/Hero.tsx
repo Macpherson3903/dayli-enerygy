@@ -3,33 +3,36 @@ import Link from "next/link";
 
 export default function Hero() {
   return (
-    <section className="relative isolate overflow-hidden bg-[#0B5D3B] text-white">
-      {/* Mobile Background */}
-      <div className="absolute inset-0 -z-10 md:hidden">
+    <section className="relative overflow-hidden bg-[#0B5D3B] text-white">
+      <div className="absolute inset-0 z-0 md:hidden">
         <Image
           src="/heroImg.png"
           alt=""
           fill
+          unoptimized
           sizes="100vw"
           className="object-cover object-center"
         />
-        <div className="absolute inset-0 bg-[#0B5D3B]/85" />
       </div>
 
-      {/* Desktop Background */}
-      <div className="absolute inset-0 -z-10 hidden md:block">
+      <div className="absolute inset-0 z-0 hidden md:block">
         <Image
           src="/solarRoof.png"
           alt=""
           fill
+          unoptimized
           priority
           sizes="100vw"
           className="object-cover object-center"
         />
-        <div className="absolute inset-0 bg-[#0B5D3B]/80" />
       </div>
 
-      <div className="mx-auto max-w-7xl px-6 py-24 sm:py-28 md:py-32 lg:py-36">
+      <div
+        className="absolute inset-0 z-[1] bg-[#0B5D3B]/85 md:bg-[#0B5D3B]/80"
+        aria-hidden
+      />
+
+      <div className="relative z-10 mx-auto max-w-7xl px-6 py-24 sm:py-28 md:py-32 lg:py-36">
         <div className="mx-auto max-w-3xl text-center">
           <h1 className="text-balance text-4xl font-bold leading-[1.1] tracking-tight sm:text-5xl lg:text-6xl">
             Power Your Life with Reliable Solar Energy

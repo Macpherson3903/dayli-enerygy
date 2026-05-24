@@ -41,7 +41,7 @@ function formToProductInput(formData: FormData, forUpdate: boolean) {
   const priceMax = Number(formData.get("priceMax"));
   const description = String(formData.get("description") ?? "");
   const shortRaw = String(formData.get("shortDescription") ?? "");
-  const image = String(formData.get("image") ?? "");
+  const image = String(formData.get("image") ?? "").trim();
   const featuresRaw = String(formData.get("features") ?? "");
   const features = featuresRaw
     .split("\n")
@@ -78,6 +78,13 @@ export async function createProductAction(
 ) {
   if ((await getAppRole()) !== "inventory_admin") {
     return { error: "Not allowed" };
+  }
+  const imageField = String(formData.get("image") ?? "").trim();
+  if (!imageField) {
+    return {
+      error:
+        "Product image is required. Upload an image and wait for “Image uploaded” before saving.",
+    };
   }
   const raw = formToProductInput(formData, false);
   const parsed = productInputSchema.safeParse({

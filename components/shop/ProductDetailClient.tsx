@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
-import Image from "next/image";
+import { CatalogImage } from "@/components/ui/CatalogImage";
 import { motion } from "framer-motion";
 import { useAuth, SignInButton } from "@clerk/nextjs";
 import { useCart } from "@/context/CartContext";
@@ -46,7 +46,7 @@ export default function ProductDetailClient({
             transition={{ duration: 0.4 }}
             className="relative w-full h-[400px] bg-gray-100 rounded-2xl overflow-hidden"
           >
-            <Image
+            <CatalogImage
               src={product.image}
               alt={product.name}
               fill
@@ -208,8 +208,8 @@ export default function ProductDetailClient({
                     </p>
                   </div>
                   <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-lg bg-gray-100">
-                    <Image
-                      src={item.image || "/placeholder.jpg"}
+                    <CatalogImage
+                      src={item.image}
                       alt=""
                       fill
                       sizes="64px"

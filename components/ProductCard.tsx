@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+import { CatalogImage } from "@/components/ui/CatalogImage";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { clsx } from "clsx";
@@ -41,8 +41,8 @@ export default function ProductCard({
         >
             {/* Image */}
             <div className="relative h-52 w-full bg-gray-100 overflow-hidden">
-                <Image
-                    src={product?.image || "/placeholder.jpg"}
+                <CatalogImage
+                    src={product?.image}
                     alt={product?.name || "Product image"}
                     fill
                     sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"

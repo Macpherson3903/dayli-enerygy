@@ -33,44 +33,48 @@ export function PageHero({
 
   return (
     <section
-      className="relative isolate overflow-hidden bg-[#0B5D3B] text-white"
+      className="relative overflow-hidden bg-[#0B5D3B] text-white"
       aria-label={`${title} hero`}
     >
       {useLocalImages ? (
         <>
-          <div className="absolute inset-0 -z-10 md:hidden">
+          <div className="absolute inset-0 z-0 md:hidden">
             <Image
               src={mobileBackgroundImageUrl ?? backgroundImageUrl}
               alt=""
               fill
+              unoptimized
               sizes="100vw"
               className="object-cover object-center"
               priority
             />
-            <div className="absolute inset-0 bg-[#0B5D3B]/85" />
           </div>
-          <div className="absolute inset-0 -z-10 hidden md:block">
+          <div className="absolute inset-0 z-0 hidden md:block">
             <Image
               src={backgroundImageUrl}
               alt=""
               fill
+              unoptimized
               priority
               sizes="100vw"
               className="object-cover object-center"
             />
-            <div className="absolute inset-0 bg-[#0B5D3B]/80" />
           </div>
+          <div
+            className="absolute inset-0 z-[1] bg-[#0B5D3B]/85 md:bg-[#0B5D3B]/80"
+            aria-hidden
+          />
         </>
       ) : (
         <>
           <div
-            className="absolute inset-0 -z-10 bg-cover bg-center"
+            className="absolute inset-0 z-0 bg-cover bg-center"
             style={{ backgroundImage: `url("${backgroundImageUrl}")` }}
           />
-          <div className="absolute inset-0 -z-10 bg-[#0B5D3B]/75" />
+          <div className="absolute inset-0 z-[1] bg-[#0B5D3B]/75" aria-hidden />
         </>
       )}
-      <div className="mx-auto max-w-7xl px-6 py-20 md:px-12 md:py-28">
+      <div className="relative z-10 mx-auto max-w-7xl px-6 py-20 md:px-12 md:py-28">
         <div className="max-w-3xl">
           {eyebrow ? (
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-white/90">

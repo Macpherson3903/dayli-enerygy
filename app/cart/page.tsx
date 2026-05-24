@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
+import { CatalogImage } from "@/components/ui/CatalogImage";
 import { useAuth, SignInButton, SignUpButton } from "@clerk/nextjs";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -43,7 +43,7 @@ export default function CartPage() {
                 className="flex flex-col sm:flex-row sm:items-center gap-4"
               >
                 <div className="relative w-full sm:w-24 h-24 bg-gray-100 rounded-lg overflow-hidden shrink-0">
-                  <Image
+                  <CatalogImage
                     src={line.image}
                     alt={line.name}
                     fill
