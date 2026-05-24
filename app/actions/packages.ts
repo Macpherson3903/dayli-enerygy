@@ -2,7 +2,11 @@
 
 import { revalidatePath } from "next/cache";
 import { getAppRole } from "@/lib/auth/roles";
-import { packageInputSchema, type PackageInput } from "@/lib/validators";
+import {
+  firstZodErrorMessage,
+  packageInputSchema,
+  type PackageInput,
+} from "@/lib/validators";
 import { isCatalogSlugTaken } from "@/lib/db/catalog-slugs";
 import {
   createPackage,
@@ -115,17 +119,23 @@ export async function updatePackageAction(
   const raw = formToPackageInput(formData, true);
   const parsed = packageInputSchema.safeParse(raw);
   if (!parsed.success) {
-    return {
-      error: parsed.error.flatten().formErrors[0] ?? "Check all fields",
-    };
+    return { error: firstZodErrorMessage(parsed.error) };
   }
   if (
     await isCatalogSlugTaken(parsed.data.slug, { excludePackageId: packageId })
   ) {
     return { error: "That URL slug is already used by a product or package" };
   }
-  await updatePackage(packageId, parsed.data);
+  try {
+    await updatePackage(packageId, parsed.data);
+  } catch (error) {
+    return {
+      error:
+        error instanceof Error ? error.message : "Unable to update package",
+    };
+  }
   revalidatePath("/admin/inventory");
+  revalidatePath(`/admin/inventory/packages/${packageId}`);
   revalidatePath("/admin/inventory/packages");
   revalidatePath("/admin/inventory/categories");
   revalidatePath("/order");

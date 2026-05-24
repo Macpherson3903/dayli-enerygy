@@ -115,14 +115,14 @@ export function PackageEditForm({
         name="features"
         label="Kit highlights (one per line)"
         rows={4}
-        defaultValue={pkg.features.join("\n")}
+        defaultValue={(pkg.features ?? []).join("\n")}
       />
       <Textarea
         name="typicalAppliances"
         label="Typical home loads (one per line)"
         rows={5}
         required
-        defaultValue={pkg.typicalAppliances.join("\n")}
+        defaultValue={(pkg.typicalAppliances ?? []).join("\n")}
       />
       <Input
         name="stock"

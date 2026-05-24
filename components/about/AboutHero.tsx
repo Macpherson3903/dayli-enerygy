@@ -24,7 +24,8 @@ export default function AboutHero({
       eyebrow="About Dayli Energy"
       title={title}
       description={subtitle}
-      backgroundImageUrl="https://images.unsplash.com/photo-1509391366360-2e959784a276?auto=format&fit=crop&w=1920&q=80"
+      backgroundImageUrl="/about-hero.jpeg"
+      mobileBackgroundImageUrl="/about-hero.jpeg"
       primaryCta={primaryCta}
       secondaryCta={secondaryCta}
     />

@@ -37,7 +37,13 @@ export const createOrderSchema = z.object({
   userId: z.string().min(1),
 });
 
-export const productInputSchema = z.object({
+const productPriceRangeRefine = {
+  check: (d: { priceMin: number; priceMax: number }) => d.priceMin <= d.priceMax,
+  message: "Maximum price must be greater than or equal to minimum price",
+  path: ["priceMax"] as const,
+};
+
+const productInputFieldsSchema = z.object({
   name: z.string().min(1),
   slug: z
     .string()
@@ -59,10 +65,23 @@ export const productInputSchema = z.object({
   features: z.array(z.string()).default([]),
   stock: z.number().int().nonnegative(),
   active: z.boolean().default(true),
-}).refine((d) => d.priceMin <= d.priceMax, {
-  message: "Maximum price must be greater than or equal to minimum price",
-  path: ["priceMax"],
 });
+
+export const productInputSchema = productInputFieldsSchema.refine(
+  productPriceRangeRefine.check,
+  {
+    message: productPriceRangeRefine.message,
+    path: productPriceRangeRefine.path,
+  }
+);
+
+/** Product edit form — slug is unchanged in DB, so it is omitted from validation. */
+export const productUpdateInputSchema = productInputFieldsSchema
+  .omit({ slug: true })
+  .refine(productPriceRangeRefine.check, {
+    message: productPriceRangeRefine.message,
+    path: productPriceRangeRefine.path,
+  });
 
 export const packageInputSchema = z.object({
   name: z.string().min(1),
@@ -300,5 +319,6 @@ export const productAgentInquiryUpdateSchema = z.object({
 });
 export type InstallationBookingInput = z.infer<typeof installationBookingSchema>;
 export type ProductInput = z.infer<typeof productInputSchema>;
+export type ProductUpdateInput = z.infer<typeof productUpdateInputSchema>;
 export type PackageInput = z.infer<typeof packageInputSchema>;
 export type ProposalPayloadInput = z.infer<typeof proposalPayloadSchema>;

@@ -42,14 +42,16 @@ export default async function EditPackagePage({
           category,
           priceMin,
           priceMax,
-          description: pkg.description,
+          description: pkg.description ?? "",
           shortDescription: pkg.shortDescription,
-          image: pkg.image,
-          features: pkg.features,
-          typicalAppliances: pkg.typicalAppliances,
-          stock: pkg.stock,
-          active: pkg.active,
-          featured: pkg.featured,
+          image: pkg.image ?? "",
+          features: Array.isArray(pkg.features) ? pkg.features : [],
+          typicalAppliances: Array.isArray(pkg.typicalAppliances)
+            ? pkg.typicalAppliances
+            : [],
+          stock: pkg.stock ?? 0,
+          active: pkg.active ?? true,
+          featured: pkg.featured ?? false,
         }}
       />
       <div className="pt-4 border-t">

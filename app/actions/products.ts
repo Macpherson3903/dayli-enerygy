@@ -5,10 +5,13 @@ import { getAppRole } from "@/lib/auth/roles";
 import {
   firstZodErrorMessage,
   productInputSchema,
+  productUpdateInputSchema,
   type ProductInput,
+  type ProductUpdateInput,
 } from "@/lib/validators";
 import {
   createProduct,
+  getProductById,
   updateProduct,
   deleteProduct,
   addInventoryCategory,
@@ -61,7 +64,7 @@ function formToProductInput(formData: FormData, forUpdate: boolean) {
     active: forUpdate ? active : true,
   };
   if (forUpdate) {
-    return { ...base, shortDescription: shortRaw || undefined } as ProductInput;
+    return { ...base, shortDescription: shortRaw || undefined } as ProductUpdateInput;
   }
   return {
     ...base,
@@ -192,9 +195,7 @@ export async function updateProductAction(
     return { error: "Not allowed" };
   }
   const raw = formToProductInput(formData, true);
-  const parsed = productInputSchema
-    .omit({ slug: true })
-    .safeParse(raw);
+  const parsed = productUpdateInputSchema.safeParse(raw);
   if (!parsed.success) {
     return { error: firstZodErrorMessage(parsed.error) };
   }
@@ -210,6 +211,10 @@ export async function updateProductAction(
   revalidatePath(`/admin/inventory/${productId}`);
   revalidatePath("/order");
   revalidatePath(`/order/${productId}`);
+  const updated = await getProductById(productId);
+  if (updated?.slug) {
+    revalidatePath(`/order/${updated.slug}`);
+  }
   revalidatePath("/");
   return { ok: true as const };
 }

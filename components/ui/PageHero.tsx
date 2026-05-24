@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 
 type HeroCta = {
@@ -8,7 +9,10 @@ type HeroCta = {
 type PageHeroProps = {
   title: string;
   description: string;
+  /** Desktop / default hero background (local path or URL). */
   backgroundImageUrl: string;
+  /** Optional mobile background — matches home hero when set. */
+  mobileBackgroundImageUrl?: string;
   eyebrow?: string;
   primaryCta?: HeroCta;
   secondaryCta?: HeroCta;
@@ -18,21 +22,54 @@ export function PageHero({
   title,
   description,
   backgroundImageUrl,
+  mobileBackgroundImageUrl,
   eyebrow,
   primaryCta,
   secondaryCta,
 }: PageHeroProps) {
+  const useLocalImages =
+    backgroundImageUrl.startsWith("/") &&
+    (!mobileBackgroundImageUrl || mobileBackgroundImageUrl.startsWith("/"));
+
   return (
     <section
-      className="relative isolate overflow-hidden text-white"
+      className="relative isolate overflow-hidden bg-[#0B5D3B] text-white"
       aria-label={`${title} hero`}
-      style={{
-        backgroundImage: `url("${backgroundImageUrl}")`,
-        backgroundPosition: "center",
-        backgroundSize: "cover",
-      }}
     >
-      <div className="absolute inset-0 -z-10 bg-[#0B5D3B]/75" />
+      {useLocalImages ? (
+        <>
+          <div className="absolute inset-0 -z-10 md:hidden">
+            <Image
+              src={mobileBackgroundImageUrl ?? backgroundImageUrl}
+              alt=""
+              fill
+              sizes="100vw"
+              className="object-cover object-center"
+              priority
+            />
+            <div className="absolute inset-0 bg-[#0B5D3B]/85" />
+          </div>
+          <div className="absolute inset-0 -z-10 hidden md:block">
+            <Image
+              src={backgroundImageUrl}
+              alt=""
+              fill
+              priority
+              sizes="100vw"
+              className="object-cover object-center"
+            />
+            <div className="absolute inset-0 bg-[#0B5D3B]/80" />
+          </div>
+        </>
+      ) : (
+        <>
+          <div
+            className="absolute inset-0 -z-10 bg-cover bg-center"
+            style={{ backgroundImage: `url("${backgroundImageUrl}")` }}
+          />
+          <div className="absolute inset-0 -z-10 bg-[#0B5D3B]/75" />
+        </>
+      )}
       <div className="mx-auto max-w-7xl px-6 py-20 md:px-12 md:py-28">
         <div className="max-w-3xl">
           {eyebrow ? (
