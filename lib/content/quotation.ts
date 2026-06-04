@@ -59,7 +59,7 @@ export const quotationAppliances: QuotationAppliance[] = [
   },
   {
     id: "air-conditioner-window",
-    name: "Air Conditioner (Window 1.HP)",
+    name: "Air Conditioner (Window Unit)",
     watts: 1000,
     defaultHoursPerDay: 4,
   },
