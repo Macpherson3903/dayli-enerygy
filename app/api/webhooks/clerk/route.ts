@@ -1,4 +1,5 @@
 import { verifyWebhook } from "@clerk/nextjs/webhooks";
+import type { NextRequest } from "next/server";
 import {
   recordSessionCreated,
   upsertUserFromClerkUserJson,
@@ -7,7 +8,7 @@ import { deleteUserByClerkId } from "@/lib/db/users";
 
 export const runtime = "nodejs";
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
   let event;
   try {
     event = await verifyWebhook(request);
