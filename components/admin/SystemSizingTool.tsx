@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState, useTransition } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Plus, Printer, Save } from "lucide-react";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
@@ -20,6 +20,7 @@ import {
 } from "@/lib/solar-sizing";
 import { saveSizingCalculationAction } from "@/app/actions/sizing";
 import { createQuotationApplianceAction } from "@/app/actions/quotation-appliances";
+import { afterNextPaint, runSizingPrint } from "@/lib/after-paint";
 import { useStatusMessage } from "@/context/StatusMessageContext";
 import type { SizingRecommendationSnapshot } from "@/lib/types";
 
@@ -89,7 +90,7 @@ export function SystemSizingTool({
   const [newName, setNewName] = useState("");
   const [newWatts, setNewWatts] = useState("");
   const [newHours, setNewHours] = useState("4");
-  const [adding, startAdd] = useTransition();
+  const [adding, setAdding] = useState(false);
 
   useEffect(() => {
     setHoursInputs((prev) => {
@@ -162,7 +163,8 @@ export function SystemSizingTool({
 
   const hasLoad = totals.peakLoad > 0 || totals.dailyEnergy > 0;
   const { showStatusMessage } = useStatusMessage();
-  const [saving, startSave] = useTransition();
+  const [saving, setSaving] = useState(false);
+  const [printing, setPrinting] = useState(false);
 
   function snapshotRec(
     role: SizingRecommendationSnapshot["role"],
@@ -194,32 +196,37 @@ export function SystemSizingTool({
       showStatusMessage("Enter a watt rating greater than 0.", "error");
       return;
     }
-    startAdd(async () => {
-      const result = await createQuotationApplianceAction({
-        name,
-        watts,
-        defaultHoursPerDay: hours,
-      });
-      if (result.error || !result.appliance) {
-        showStatusMessage(result.error ?? "Could not add appliance", "error");
-        return;
+    setAdding(true);
+    afterNextPaint(async () => {
+      try {
+        const result = await createQuotationApplianceAction({
+          name,
+          watts,
+          defaultHoursPerDay: hours,
+        });
+        if (result.error || !result.appliance) {
+          showStatusMessage(result.error ?? "Could not add appliance", "error");
+          return;
+        }
+        setAddedAppliances((prev) =>
+          prev.some((a) => a.id === result.appliance!.id)
+            ? prev
+            : [...prev, result.appliance!]
+        );
+        setHoursInputs((prev) => ({
+          ...prev,
+          [result.appliance!.id]: String(result.appliance!.defaultHoursPerDay),
+        }));
+        setNewName("");
+        setNewWatts("");
+        setNewHours("4");
+        showStatusMessage(
+          `${result.appliance.name} added to the sheet (also on the public quotation).`,
+          "success"
+        );
+      } finally {
+        setAdding(false);
       }
-      setAddedAppliances((prev) =>
-        prev.some((a) => a.id === result.appliance!.id)
-          ? prev
-          : [...prev, result.appliance!]
-      );
-      setHoursInputs((prev) => ({
-        ...prev,
-        [result.appliance!.id]: String(result.appliance!.defaultHoursPerDay),
-      }));
-      setNewName("");
-      setNewWatts("");
-      setNewHours("4");
-      showStatusMessage(
-        `${result.appliance.name} added to the sheet (also on the public quotation).`,
-        "success"
-      );
     });
   }
 
@@ -244,53 +251,54 @@ export function SystemSizingTool({
       snapshotRec("batteries", recs.batteries),
     ].filter((r): r is SizingRecommendationSnapshot => r != null);
 
-    startSave(async () => {
-      const result = await saveSizingCalculationAction({
-        customerName: customerName.trim(),
-        appliances: usedRows.map((r) => ({
-          name: r.name,
-          quantity: r.quantity,
-          watts: r.watts,
-          peakLoad: r.peakLoad,
-          hoursPerDay: r.hoursPerDay,
-          dailyEnergyWh: r.dailyEnergy,
-        })),
-        params: {
-          systemVoltage,
-          peakSunHours: peakSunHoursN,
-          systemEfficiency: systemEfficiencyN,
-          inverterOversize: inverterOversizeN,
-          daysOfAutonomy: daysOfAutonomyN,
-          depthOfDischarge: depthOfDischargeN,
-        },
-        totals: {
-          peakLoadW: totals.peakLoad,
-          dailyEnergyWh: totals.dailyEnergy,
-        },
-        result: sizing,
-        recommendations,
-      });
-      if (result.error) {
-        showStatusMessage(result.error, "error");
-        return;
+    setSaving(true);
+    afterNextPaint(async () => {
+      try {
+        const result = await saveSizingCalculationAction({
+          customerName: customerName.trim(),
+          appliances: usedRows.map((r) => ({
+            name: r.name,
+            quantity: r.quantity,
+            watts: r.watts,
+            peakLoad: r.peakLoad,
+            hoursPerDay: r.hoursPerDay,
+            dailyEnergyWh: r.dailyEnergy,
+          })),
+          params: {
+            systemVoltage,
+            peakSunHours: peakSunHoursN,
+            systemEfficiency: systemEfficiencyN,
+            inverterOversize: inverterOversizeN,
+            daysOfAutonomy: daysOfAutonomyN,
+            depthOfDischarge: depthOfDischargeN,
+          },
+          totals: {
+            peakLoadW: totals.peakLoad,
+            dailyEnergyWh: totals.dailyEnergy,
+          },
+          result: sizing,
+          recommendations,
+        });
+        if (result.error) {
+          showStatusMessage(result.error, "error");
+          return;
+        }
+        showStatusMessage(
+          `Saved ${result.sizingNumber ?? "calculation"} to the database.`,
+          "success"
+        );
+      } finally {
+        setSaving(false);
       }
-      showStatusMessage(
-        `Saved ${result.sizingNumber ?? "calculation"} to the database.`,
-        "success"
-      );
     });
   }
 
   function printWorksheet() {
-    const body = document.body;
-    const cleanup = () => {
-      body.classList.remove("sizing-print-mode");
-      window.removeEventListener("afterprint", cleanup);
-    };
-    body.classList.add("sizing-print-mode");
-    window.addEventListener("afterprint", cleanup);
-    window.print();
-    window.setTimeout(cleanup, 1000);
+    setPrinting(true);
+    afterNextPaint(() => {
+      runSizingPrint();
+      setPrinting(false);
+    });
   }
 
   return (
@@ -309,16 +317,18 @@ export function SystemSizingTool({
           <Button
             type="button"
             className="gap-2"
-            disabled={saving || !hasLoad}
+            pending={saving}
+            disabled={!hasLoad}
             onClick={saveCalculation}
           >
             <Save className="h-4 w-4" aria-hidden />
-            {saving ? "Saving…" : "Save"}
+            Save
           </Button>
           <Button
             type="button"
             variant="secondary"
             className="gap-2"
+            pending={printing}
             onClick={printWorksheet}
           >
             <Printer className="h-4 w-4" aria-hidden />
@@ -478,11 +488,11 @@ export function SystemSizingTool({
         <Button
           type="button"
           className="mt-4 gap-2"
-          disabled={adding}
+          pending={adding}
           onClick={addMissingAppliance}
         >
           <Plus className="h-4 w-4" aria-hidden />
-          {adding ? "Adding…" : "Add to sheet"}
+          Add to sheet
         </Button>
       </Card>
 

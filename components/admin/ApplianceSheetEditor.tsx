@@ -66,8 +66,8 @@ export function ApplianceSheetEditor({
             </p>
           ) : null}
           <div className="sm:col-span-4">
-            <Button type="submit" disabled={adding}>
-              {adding ? "Adding…" : "Add to sheet"}
+            <Button type="submit" pending={adding}>
+              Add to sheet
             </Button>
           </div>
         </form>
@@ -142,8 +142,8 @@ function SheetRow({ row }: { row: QuotationApplianceAdminRow }) {
           defaultValue={row.sortOrder}
         />
         <div className="flex items-end gap-2">
-          <Button type="submit" size="sm" disabled={updating}>
-            {updating ? "Saving…" : "Update"}
+          <Button type="submit" size="sm" pending={updating}>
+            Update
           </Button>
         </div>
       </form>
@@ -157,8 +157,8 @@ function SheetRow({ row }: { row: QuotationApplianceAdminRow }) {
         }}
       >
         <input type="hidden" name="id" value={row.mongoId} />
-        <Button type="submit" variant="danger" size="sm" disabled={deleting}>
-          {deleting ? "Removing…" : "Remove"}
+        <Button type="submit" variant="danger" size="sm" pending={deleting}>
+          Remove
         </Button>
       </form>
     </Card>

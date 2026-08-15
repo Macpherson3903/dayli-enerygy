@@ -81,8 +81,8 @@ export function BookingUpdateForm({
           rows={4}
           className="font-mono text-sm"
         />
-        <Button type="submit" disabled={pending}>
-          {pending ? "Saving..." : "Save update"}
+        <Button type="submit" pending={pending}>
+          Save update
         </Button>
       </form>
     </Card>

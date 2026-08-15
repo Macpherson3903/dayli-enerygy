@@ -1,11 +1,14 @@
 import { forwardRef, type ComponentProps, type ReactNode } from "react";
 import { clsx } from "clsx";
+import { Loader2 } from "lucide-react";
 
 type ButtonProps = ComponentProps<"button"> & {
   children: ReactNode;
   variant?: "primary" | "secondary" | "ghost" | "danger";
   size?: "sm" | "md" | "lg";
   className?: string;
+  /** Shows a spinner and disables the button. Visible label is hidden; keep aria-label if needed. */
+  pending?: boolean;
 };
 
 const variantClass: Record<NonNullable<ButtonProps["variant"]>, string> = {
@@ -22,6 +25,12 @@ const sizeClass: Record<NonNullable<ButtonProps["size"]>, string> = {
   lg: "px-6 py-3 text-base rounded-lg",
 };
 
+const spinnerSize: Record<NonNullable<ButtonProps["size"]>, string> = {
+  sm: "h-4 w-4",
+  md: "h-4 w-4",
+  lg: "h-5 w-5",
+};
+
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
   function Button(
     {
@@ -31,6 +40,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       type = "button",
       children,
       disabled,
+      pending = false,
       ...rest
     },
     ref
@@ -39,7 +49,8 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       <button
         ref={ref}
         type={type}
-        disabled={disabled}
+        disabled={disabled || pending}
+        aria-busy={pending || undefined}
         className={clsx(
           "inline-flex items-center justify-center font-medium transition focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
           variantClass[variant],
@@ -48,7 +59,17 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         )}
         {...rest}
       >
-        {children}
+        {pending ? (
+          <>
+            <Loader2
+              className={clsx(spinnerSize[size], "animate-spin")}
+              aria-hidden
+            />
+            <span className="sr-only">{children}</span>
+          </>
+        ) : (
+          children
+        )}
       </button>
     );
   }

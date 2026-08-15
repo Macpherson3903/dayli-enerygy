@@ -15,9 +15,14 @@ export function normalizeRole(v: unknown): AppRole {
 }
 
 export async function getAppRole(): Promise<AppRole> {
-  const user = await currentUser();
-  if (!user) return "customer";
-  return normalizeRole(user.publicMetadata?.role);
+  try {
+    const user = await currentUser();
+    if (!user) return "customer";
+    return normalizeRole(user.publicMetadata?.role);
+  } catch (e) {
+    console.error("[auth] Clerk currentUser failed; defaulting role to customer", e);
+    return "customer";
+  }
 }
 
 export function assertRole(allowed: AppRole[], role: AppRole): void {

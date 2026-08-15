@@ -706,16 +706,17 @@ export function ProposalFormEditor({
 
       {!locked ? (
         <div className="mt-6 flex flex-wrap gap-3 border-t border-gray-100 pt-6">
-          <Button type="button" onClick={submitSave} disabled={savePending || sendPending}>
-            {savePending ? "Saving…" : "Save draft"}
+          <Button type="button" onClick={submitSave} pending={savePending} disabled={sendPending}>
+            Save draft
           </Button>
           <Button
             type="button"
             variant="secondary"
             onClick={submitSend}
-            disabled={savePending || sendPending}
+            pending={sendPending}
+            disabled={savePending}
           >
-            {sendPending ? "Sending…" : "Send to client"}
+            Send to client
           </Button>
         </div>
       ) : null}

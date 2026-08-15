@@ -1,20 +1,29 @@
 "use client";
 
-import { useId } from "react";
+import { useId, useState } from "react";
 import { clsx } from "clsx";
 import { Button } from "@/components/ui/Button";
 import { Printer } from "lucide-react";
+import { afterNextPaint } from "@/lib/after-paint";
 
 /** Print control for booking detail: keyboard-activatable, named for assistive tech, with extra description on focus. */
 export function BookingPrintButton({ className = "" }: { className?: string }) {
   const descriptionId = useId();
+  const [printing, setPrinting] = useState(false);
   return (
     <Button
       type="button"
       variant="secondary"
       size="sm"
       className={clsx("gap-2 shrink-0", className)}
-      onClick={() => window.print()}
+      pending={printing}
+      onClick={() => {
+        setPrinting(true);
+        afterNextPaint(() => {
+          window.print();
+          setPrinting(false);
+        });
+      }}
       aria-describedby={descriptionId}
     >
       <Printer className="h-4 w-4 shrink-0" aria-hidden />

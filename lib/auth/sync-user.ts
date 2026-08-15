@@ -96,9 +96,9 @@ export async function upsertUserFromClerkUserJson(
 
 /** Insert the signed-in Clerk user if they are not in Mongo yet. Does not update existing rows. */
 export async function ensureCurrentUserInDb(): Promise<void> {
-  const user = await currentUser();
-  if (!user) return;
   try {
+    const user = await currentUser();
+    if (!user) return;
     await insertUserIfMissing(userRecordFromClerkUser(user));
   } catch (e) {
     console.error("[users] Failed to store signed-in user in MongoDB", e);
