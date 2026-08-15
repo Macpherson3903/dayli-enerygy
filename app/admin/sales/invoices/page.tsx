@@ -22,8 +22,8 @@ export default async function SalesInvoicesPage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Invoices"
-        description="Work orders and sales invoices created by sales admin. Search by work order number, customer name, or phone."
+        title="Saved invoices"
+        description="All work orders saved by sales admin. Search by work order number, customer name, phone, or email. Open an invoice to print or send it by email."
         actions={
           <Link
             href="/admin/sales/invoices/new"

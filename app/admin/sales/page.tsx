@@ -18,6 +18,8 @@ import { BreakdownBarChart } from "@/components/charts/BreakdownBarChart";
 import { DistributionPieChart } from "@/components/charts/DistributionPieChart";
 import { CategoricalLineChart } from "@/components/charts/CategoricalLineChart";
 import { backfillUsersFromClerkIfEmpty } from "@/lib/auth/sync-user";
+import { listAllInvoices } from "@/lib/db/invoices";
+import { formatNaira } from "@/lib/pricing";
 import { countUsers, listUsers, userDisplayName } from "@/lib/db/users";
 
 export const dynamic = "force-dynamic";
@@ -29,10 +31,11 @@ function formatTimestamp(value: Date | null | undefined): string {
 
 export default async function SalesAdminPage() {
   const backfill = backfillUsersFromClerkIfEmpty();
-  const [orders, installationBookings, productInquiries] = await Promise.all([
+  const [orders, installationBookings, productInquiries, invoices] = await Promise.all([
     listAllOrders(),
     listAllInstallationBookings(),
     listProductAgentInquiries(),
+    listAllInvoices(),
   ]);
   await backfill;
   const [recentUsers, totalUsers] = await Promise.all([
@@ -45,6 +48,7 @@ export default async function SalesAdminPage() {
   const totalBookings = installationBookings.length;
   const recentOrders = orders.slice(0, 5);
   const recentBookings = installationBookings.slice(0, 5);
+  const recentInvoices = invoices.slice(0, 5);
 
   const newOrdersCount = orders.filter((o) => o.status === "new").length;
   const newBookingsCount = installationBookings.filter((b) => b.status === "new").length;
@@ -228,6 +232,40 @@ export default async function SalesAdminPage() {
                     </div>
                     <div className="text-sm text-gray-600">
                       {ORDER_STATUS_LABEL[o.status]}
+                    </div>
+                  </Card>
+                </Link>
+              </li>
+            ))
+          )}
+        </ul>
+      </div>
+      <div>
+        <div className="flex flex-wrap items-end justify-between gap-2 mb-2">
+          <h2 className="text-sm font-medium text-gray-500 uppercase">Recent invoices</h2>
+          <Link
+            href="/admin/sales/invoices"
+            className="text-xs font-medium text-brand-700 hover:underline"
+          >
+            View all
+          </Link>
+        </div>
+        <ul className="space-y-2" role="list">
+          {recentInvoices.length === 0 ? (
+            <li className="text-sm text-gray-500">No saved invoices yet.</li>
+          ) : (
+            recentInvoices.map((invoice) => (
+              <li key={invoice._id.toString()}>
+                <Link href={`/admin/sales/invoices/${invoice._id.toString()}`}>
+                  <Card className="flex flex-col gap-2 py-4 transition hover:border-brand-200 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                      <p className="font-medium">{invoice.workOrderNumber}</p>
+                      <p className="text-sm text-gray-600">
+                        {invoice.customer.name} · {invoice.customer.email}
+                      </p>
+                      <p className="mt-1 text-xs text-gray-500">
+                        {invoice.issuedAt.toLocaleDateString()} · {formatNaira(invoice.grandTotal)}
+                      </p>
                     </div>
                   </Card>
                 </Link>

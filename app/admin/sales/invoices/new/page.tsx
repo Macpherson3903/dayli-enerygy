@@ -42,13 +42,13 @@ export default async function NewInvoicePage() {
     <div className="space-y-6">
       <PageHeader
         title="Create invoice"
-        description="Work order / sales & installation order. Search the catalog to add products, then adjust quantities, labour, transport, discount, and VAT."
+        description="Work order / sales & installation order. Search the catalog to add products, then adjust quantities, labour, transport, discount, and VAT. Saving opens the invoice so you can print it or email it."
         actions={
           <Link
             href="/admin/sales/invoices"
             className="text-sm font-medium text-brand-700 hover:underline"
           >
-            All invoices
+            Saved invoices
           </Link>
         }
       />

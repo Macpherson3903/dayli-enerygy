@@ -1,5 +1,7 @@
 import nodemailer from "nodemailer";
 import { hearAboutUsLabel } from "@/lib/constants";
+import { invoiceEmailHtml, invoiceEmailText } from "@/lib/invoice-email";
+import type { InvoiceDoc } from "@/lib/types";
 
 /** Canonical SMTP_* vars; HOSTINGER_SMTP_* kept as legacy aliases. */
 function getResolvedSmtpHost(): string {
@@ -570,6 +572,36 @@ export async function sendInstallationBookingConfirmationToCustomer(payload: {
     return true;
   } catch {
     console.error("[email] Installation booking confirmation failed to send");
+    return false;
+  }
+}
+
+export async function sendInvoiceToRecipient(payload: {
+  to: string;
+  invoice: InvoiceDoc;
+  appUrl: string;
+}): Promise<boolean> {
+  const transporter = getTransporter();
+  if (!transporter) {
+    console.info(
+      "[email] Invoice email skipped (SMTP not configured — set SMTP_*)",
+      payload.invoice.workOrderNumber
+    );
+    return false;
+  }
+  const to = payload.to.trim();
+  if (!to) return false;
+  try {
+    await transporter.sendMail({
+      from: getMailFrom(),
+      to: [to],
+      subject: `Work order ${payload.invoice.workOrderNumber} — Dayli Energy`,
+      text: invoiceEmailText(payload.invoice, payload.appUrl),
+      html: invoiceEmailHtml(payload.invoice, payload.appUrl),
+    });
+    return true;
+  } catch (e) {
+    console.error("[email] Invoice email failed to send", payload.invoice.workOrderNumber, e);
     return false;
   }
 }

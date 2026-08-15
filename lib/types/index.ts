@@ -376,6 +376,8 @@ export type InvoiceDoc = {
   validity: string;
   accountNumber: string;
   createdByUserId: string;
+  lastSentTo?: string | null;
+  lastSentAt?: Date | null;
   createdAt: Date;
   updatedAt: Date;
 };

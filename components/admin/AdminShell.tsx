@@ -67,8 +67,13 @@ const areas: NavArea[] = [
             badge: "newOrders",
           },
           {
+            href: "/admin/sales/invoices/new",
+            label: "Create invoice",
+            icon: PlusCircle,
+          },
+          {
             href: "/admin/sales/invoices",
-            label: "Invoices",
+            label: "Saved invoices",
             icon: Receipt,
           },
           {
@@ -169,6 +174,13 @@ function isLinkActive(path: string, href: string, home: string): boolean {
       path === href ||
       (path.startsWith(`${href}/`) &&
         !path.startsWith("/admin/inventory/packages/add"))
+    );
+  }
+  if (href === "/admin/sales/invoices") {
+    return (
+      path === href ||
+      (path.startsWith(`${href}/`) &&
+        !path.startsWith("/admin/sales/invoices/new"))
     );
   }
   return path === href || path.startsWith(`${href}/`);

@@ -424,6 +424,12 @@ export const createInvoiceSchema = z.object({
 });
 
 export type CreateInvoiceInput = z.infer<typeof createInvoiceSchema>;
+
+export const sendInvoiceEmailSchema = z.object({
+  invoiceId: z.string().trim().min(1).max(40),
+  to: z.string().trim().email().max(200),
+});
+export type SendInvoiceEmailInput = z.infer<typeof sendInvoiceEmailSchema>;
 export type InstallationBookingInput = z.infer<typeof installationBookingSchema>;
 export type ProductInput = z.infer<typeof productInputSchema>;
 export type ProductUpdateInput = z.infer<typeof productUpdateInputSchema>;

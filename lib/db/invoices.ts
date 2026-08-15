@@ -90,6 +90,8 @@ export async function createInvoice(
     validity: data.validity,
     accountNumber: data.accountNumber,
     createdByUserId,
+    lastSentTo: null,
+    lastSentAt: null,
     createdAt: now,
     updatedAt: now,
   };
@@ -114,4 +116,18 @@ export async function listAllInvoices() {
     .find()
     .sort({ createdAt: -1 })
     .toArray();
+}
+
+export async function recordInvoiceEmailSent(
+  id: string,
+  to: string
+): Promise<boolean> {
+  if (!ObjectId.isValid(id)) return false;
+  const db = await getDb();
+  const now = new Date();
+  const r = await db.collection<InvoiceDoc>(COL).updateOne(
+    { _id: new ObjectId(id) },
+    { $set: { lastSentTo: to, lastSentAt: now, updatedAt: now } }
+  );
+  return r.matchedCount === 1;
 }
