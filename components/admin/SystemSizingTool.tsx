@@ -1,12 +1,12 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { Printer } from "lucide-react";
+import { useEffect, useMemo, useState, useTransition } from "react";
+import { Plus, Printer, Save } from "lucide-react";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import {
   computeQuotationRow,
-  quotationAppliances,
+  type QuotationAppliance,
   type QuotationComputedRow,
 } from "@/lib/content/quotation";
 import {
@@ -14,9 +14,14 @@ import {
   DEFAULT_SIZING_PARAMS,
   recommendSizingProducts,
   SYSTEM_VOLTAGES,
+  type ProductRecommendation,
   type SizingCatalogItem,
   type SystemVoltage,
 } from "@/lib/solar-sizing";
+import { saveSizingCalculationAction } from "@/app/actions/sizing";
+import { createQuotationApplianceAction } from "@/app/actions/quotation-appliances";
+import { useStatusMessage } from "@/context/StatusMessageContext";
+import type { SizingRecommendationSnapshot } from "@/lib/types";
 
 const DECIMAL_INPUT_RE = /^\d*\.?\d*$/;
 
@@ -40,18 +45,31 @@ function formatNumber(value: number, digits = 0): string {
   });
 }
 
-function defaultHoursMap(): Record<string, string> {
+function hoursMapFromSheet(sheet: QuotationAppliance[]): Record<string, string> {
   const out: Record<string, string> = {};
-  for (const a of quotationAppliances) {
+  for (const a of sheet) {
     out[a.id] = String(a.defaultHoursPerDay);
   }
   return out;
 }
 
-export function SystemSizingTool({ catalog }: { catalog: SizingCatalogItem[] }) {
+export function SystemSizingTool({
+  catalog,
+  appliances,
+}: {
+  catalog: SizingCatalogItem[];
+  appliances: QuotationAppliance[];
+}) {
   const [customerName, setCustomerName] = useState("");
+  const [addedAppliances, setAddedAppliances] = useState<QuotationAppliance[]>([]);
+  const sheet = useMemo(() => {
+    const seen = new Set(appliances.map((a) => a.id));
+    return [...appliances, ...addedAppliances.filter((a) => !seen.has(a.id))];
+  }, [appliances, addedAppliances]);
   const [quantityInputs, setQuantityInputs] = useState<Record<string, string>>({});
-  const [hoursInputs, setHoursInputs] = useState<Record<string, string>>(defaultHoursMap);
+  const [hoursInputs, setHoursInputs] = useState<Record<string, string>>(() =>
+    hoursMapFromSheet(appliances)
+  );
   const [systemVoltage, setSystemVoltage] = useState<SystemVoltage>(
     DEFAULT_SIZING_PARAMS.systemVoltage
   );
@@ -68,16 +86,34 @@ export function SystemSizingTool({ catalog }: { catalog: SizingCatalogItem[] }) 
   const [depthOfDischarge, setDepthOfDischarge] = useState(
     String(DEFAULT_SIZING_PARAMS.depthOfDischarge)
   );
+  const [newName, setNewName] = useState("");
+  const [newWatts, setNewWatts] = useState("");
+  const [newHours, setNewHours] = useState("4");
+  const [adding, startAdd] = useTransition();
+
+  useEffect(() => {
+    setHoursInputs((prev) => {
+      const next = { ...prev };
+      let changed = false;
+      for (const a of sheet) {
+        if (next[a.id] === undefined) {
+          next[a.id] = String(a.defaultHoursPerDay);
+          changed = true;
+        }
+      }
+      return changed ? next : prev;
+    });
+  }, [sheet]);
 
   const rows = useMemo<QuotationComputedRow[]>(() => {
-    return quotationAppliances.map((appliance) =>
+    return sheet.map((appliance) =>
       computeQuotationRow(
         appliance,
         parseDecimalInput(quantityInputs[appliance.id]),
         parseDecimalInput(hoursInputs[appliance.id], { max: 24 })
       )
     );
-  }, [quantityInputs, hoursInputs]);
+  }, [sheet, quantityInputs, hoursInputs]);
 
   const usedRows = useMemo(() => rows.filter((r) => r.quantity > 0), [rows]);
 
@@ -125,10 +161,141 @@ export function SystemSizingTool({ catalog }: { catalog: SizingCatalogItem[] }) 
   );
 
   const hasLoad = totals.peakLoad > 0 || totals.dailyEnergy > 0;
+  const { showStatusMessage } = useStatusMessage();
+  const [saving, startSave] = useTransition();
+
+  function snapshotRec(
+    role: SizingRecommendationSnapshot["role"],
+    rec: ProductRecommendation | null
+  ): SizingRecommendationSnapshot | null {
+    if (!rec) return null;
+    return {
+      role,
+      productId: rec.product.id,
+      productName: rec.product.name,
+      productSlug: rec.product.slug,
+      quantity: rec.quantity,
+      unitLabel: rec.unitLabel,
+      coverageLabel: rec.coverageLabel,
+      priceRange: rec.priceRange,
+      note: rec.note,
+    };
+  }
+
+  function addMissingAppliance() {
+    const name = newName.trim();
+    const watts = parseDecimalInput(newWatts, { min: 0.1, max: 1e6 });
+    const hours = parseDecimalInput(newHours, { min: 0, max: 24 });
+    if (!name) {
+      showStatusMessage("Enter the appliance name.", "error");
+      return;
+    }
+    if (watts <= 0) {
+      showStatusMessage("Enter a watt rating greater than 0.", "error");
+      return;
+    }
+    startAdd(async () => {
+      const result = await createQuotationApplianceAction({
+        name,
+        watts,
+        defaultHoursPerDay: hours,
+      });
+      if (result.error || !result.appliance) {
+        showStatusMessage(result.error ?? "Could not add appliance", "error");
+        return;
+      }
+      setAddedAppliances((prev) =>
+        prev.some((a) => a.id === result.appliance!.id)
+          ? prev
+          : [...prev, result.appliance!]
+      );
+      setHoursInputs((prev) => ({
+        ...prev,
+        [result.appliance!.id]: String(result.appliance!.defaultHoursPerDay),
+      }));
+      setNewName("");
+      setNewWatts("");
+      setNewHours("4");
+      showStatusMessage(
+        `${result.appliance.name} added to the sheet (also on the public quotation).`,
+        "success"
+      );
+    });
+  }
+
+  function saveCalculation() {
+    if (!hasLoad) {
+      showStatusMessage("Enter at least one appliance quantity before saving.", "error");
+      return;
+    }
+    const peakSunHoursN = parseDecimalInput(peakSunHours, { min: 0.5, max: 8 }) || 5;
+    const systemEfficiencyN =
+      parseDecimalInput(systemEfficiency, { min: 0.4, max: 1 }) || 0.8;
+    const inverterOversizeN =
+      parseDecimalInput(inverterOversize, { min: 1, max: 2 }) || 1.25;
+    const daysOfAutonomyN =
+      parseDecimalInput(daysOfAutonomy, { min: 0.25, max: 5 }) || 1;
+    const depthOfDischargeN =
+      parseDecimalInput(depthOfDischarge, { min: 0.3, max: 1 }) || 0.8;
+
+    const recommendations = [
+      snapshotRec("panels", recs.panels),
+      snapshotRec("inverter", recs.inverter),
+      snapshotRec("batteries", recs.batteries),
+    ].filter((r): r is SizingRecommendationSnapshot => r != null);
+
+    startSave(async () => {
+      const result = await saveSizingCalculationAction({
+        customerName: customerName.trim(),
+        appliances: usedRows.map((r) => ({
+          name: r.name,
+          quantity: r.quantity,
+          watts: r.watts,
+          peakLoad: r.peakLoad,
+          hoursPerDay: r.hoursPerDay,
+          dailyEnergyWh: r.dailyEnergy,
+        })),
+        params: {
+          systemVoltage,
+          peakSunHours: peakSunHoursN,
+          systemEfficiency: systemEfficiencyN,
+          inverterOversize: inverterOversizeN,
+          daysOfAutonomy: daysOfAutonomyN,
+          depthOfDischarge: depthOfDischargeN,
+        },
+        totals: {
+          peakLoadW: totals.peakLoad,
+          dailyEnergyWh: totals.dailyEnergy,
+        },
+        result: sizing,
+        recommendations,
+      });
+      if (result.error) {
+        showStatusMessage(result.error, "error");
+        return;
+      }
+      showStatusMessage(
+        `Saved ${result.sizingNumber ?? "calculation"} to the database.`,
+        "success"
+      );
+    });
+  }
+
+  function printWorksheet() {
+    const body = document.body;
+    const cleanup = () => {
+      body.classList.remove("sizing-print-mode");
+      window.removeEventListener("afterprint", cleanup);
+    };
+    body.classList.add("sizing-print-mode");
+    window.addEventListener("afterprint", cleanup);
+    window.print();
+    window.setTimeout(cleanup, 1000);
+  }
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-end justify-between gap-4 print:hidden">
+      <div className="flex flex-wrap items-end justify-between gap-4 print:hidden no-print">
         <label className="block text-sm">
           <span className="text-gray-700">Customer name (optional, for print)</span>
           <input
@@ -138,17 +305,29 @@ export function SystemSizingTool({ catalog }: { catalog: SizingCatalogItem[] }) 
             className="mt-1 block w-72 max-w-full rounded-md border border-gray-300 px-3 py-2 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-200"
           />
         </label>
-        <Button
-          type="button"
-          variant="secondary"
-          className="gap-2"
-          onClick={() => window.print()}
-        >
-          <Printer className="h-4 w-4" aria-hidden />
-          Print calculations
-        </Button>
+        <div className="flex flex-wrap gap-2">
+          <Button
+            type="button"
+            className="gap-2"
+            disabled={saving || !hasLoad}
+            onClick={saveCalculation}
+          >
+            <Save className="h-4 w-4" aria-hidden />
+            {saving ? "Saving…" : "Save"}
+          </Button>
+          <Button
+            type="button"
+            variant="secondary"
+            className="gap-2"
+            onClick={printWorksheet}
+          >
+            <Printer className="h-4 w-4" aria-hidden />
+            Print calculations
+          </Button>
+        </div>
       </div>
 
+      <div className="sizing-print-root space-y-6">
       <div className="hidden print:block mb-4">
         <p className="text-lg font-semibold text-gray-900">System sizing worksheet</p>
         <p className="text-sm text-gray-600">
@@ -253,6 +432,60 @@ export function SystemSizingTool({ catalog }: { catalog: SizingCatalogItem[] }) 
         </div>
       </Card>
 
+      <Card className="p-4 sm:p-6 print:hidden no-print">
+        <h2 className="text-sm font-semibold text-gray-900">Add missing appliance</h2>
+        <p className="mt-1 text-sm text-gray-600">
+          Adds this item to this worksheet and to the shared sheet used on the public quotation
+          page.
+        </p>
+        <div className="mt-4 grid gap-3 sm:grid-cols-4">
+          <label className="block text-sm sm:col-span-2">
+            <span className="text-gray-700">Name</span>
+            <input
+              type="text"
+              value={newName}
+              onChange={(e) => setNewName(e.target.value)}
+              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-200"
+            />
+          </label>
+          <label className="block text-sm">
+            <span className="text-gray-700">Watts</span>
+            <input
+              type="text"
+              inputMode="decimal"
+              value={newWatts}
+              onChange={(e) => {
+                const v = e.target.value;
+                if (v === "" || DECIMAL_INPUT_RE.test(v)) setNewWatts(v);
+              }}
+              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-200"
+            />
+          </label>
+          <label className="block text-sm">
+            <span className="text-gray-700">Default hours / day</span>
+            <input
+              type="text"
+              inputMode="decimal"
+              value={newHours}
+              onChange={(e) => {
+                const v = e.target.value;
+                if (v === "" || DECIMAL_INPUT_RE.test(v)) setNewHours(v);
+              }}
+              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-200"
+            />
+          </label>
+        </div>
+        <Button
+          type="button"
+          className="mt-4 gap-2"
+          disabled={adding}
+          onClick={addMissingAppliance}
+        >
+          <Plus className="h-4 w-4" aria-hidden />
+          {adding ? "Adding…" : "Add to sheet"}
+        </Button>
+      </Card>
+
       <Card className="p-4 sm:p-6">
         <h2 className="text-sm font-semibold text-gray-900">System voltage & assumptions</h2>
         <p className="mt-1 text-sm text-gray-600 print:hidden">
@@ -328,6 +561,7 @@ export function SystemSizingTool({ catalog }: { catalog: SizingCatalogItem[] }) 
           </div>
         )}
       </Card>
+      </div>
     </div>
   );
 }

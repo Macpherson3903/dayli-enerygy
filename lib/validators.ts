@@ -313,6 +313,75 @@ export type CreateOrderInput = z.infer<typeof createOrderSchema>;
 export type ContactMessageInput = z.infer<typeof contactMessageSchema>;
 export type ProductAgentInquiryInput = z.infer<typeof productAgentInquirySchema>;
 
+export const sizingCalculationInputSchema = z.object({
+  customerName: z.string().trim().max(200),
+  appliances: z
+    .array(
+      z.object({
+        name: z.string().trim().max(200),
+        quantity: z.number().nonnegative().max(1_000_000),
+        watts: z.number().nonnegative().max(1e9),
+        peakLoad: z.number().nonnegative().max(1e9),
+        hoursPerDay: z.number().nonnegative().max(24),
+        dailyEnergyWh: z.number().nonnegative().max(1e12),
+      })
+    )
+    .min(1)
+    .max(150),
+  params: z.object({
+    systemVoltage: z.union([z.literal(12), z.literal(24), z.literal(48)]),
+    peakSunHours: z.number().min(0.5).max(8),
+    systemEfficiency: z.number().min(0.4).max(1),
+    inverterOversize: z.number().min(1).max(2),
+    daysOfAutonomy: z.number().min(0.25).max(5),
+    depthOfDischarge: z.number().min(0.3).max(1),
+  }),
+  totals: z.object({
+    peakLoadW: z.number().nonnegative().max(1e12),
+    dailyEnergyWh: z.number().nonnegative().max(1e15),
+  }),
+  result: z.object({
+    inverterW: z.number().nonnegative().max(1e12),
+    inverterKva: z.number().nonnegative().max(1e9),
+    arrayW: z.number().nonnegative().max(1e12),
+    batteryWh: z.number().nonnegative().max(1e15),
+    batteryAh: z.number().nonnegative().max(1e12),
+    systemVoltage: z.union([z.literal(12), z.literal(24), z.literal(48)]),
+  }),
+  recommendations: z
+    .array(
+      z.object({
+        role: z.enum(["panels", "inverter", "batteries"]),
+        productId: z.string().trim().min(1).max(80),
+        productName: z.string().trim().min(1).max(300),
+        productSlug: z.string().trim().min(1).max(200),
+        quantity: z.number().int().positive().max(10_000),
+        unitLabel: z.string().trim().max(120),
+        coverageLabel: z.string().trim().max(400),
+        priceRange: z.string().trim().max(120),
+        note: z.string().trim().max(400).optional(),
+      })
+    )
+    .max(12),
+});
+export type SizingCalculationInput = z.infer<typeof sizingCalculationInputSchema>;
+
+export const quotationApplianceSheetInputSchema = z.object({
+  name: z.string().trim().min(1).max(200),
+  watts: z.number().positive().max(1e6),
+  defaultHoursPerDay: z.number().min(0).max(24),
+  sortOrder: z.number().int().min(0).max(100_000).optional(),
+});
+
+export const quotationApplianceSheetUpdateSchema =
+  quotationApplianceSheetInputSchema.extend({
+    id: z.string().trim().min(1).max(40),
+  });
+
+export type QuotationApplianceSheetInput = z.infer<
+  typeof quotationApplianceSheetInputSchema
+>;
+
 export const productAgentInquiryUpdateSchema = z.object({
   status: z.enum(["new", "in_progress", "resolved"]),
   internalNotes: z.string().max(8000),

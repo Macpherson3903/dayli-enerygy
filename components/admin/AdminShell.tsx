@@ -19,6 +19,7 @@ import {
   Users,
   MessageCircle,
   Calculator,
+  List,
 } from "lucide-react";
 
 type Item = {
@@ -41,6 +42,7 @@ const items: Item[] = [
       { href: "/admin/sales/bookings", label: "Bookings" },
       { href: "/admin/sales/product-inquiries", label: "Product inquiries" },
       { href: "/admin/sales/sizing", label: "System sizing" },
+      { href: "/admin/sales/appliance-sheet", label: "Appliance sheet" },
       { href: "/admin/sales/users", label: "Users" },
     ],
   },
@@ -197,6 +199,9 @@ export function AdminShell({
                             )}
                             {child.href.endsWith("/sizing") && (
                               <Calculator className="w-3.5 h-3.5" />
+                            )}
+                            {child.href.endsWith("/appliance-sheet") && (
+                              <List className="w-3.5 h-3.5" />
                             )}
                             {child.href.endsWith("/users") && (
                               <Users className="w-3.5 h-3.5" />

@@ -285,3 +285,57 @@ export type UserDoc = {
   createdAt: Date;
   updatedAt: Date;
 };
+
+export type SizingRecommendationSnapshot = {
+  role: "panels" | "inverter" | "batteries";
+  productId: string;
+  productName: string;
+  productSlug: string;
+  quantity: number;
+  unitLabel: string;
+  coverageLabel: string;
+  priceRange: string;
+  note?: string;
+};
+
+export type SizingCalculationDoc = {
+  _id: ObjectId;
+  sizingNumber: string;
+  customerName: string;
+  createdByUserId: string;
+  appliances: ProposalApplianceRow[];
+  params: {
+    systemVoltage: 12 | 24 | 48;
+    peakSunHours: number;
+    systemEfficiency: number;
+    inverterOversize: number;
+    daysOfAutonomy: number;
+    depthOfDischarge: number;
+  };
+  totals: {
+    peakLoadW: number;
+    dailyEnergyWh: number;
+  };
+  result: {
+    inverterW: number;
+    inverterKva: number;
+    arrayW: number;
+    batteryWh: number;
+    batteryAh: number;
+    systemVoltage: 12 | 24 | 48;
+  };
+  recommendations: SizingRecommendationSnapshot[];
+  createdAt: Date;
+  updatedAt: Date;
+};
+
+export type QuotationApplianceSheetDoc = {
+  _id: ObjectId;
+  slug: string;
+  name: string;
+  watts: number;
+  defaultHoursPerDay: number;
+  sortOrder: number;
+  createdAt: Date;
+  updatedAt: Date;
+};

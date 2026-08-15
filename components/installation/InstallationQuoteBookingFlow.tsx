@@ -3,13 +3,18 @@
 import { useState } from "react";
 import { QuotationCalculator } from "@/components/quotation/QuotationCalculator";
 import { InstallationBookingForm } from "./InstallationBookingForm";
+import type { QuotationAppliance } from "@/lib/content/quotation";
 import type { ProposalApplianceRow } from "@/lib/types";
 
-export function InstallationQuoteBookingFlow() {
+export function InstallationQuoteBookingFlow({
+  appliances,
+}: {
+  appliances: QuotationAppliance[];
+}) {
   const [quotationSummary, setQuotationSummary] = useState("");
-  const [quotationAppliances, setQuotationAppliances] = useState<ProposalApplianceRow[]>(
-    []
-  );
+  const [quotationAppliances, setQuotationAppliances] = useState<
+    ProposalApplianceRow[]
+  >([]);
 
   return (
     <div className="space-y-10">
@@ -25,6 +30,7 @@ export function InstallationQuoteBookingFlow() {
           </p>
         </div>
         <QuotationCalculator
+          appliances={appliances}
           onApplyEstimate={(p) => {
             setQuotationSummary(p.summaryText);
             setQuotationAppliances(p.appliances);

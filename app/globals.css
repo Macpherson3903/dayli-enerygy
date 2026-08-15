@@ -46,4 +46,30 @@ body {
     overflow: visible !important;
     max-height: none !important;
   }
+
+  .whatsapp-float,
+  .no-print,
+  [data-vercel-toolbar],
+  [data-vercel-toolbar-container],
+  vercel-live-feedback,
+  nextjs-portal {
+    display: none !important;
+  }
+
+  /* System sizing: print only the worksheet, not admin chrome or overlays */
+  body.sizing-print-mode * {
+    visibility: hidden !important;
+  }
+
+  body.sizing-print-mode .sizing-print-root,
+  body.sizing-print-mode .sizing-print-root * {
+    visibility: visible !important;
+  }
+
+  body.sizing-print-mode .sizing-print-root {
+    position: absolute !important;
+    inset: 0 auto auto 0;
+    width: 100%;
+    background: #fff;
+  }
 }

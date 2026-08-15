@@ -34,7 +34,8 @@ export const quotationHeader = {
     "Enter quantity and typical hours per day for each appliance you use. A detailed load summary is prepared when you add the estimate to your booking.",
 };
 
-export const quotationAppliances: QuotationAppliance[] = [
+/** Seed / offline fallback for the shared appliance sheet (also stored in MongoDB). */
+export const seedQuotationAppliances: QuotationAppliance[] = [
   { id: "led-bulbs", name: "LED Bulbs", watts: 15, defaultHoursPerDay: 4 },
   {
     id: "cfl-bulb-old",
@@ -109,6 +110,9 @@ export const quotationAppliances: QuotationAppliance[] = [
   { id: "washing-machine", name: "Washing machine", watts: 800, defaultHoursPerDay: 2 },
   { id: "hair-dryer", name: "Hair Dryer", watts: 2000, defaultHoursPerDay: 0 },
 ];
+
+/** Alias for seed fallbacks and tests. Prefer DB-backed list in UI. */
+export const quotationAppliances = seedQuotationAppliances;
 
 export function computeQuotationRow(
   appliance: QuotationAppliance,

@@ -7,6 +7,9 @@ import {
   installationBookingHeader,
   installationBookingSeo,
 } from "@/lib/content/installation-booking";
+import { getQuotationAppliancesPublic } from "@/lib/db/quotation-appliances";
+
+export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: installationBookingSeo.title,
@@ -20,7 +23,8 @@ export const metadata: Metadata = {
   },
 };
 
-export default function InstallationBookingPage() {
+export default async function InstallationBookingPage() {
+  const appliances = await getQuotationAppliancesPublic();
   return (
     <>
       <Navbar />
@@ -31,7 +35,7 @@ export default function InstallationBookingPage() {
             description={installationBookingHeader.description}
           />
           <div className="mt-8">
-            <InstallationQuoteBookingFlow />
+            <InstallationQuoteBookingFlow appliances={appliances} />
           </div>
         </div>
       </main>

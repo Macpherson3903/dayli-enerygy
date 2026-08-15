@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/Button";
 import {
   computeQuotationRow,
   formatQuotationSummaryText,
-  quotationAppliances,
+  type QuotationAppliance,
   type QuotationComputedRow,
 } from "@/lib/content/quotation";
 import type { ProposalApplianceRow } from "@/lib/types";
@@ -17,6 +17,7 @@ export type QuotationApplyEstimatePayload = {
 };
 
 type QuotationCalculatorProps = {
+  appliances: QuotationAppliance[];
   /** When set, shows a button that sends the current estimate as text + structured rows. */
   onApplyEstimate?: (payload: QuotationApplyEstimatePayload) => void;
   applyEstimateLabel?: string;
@@ -43,21 +44,22 @@ function parseDecimalInput(
 }
 
 export function QuotationCalculator({
+  appliances,
   onApplyEstimate,
   applyEstimateLabel = "Add this estimate to my booking request",
-}: QuotationCalculatorProps = {}) {
+}: QuotationCalculatorProps) {
   const [quantityInputs, setQuantityInputs] = useState<Record<string, string>>({});
   const [hoursInputs, setHoursInputs] = useState<Record<string, string>>({});
 
   const rows = useMemo<QuotationComputedRow[]>(() => {
-    return quotationAppliances.map((appliance) =>
+    return appliances.map((appliance) =>
       computeQuotationRow(
         appliance,
         parseDecimalInput(quantityInputs[appliance.id]),
         parseDecimalInput(hoursInputs[appliance.id], { max: 24 })
       )
     );
-  }, [quantityInputs, hoursInputs]);
+  }, [appliances, quantityInputs, hoursInputs]);
 
   const totals = useMemo(() => {
     return rows.reduce(
