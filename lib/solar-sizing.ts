@@ -94,7 +94,9 @@ export function computeSystemSizing(p: SystemSizingParams): SystemSizingResult {
 }
 
 function itemText(item: SizingCatalogItem): string[] {
-  return [item.name, item.shortDescription, item.description, ...(item.features ?? [])];
+  return [item.name, item.shortDescription, item.description, ...(item.features ?? [])].filter(
+    (part): part is string => Boolean(part)
+  );
 }
 
 function isCategory(item: SizingCatalogItem, ...names: string[]): boolean {
