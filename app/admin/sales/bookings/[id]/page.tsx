@@ -16,6 +16,7 @@ import { BookingUpdateForm } from "./BookingUpdateForm";
 import {
   INSTALLATION_BOOKING_STATUSES,
   INSTALLATION_BOOKING_STATUS_LABEL,
+  hearAboutUsLabel,
 } from "@/lib/constants";
 import type { ProposalApprovalStatus } from "@/lib/types";
 
@@ -155,6 +156,18 @@ export default async function SalesBookingPage({
             {booking.details.message}
           </p>
         )}
+        {booking.details.referredBy ? (
+          <p className="mt-2 text-sm text-gray-700">
+            <span className="font-medium">Referred by: </span>
+            {booking.details.referredBy}
+          </p>
+        ) : null}
+        {hearAboutUsLabel(booking.details.hearAboutUs) ? (
+          <p className="mt-2 text-sm text-gray-700">
+            <span className="font-medium">How they heard about us: </span>
+            {hearAboutUsLabel(booking.details.hearAboutUs)}
+          </p>
+        ) : null}
       </Card>
 
       <div className="hidden print:block print:break-inside-avoid">

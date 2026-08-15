@@ -1,4 +1,5 @@
 import { z, type ZodError } from "zod";
+import { HEAR_ABOUT_US_VALUES } from "@/lib/constants";
 
 /** First human-readable message from a Zod error (form-level or field-level). */
 export function firstZodErrorMessage(
@@ -230,6 +231,13 @@ export const installationBookingSchema = z.object({
       .transform((s) => (s === "" ? undefined : s))
       .optional(),
     quotationAppliances: z.array(proposalApplianceRowSchema).max(150).optional(),
+    referredBy: z
+      .string()
+      .trim()
+      .max(200)
+      .transform((s) => (s === "" ? undefined : s))
+      .optional(),
+    hearAboutUs: z.enum(HEAR_ABOUT_US_VALUES),
   }),
   consent: z
     .boolean()

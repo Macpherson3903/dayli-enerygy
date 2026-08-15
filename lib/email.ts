@@ -1,4 +1,5 @@
 import nodemailer from "nodemailer";
+import { hearAboutUsLabel } from "@/lib/constants";
 
 /** Canonical SMTP_* vars; HOSTINGER_SMTP_* kept as legacy aliases. */
 function getResolvedSmtpHost(): string {
@@ -376,6 +377,8 @@ export function formatInstallationBookingCustomerCopy(payload: {
   electricityBillRange: string;
   message?: string;
   quotationSummary?: string;
+  referredBy?: string;
+  hearAboutUs?: string;
 }): string {
   const bill =
     ELECTRICITY_BILL_LABELS[payload.electricityBillRange] ??
@@ -414,6 +417,13 @@ export function formatInstallationBookingCustomerCopy(payload: {
     lines.push("", "--- Additional notes ---", payload.message);
   }
 
+  const hear = hearAboutUsLabel(payload.hearAboutUs);
+  if (payload.referredBy || hear) {
+    lines.push("", "--- How you found us ---");
+    if (payload.referredBy) lines.push(`Referred by: ${payload.referredBy}`);
+    if (hear) lines.push(`How you heard about us: ${hear}`);
+  }
+
   lines.push(
     "",
     "Our team will contact you soon to confirm your site visit and next steps.",
@@ -440,6 +450,8 @@ export async function sendInstallationBookingEmailToOps(payload: {
   electricityBillRange: string;
   message?: string;
   quotationSummary?: string;
+  referredBy?: string;
+  hearAboutUs?: string;
   appUrl: string;
 }): Promise<boolean> {
   const transporter = getTransporter();
@@ -475,6 +487,10 @@ export async function sendInstallationBookingEmailToOps(payload: {
       ? ["", "Load estimate (quotation):", payload.quotationSummary]
       : []),
     ...(payload.message ? ["", "Message:", payload.message] : []),
+    ...(payload.referredBy ? [`Referred by: ${payload.referredBy}`] : []),
+    ...(hearAboutUsLabel(payload.hearAboutUs)
+      ? [`How they heard about us: ${hearAboutUsLabel(payload.hearAboutUs)}`]
+      : []),
     "",
     `Submitted via ${payload.appUrl}/installation-booking`,
   ].join("\n");

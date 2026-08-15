@@ -6,6 +6,7 @@ import { BookingLoadEstimateSection } from "@/components/installation/BookingLoa
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Card } from "@/components/ui/Card";
 import { InstallationBookingStatusBadge } from "@/components/ui/StatusBadge";
+import { hearAboutUsLabel } from "@/lib/constants";
 
 export const dynamic = "force-dynamic";
 
@@ -77,6 +78,18 @@ export default async function AccountBookingDetailPage({
               {booking.details.message}
             </p>
           )}
+          {booking.details.referredBy ? (
+            <p className="mt-2 text-sm text-gray-700">
+              <span className="font-medium">Referred by: </span>
+              {booking.details.referredBy}
+            </p>
+          ) : null}
+          {hearAboutUsLabel(booking.details.hearAboutUs) ? (
+            <p className="mt-2 text-sm text-gray-700">
+              <span className="font-medium">How you heard about us: </span>
+              {hearAboutUsLabel(booking.details.hearAboutUs)}
+            </p>
+          ) : null}
         </Card>
         <p className="text-sm text-gray-500">
           <Link href="/account/bookings" className="text-brand-700 hover:underline">

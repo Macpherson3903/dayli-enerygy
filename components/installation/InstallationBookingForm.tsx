@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { useStatusMessage } from "@/context/StatusMessageContext";
 import type { ProposalApplianceRow } from "@/lib/types";
+import { HEAR_ABOUT_US_LABEL, HEAR_ABOUT_US_VALUES } from "@/lib/constants";
 
 type BookingFormState = {
   error?: string;
@@ -306,6 +307,25 @@ export function InstallationBookingForm({
           rows={5}
           error={fe["details.message"]}
           placeholder="Tell us about your power needs, appliances, or anything important for the site visit."
+        />
+
+        <Input
+          label="Referred by"
+          name="referredBy"
+          autoComplete="off"
+          error={fe["details.referredBy"]}
+          placeholder="Name of the person or company who sent you (optional)"
+        />
+
+        <SelectField
+          label="How did you hear about us"
+          name="hearAboutUs"
+          required
+          error={fe["details.hearAboutUs"]}
+          options={HEAR_ABOUT_US_VALUES.map((value) => ({
+            value,
+            label: HEAR_ABOUT_US_LABEL[value],
+          }))}
         />
 
         <label className="flex items-start gap-2 text-sm text-gray-700">

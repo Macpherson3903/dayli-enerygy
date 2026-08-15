@@ -88,6 +88,8 @@ export async function POST(request: Request) {
         quotationAppliances: parseQuotationAppliancesJson(
           String(formData.get("quotationAppliancesJson") ?? "")
         ),
+        referredBy: String(formData.get("referredBy") ?? ""),
+        hearAboutUs: String(formData.get("hearAboutUs") ?? ""),
       },
       consent: formData.get("consent") === "on" || formData.get("consent") === "true",
       userId: userId ?? null,
@@ -132,6 +134,8 @@ export async function POST(request: Request) {
       electricityBillRange: parsed.data.details.electricityBillRange,
       message: parsed.data.details.message,
       quotationSummary: parsed.data.details.quotationSummary,
+      referredBy: parsed.data.details.referredBy,
+      hearAboutUs: parsed.data.details.hearAboutUs,
     });
 
     const opsOk = await sendInstallationBookingEmailToOps({
@@ -149,6 +153,8 @@ export async function POST(request: Request) {
       electricityBillRange: parsed.data.details.electricityBillRange,
       message: parsed.data.details.message,
       quotationSummary: parsed.data.details.quotationSummary,
+      referredBy: parsed.data.details.referredBy,
+      hearAboutUs: parsed.data.details.hearAboutUs,
       appUrl,
     });
 

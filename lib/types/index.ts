@@ -226,6 +226,8 @@ export type InstallationBookingDoc = {
     quotationSummary?: string;
     /** Structured appliance rows when the client applied an estimate from the calculator. */
     quotationAppliances?: ProposalApplianceRow[];
+    referredBy?: string;
+    hearAboutUs?: string;
   };
   consent: true;
   status: InstallationBookingStatus;
