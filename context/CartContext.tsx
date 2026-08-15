@@ -9,7 +9,7 @@ import {
   useRef,
   useState,
 } from "react";
-import { useUser } from "@clerk/nextjs";
+import { useAuth } from "@clerk/nextjs";
 import {
   addMyCartItemAction,
   clearMyCartAction,
@@ -60,7 +60,7 @@ function clearStorage() {
 }
 
 export function CartProvider({ children }: { children: React.ReactNode }) {
-  const { isLoaded: authLoaded, isSignedIn } = useUser();
+  const { isLoaded: authLoaded, isSignedIn, userId } = useAuth();
   const { showStatusMessage } = useStatusMessage();
   const [lines, setLines] = useState<CartLine[]>([]);
   const [ready, setReady] = useState(false);
@@ -71,7 +71,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     if (!authLoaded || hydratedRef.current) return;
     hydratedRef.current = true;
     const localLines = load().lines;
-    if (!isSignedIn) {
+    if (!isSignedIn || !userId) {
       // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional one-time hydration
       setLines(localLines);
       setReady(true);
@@ -104,7 +104,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     return () => {
       cancelled = true;
     };
-  }, [authLoaded, isSignedIn]);
+  }, [authLoaded, isSignedIn, userId]);
 
   useEffect(() => {
     if (!authLoaded || !ready || !hydratedRef.current) return;

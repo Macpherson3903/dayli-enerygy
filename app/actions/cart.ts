@@ -45,10 +45,9 @@ function dedupeLines(lines: CartLine[]): CartLine[] {
   return Array.from(map.values());
 }
 
-async function requireUserId(): Promise<string> {
+async function currentUserId(): Promise<string | null> {
   const { userId } = await auth();
-  if (!userId) throw new Error("Unauthorized");
-  return userId;
+  return userId ?? null;
 }
 
 async function hydrateFromProductOrFallback(
@@ -91,13 +90,15 @@ async function hydrateFromProductOrFallback(
 }
 
 export async function getMyCartAction(): Promise<CartPayload> {
-  const userId = await requireUserId();
+  const userId = await currentUserId();
+  if (!userId) return { lines: [] };
   const cart = await getCartForUser(userId);
   return { lines: dedupeLines(cart?.lines ?? []) };
 }
 
 export async function mergeMyCartAction(lines: CartLine[]): Promise<CartPayload> {
-  const userId = await requireUserId();
+  const userId = await currentUserId();
+  if (!userId) return { lines: dedupeLines(lines) };
   const cart = await getCartForUser(userId);
   const merged = dedupeLines([...(cart?.lines ?? []), ...lines]);
   const nextLines = await replaceCartForUser(userId, merged);
@@ -108,7 +109,8 @@ export async function addMyCartItemAction(
   product: ProductPublic,
   quantity: number
 ): Promise<CartPayload> {
-  const userId = await requireUserId();
+  const userId = await currentUserId();
+  if (!userId) return { lines: [] };
   const base = await hydrateFromProductOrFallback(product);
   if (!base) return getMyCartAction();
   const qty = Number.isInteger(quantity) ? quantity : 1;
@@ -130,7 +132,8 @@ export async function setMyCartQuantityAction(
   productId: string,
   quantity: number
 ): Promise<CartPayload> {
-  const userId = await requireUserId();
+  const userId = await currentUserId();
+  if (!userId) return { lines: [] };
   const cart = await getCartForUser(userId);
   const existing = cart?.lines ?? [];
   if (!existing.some((line) => line.productId === productId)) {
@@ -153,7 +156,8 @@ export async function setMyCartQuantityAction(
 export async function removeMyCartLineAction(
   productId: string
 ): Promise<CartPayload> {
-  const userId = await requireUserId();
+  const userId = await currentUserId();
+  if (!userId) return { lines: [] };
   const cart = await getCartForUser(userId);
   const next = (cart?.lines ?? []).filter((line) => line.productId !== productId);
   const nextLines = await replaceCartForUser(userId, next);
@@ -161,6 +165,7 @@ export async function removeMyCartLineAction(
 }
 
 export async function clearMyCartAction(): Promise<void> {
-  const userId = await requireUserId();
+  const userId = await currentUserId();
+  if (!userId) return;
   await clearCartForUser(userId);
 }
