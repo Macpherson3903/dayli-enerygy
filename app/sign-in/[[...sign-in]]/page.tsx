@@ -11,6 +11,8 @@ export default function SignInPage() {
       </p>
       <SignIn
         signUpUrl="/sign-up"
+        forceRedirectUrl="/dashboard"
+        fallbackRedirectUrl="/dashboard"
         appearance={{
           elements: {
             formButtonPrimary: "bg-brand-700 hover:bg-brand-900",

@@ -1,6 +1,7 @@
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { getAppRole } from "@/lib/auth/roles";
+import { ensureCurrentUserInDb } from "@/lib/auth/sync-user";
 
 export const dynamic = "force-dynamic";
 
@@ -10,6 +11,7 @@ export default async function DashboardPage() {
     redirect("/sign-in?redirect_url=/dashboard");
   }
 
+  await ensureCurrentUserInDb();
   const role = await getAppRole();
 
   if (role === "sales_admin") {

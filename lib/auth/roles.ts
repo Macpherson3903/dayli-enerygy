@@ -7,7 +7,7 @@ const VALID_ROLES: AppRole[] = [
   "inventory_admin",
 ];
 
-function normalizeRole(v: unknown): AppRole {
+export function normalizeRole(v: unknown): AppRole {
   if (typeof v === "string" && VALID_ROLES.includes(v as AppRole)) {
     return v as AppRole;
   }

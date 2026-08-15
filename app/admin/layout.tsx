@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { getAppRole } from "@/lib/auth/roles";
+import { ensureCurrentUserInDb } from "@/lib/auth/sync-user";
 import { AdminShell } from "@/components/admin/AdminShell";
 import { getSalesNavBadgeCounts } from "@/lib/admin/sales-nav-badges";
 import type { ReactNode } from "react";
@@ -10,6 +11,7 @@ export default async function AdminLayout({
 }: {
   children: ReactNode;
 }) {
+  await ensureCurrentUserInDb();
   const role: AppRole = await getAppRole();
   if (role !== "sales_admin" && role !== "inventory_admin") {
     redirect("/account");

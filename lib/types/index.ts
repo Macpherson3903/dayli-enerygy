@@ -271,3 +271,17 @@ export type CartDoc = {
   createdAt: Date;
   updatedAt: Date;
 };
+
+/** Local copy of a Clerk user for inspection in MongoDB. */
+export type UserDoc = {
+  _id: ObjectId;
+  clerkId: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  role: AppRole;
+  lastSignInAt: Date | null;
+  /** Clerk account created time. */
+  createdAt: Date;
+  updatedAt: Date;
+};

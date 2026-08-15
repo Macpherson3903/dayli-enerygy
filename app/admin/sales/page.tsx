@@ -17,34 +17,34 @@ import { TrendLineChart } from "@/components/charts/TrendLineChart";
 import { BreakdownBarChart } from "@/components/charts/BreakdownBarChart";
 import { DistributionPieChart } from "@/components/charts/DistributionPieChart";
 import { CategoricalLineChart } from "@/components/charts/CategoricalLineChart";
-import { clerkClient } from "@clerk/nextjs/server";
+import { backfillUsersFromClerkIfEmpty } from "@/lib/auth/sync-user";
+import { countUsers, listUsers, userDisplayName } from "@/lib/db/users";
 
 export const dynamic = "force-dynamic";
 
-function formatTimestamp(value: number | null | undefined): string {
+function formatTimestamp(value: Date | null | undefined): string {
   if (!value) return "N/A";
-  return new Date(value).toLocaleString();
+  return value.toLocaleString();
 }
 
 export default async function SalesAdminPage() {
+  const backfill = backfillUsersFromClerkIfEmpty();
   const [orders, installationBookings, productInquiries] = await Promise.all([
     listAllOrders(),
     listAllInstallationBookings(),
     listProductAgentInquiries(),
   ]);
+  await backfill;
+  const [recentUsers, totalUsers] = await Promise.all([
+    listUsers(5),
+    countUsers(),
+  ]);
 
   const salesCharts = buildSalesChartMetrics(orders, installationBookings);
-  const client = await clerkClient();
-  const userList = await client.users.getUserList({ limit: 100 });
-  const totalUsers = userList.totalCount;
   const totalOrders = orders.length;
   const totalBookings = installationBookings.length;
   const recentOrders = orders.slice(0, 5);
   const recentBookings = installationBookings.slice(0, 5);
-  const recentUsers = userList.data
-    .slice()
-    .sort((a, b) => (b.createdAt ?? 0) - (a.createdAt ?? 0))
-    .slice(0, 5);
 
   const newOrdersCount = orders.filter((o) => o.status === "new").length;
   const newBookingsCount = installationBookings.filter((b) => b.status === "new").length;
@@ -288,21 +288,17 @@ export default async function SalesAdminPage() {
               {recentUsers.length === 0 ? (
                 <tr>
                   <td colSpan={3} className="px-4 py-6 text-gray-500">
-                    No users in the loaded sample.
+                    No users in the database yet.
                   </td>
                 </tr>
               ) : (
                 recentUsers.map((u) => (
                   <tr
-                    key={u.id}
+                    key={u.clerkId}
                     className="border-b border-gray-100 last:border-0"
                   >
-                    <td className="px-4 py-2">
-                      {`${u.firstName ?? ""} ${u.lastName ?? ""}`.trim() || "N/A"}
-                    </td>
-                    <td className="px-4 py-2">
-                      {u.emailAddresses[0]?.emailAddress ?? "N/A"}
-                    </td>
+                    <td className="px-4 py-2">{userDisplayName(u)}</td>
+                    <td className="px-4 py-2">{u.email || "N/A"}</td>
                     <td className="px-4 py-2">{formatTimestamp(u.createdAt)}</td>
                   </tr>
                 ))
@@ -312,7 +308,7 @@ export default async function SalesAdminPage() {
         </div>
         {totalUsers > recentUsers.length ? (
           <p className="mt-2 text-xs text-gray-500">
-            Showing {recentUsers.length} of {totalUsers} users (Clerk). Open{" "}
+            Showing {recentUsers.length} of {totalUsers} users (MongoDB). Open{" "}
             <Link href="/admin/sales/users" className="text-brand-700 hover:underline">
               Users
             </Link>{" "}
