@@ -1,18 +1,16 @@
 import { getProductsForSalesView } from "@/lib/db/products";
-import { listSizingCalculations } from "@/lib/db/sizing-calculations";
 import { getQuotationAppliancesPublic } from "@/lib/db/quotation-appliances";
 import { priceBoundsFromDoc } from "@/lib/pricing";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { SystemSizingTool } from "@/components/admin/SystemSizingTool";
-import { SavedSizingList } from "@/components/admin/SavedSizingList";
 import type { SizingCatalogItem } from "@/lib/solar-sizing";
+import Link from "next/link";
 
 export const dynamic = "force-dynamic";
 
 export default async function SalesSystemSizingPage() {
-  const [products, saved, appliances] = await Promise.all([
+  const [products, appliances] = await Promise.all([
     getProductsForSalesView(),
-    listSizingCalculations(),
     getQuotationAppliancesPublic(),
   ]);
   const catalog: SizingCatalogItem[] = products.map((p) => {
@@ -36,10 +34,17 @@ export default async function SalesSystemSizingPage() {
     <div className="space-y-10">
       <PageHeader
         title="System sizing"
-        description="Enter the customer’s appliances and system voltage. Totals size the inverter, battery bank, and solar array, then match products from the catalog (watt, kVA, and Ah ratings in the product name or description). Save stores the worksheet in MongoDB."
+        description="Enter appliances, size the system, then Recommend catalog items (or add a manual product) for the print document. Save stores the worksheet and selected products."
+        actions={
+          <Link
+            href="/admin/sales/saved-sizings"
+            className="text-sm font-medium text-brand-700 hover:underline"
+          >
+            Saved calculations
+          </Link>
+        }
       />
       <SystemSizingTool catalog={catalog} appliances={appliances} />
-      <SavedSizingList rows={saved} />
     </div>
   );
 }

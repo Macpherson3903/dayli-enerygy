@@ -352,9 +352,10 @@ export const sizingCalculationInputSchema = z.object({
     .array(
       z.object({
         role: z.enum(["panels", "inverter", "batteries"]),
+        source: z.enum(["catalog", "manual"]).optional(),
         productId: z.string().trim().min(1).max(80),
         productName: z.string().trim().min(1).max(300),
-        productSlug: z.string().trim().min(1).max(200),
+        productSlug: z.string().trim().max(200),
         quantity: z.number().int().positive().max(10_000),
         unitLabel: z.string().trim().max(120),
         coverageLabel: z.string().trim().max(400),
@@ -362,7 +363,7 @@ export const sizingCalculationInputSchema = z.object({
         note: z.string().trim().max(400).optional(),
       })
     )
-    .max(12),
+    .max(40),
 });
 export type SizingCalculationInput = z.infer<typeof sizingCalculationInputSchema>;
 

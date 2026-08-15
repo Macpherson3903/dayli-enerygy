@@ -288,6 +288,7 @@ export type UserDoc = {
 
 export type SizingRecommendationSnapshot = {
   role: "panels" | "inverter" | "batteries";
+  source?: "catalog" | "manual";
   productId: string;
   productName: string;
   productSlug: string;

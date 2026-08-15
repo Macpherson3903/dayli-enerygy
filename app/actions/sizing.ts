@@ -37,7 +37,9 @@ export async function saveSizingCalculationAction(
 
   const created = await createSizingCalculation(parsed.data, userId);
   revalidatePath("/admin/sales/sizing");
+  revalidatePath("/admin/sales/saved-sizings");
   revalidatePath(`/admin/sales/sizing/${created._id.toString()}`);
+  revalidatePath(`/admin/sales/saved-sizings/${created._id.toString()}`);
   return {
     ok: true,
     id: created._id.toString(),

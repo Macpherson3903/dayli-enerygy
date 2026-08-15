@@ -165,6 +165,15 @@ export function SystemSizingTool({
   const { showStatusMessage } = useStatusMessage();
   const [saving, setSaving] = useState(false);
   const [printing, setPrinting] = useState(false);
+  const [selectedForPrint, setSelectedForPrint] = useState<
+    SizingRecommendationSnapshot[]
+  >([]);
+  const [manualRole, setManualRole] =
+    useState<SizingRecommendationSnapshot["role"]>("panels");
+  const [manualName, setManualName] = useState("");
+  const [manualQty, setManualQty] = useState("1");
+  const [manualUnit, setManualUnit] = useState("pcs");
+  const [manualDetails, setManualDetails] = useState("");
 
   function snapshotRec(
     role: SizingRecommendationSnapshot["role"],
@@ -173,6 +182,7 @@ export function SystemSizingTool({
     if (!rec) return null;
     return {
       role,
+      source: "catalog",
       productId: rec.product.id,
       productName: rec.product.name,
       productSlug: rec.product.slug,
@@ -182,6 +192,42 @@ export function SystemSizingTool({
       priceRange: rec.priceRange,
       note: rec.note,
     };
+  }
+
+  function addToPrintList(item: SizingRecommendationSnapshot) {
+    setSelectedForPrint((prev) => {
+      if (prev.some((p) => p.productId === item.productId)) return prev;
+      return [...prev, item];
+    });
+    showStatusMessage(`${item.productName} added to the print list.`, "success");
+  }
+
+  function removeFromPrintList(productId: string) {
+    setSelectedForPrint((prev) => prev.filter((p) => p.productId !== productId));
+  }
+
+  function addManualRecommendation() {
+    const name = manualName.trim();
+    const qty = Math.max(1, Math.round(parseDecimalInput(manualQty, { min: 1, max: 10_000 })));
+    if (!name) {
+      showStatusMessage("Enter a product name.", "error");
+      return;
+    }
+    addToPrintList({
+      role: manualRole,
+      source: "manual",
+      productId: `manual:${Date.now().toString(36)}`,
+      productName: name,
+      productSlug: "manual",
+      quantity: qty,
+      unitLabel: manualUnit.trim() || "pcs",
+      coverageLabel: manualDetails.trim(),
+      priceRange: "",
+      note: "Manual recommendation",
+    });
+    setManualName("");
+    setManualQty("1");
+    setManualDetails("");
   }
 
   function addMissingAppliance() {
@@ -245,12 +291,6 @@ export function SystemSizingTool({
     const depthOfDischargeN =
       parseDecimalInput(depthOfDischarge, { min: 0.3, max: 1 }) || 0.8;
 
-    const recommendations = [
-      snapshotRec("panels", recs.panels),
-      snapshotRec("inverter", recs.inverter),
-      snapshotRec("batteries", recs.batteries),
-    ].filter((r): r is SizingRecommendationSnapshot => r != null);
-
     setSaving(true);
     afterNextPaint(async () => {
       try {
@@ -277,7 +317,7 @@ export function SystemSizingTool({
             dailyEnergyWh: totals.dailyEnergy,
           },
           result: sizing,
-          recommendations,
+          recommendations: selectedForPrint,
         });
         if (result.error) {
           showStatusMessage(result.error, "error");
@@ -558,20 +598,173 @@ export function SystemSizingTool({
       </div>
 
       <Card className="p-4 sm:p-6">
-        <h2 className="text-sm font-semibold text-gray-900">Catalog recommendations</h2>
+        <h2 className="text-sm font-semibold text-gray-900">Recommended for this customer</h2>
+        {selectedForPrint.length === 0 ? (
+          <p className="mt-2 text-sm text-gray-600">
+            Nothing on the print list yet. Use Recommend on a catalog match, or add a product
+            manually below.
+          </p>
+        ) : (
+          <ul className="mt-3 divide-y divide-gray-100" role="list">
+            {selectedForPrint.map((item) => (
+              <li key={item.productId} className="flex flex-wrap items-start justify-between gap-2 py-3">
+                <div>
+                  <p className="text-xs uppercase tracking-wide text-gray-500">
+                    {item.role}
+                    {item.source === "manual" ? " · manual" : ""}
+                  </p>
+                  <p className="font-medium text-gray-900">{item.productName}</p>
+                  <p className="text-sm text-gray-700">
+                    Qty {item.quantity} · {item.unitLabel}
+                  </p>
+                  {item.coverageLabel ? (
+                    <p className="text-sm text-gray-600">{item.coverageLabel}</p>
+                  ) : null}
+                  {item.priceRange ? (
+                    <p className="text-sm text-gray-600">{item.priceRange}</p>
+                  ) : null}
+                </div>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="print:hidden no-print"
+                  onClick={() => removeFromPrintList(item.productId)}
+                >
+                  Remove
+                </Button>
+              </li>
+            ))}
+          </ul>
+        )}
+      </Card>
+      </div>
+
+      <Card className="p-4 sm:p-6 print:hidden no-print">
+        <h2 className="text-sm font-semibold text-gray-900">Catalog matches</h2>
+        <p className="mt-1 text-sm text-gray-600">
+          These are suggestions from inventory. Click Recommend to put a product on the print
+          document.
+        </p>
         {!hasLoad ? (
           <p className="mt-2 text-sm text-gray-600">
             Enter appliance quantities to size the system and match products in stock.
           </p>
         ) : (
           <div className="mt-4 grid gap-4 lg:grid-cols-3">
-            <RecoCard title="Solar panels" rec={recs.panels} empty="No solar products with a watt rating in the catalog." />
-            <RecoCard title="Inverter" rec={recs.inverter} empty="No inverters with a kVA rating in the catalog." />
-            <RecoCard title="Batteries" rec={recs.batteries} empty="No batteries with an Ah rating that fit this voltage." />
+            <RecoCard
+              title="Solar panels"
+              rec={recs.panels}
+              empty="No solar products with a watt rating in the catalog."
+              recommended={
+                recs.panels
+                  ? selectedForPrint.some((s) => s.productId === recs.panels!.product.id)
+                  : false
+              }
+              onRecommend={() => {
+                const snap = snapshotRec("panels", recs.panels);
+                if (snap) addToPrintList(snap);
+              }}
+            />
+            <RecoCard
+              title="Inverter"
+              rec={recs.inverter}
+              empty="No inverters with a kVA rating in the catalog."
+              recommended={
+                recs.inverter
+                  ? selectedForPrint.some((s) => s.productId === recs.inverter!.product.id)
+                  : false
+              }
+              onRecommend={() => {
+                const snap = snapshotRec("inverter", recs.inverter);
+                if (snap) addToPrintList(snap);
+              }}
+            />
+            <RecoCard
+              title="Batteries"
+              rec={recs.batteries}
+              empty="No batteries with an Ah rating that fit this voltage."
+              recommended={
+                recs.batteries
+                  ? selectedForPrint.some((s) => s.productId === recs.batteries!.product.id)
+                  : false
+              }
+              onRecommend={() => {
+                const snap = snapshotRec("batteries", recs.batteries);
+                if (snap) addToPrintList(snap);
+              }}
+            />
           </div>
         )}
       </Card>
-      </div>
+
+      <Card className="p-4 sm:p-6 print:hidden no-print">
+        <h2 className="text-sm font-semibold text-gray-900">Manual product</h2>
+        <p className="mt-1 text-sm text-gray-600">
+          Use this when inventory has no match, or you want to specify panels / equipment not in
+          the catalog.
+        </p>
+        <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          <label className="block text-sm">
+            <span className="text-gray-700">Type</span>
+            <select
+              value={manualRole}
+              onChange={(e) =>
+                setManualRole(e.target.value as SizingRecommendationSnapshot["role"])
+              }
+              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-200"
+            >
+              <option value="panels">Solar panels</option>
+              <option value="inverter">Inverter</option>
+              <option value="batteries">Batteries</option>
+            </select>
+          </label>
+          <label className="block text-sm sm:col-span-2">
+            <span className="text-gray-700">Product name</span>
+            <input
+              type="text"
+              value={manualName}
+              onChange={(e) => setManualName(e.target.value)}
+              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-200"
+            />
+          </label>
+          <label className="block text-sm">
+            <span className="text-gray-700">Quantity</span>
+            <input
+              type="text"
+              inputMode="numeric"
+              value={manualQty}
+              onChange={(e) => {
+                const v = e.target.value;
+                if (v === "" || DECIMAL_INPUT_RE.test(v)) setManualQty(v);
+              }}
+              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-200"
+            />
+          </label>
+          <label className="block text-sm">
+            <span className="text-gray-700">Unit (e.g. panels)</span>
+            <input
+              type="text"
+              value={manualUnit}
+              onChange={(e) => setManualUnit(e.target.value)}
+              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-200"
+            />
+          </label>
+          <label className="block text-sm sm:col-span-2 lg:col-span-3">
+            <span className="text-gray-700">Details</span>
+            <input
+              type="text"
+              value={manualDetails}
+              onChange={(e) => setManualDetails(e.target.value)}
+              placeholder="Wattage, brand, notes"
+              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-200"
+            />
+          </label>
+        </div>
+        <Button type="button" className="mt-4" onClick={addManualRecommendation}>
+          Add to print list
+        </Button>
+      </Card>
     </div>
   );
 }
@@ -616,10 +809,14 @@ function RecoCard({
   title,
   rec,
   empty,
+  recommended,
+  onRecommend,
 }: {
   title: string;
   rec: ReturnType<typeof recommendSizingProducts>["panels"];
   empty: string;
+  recommended: boolean;
+  onRecommend: () => void;
 }) {
   if (!rec) {
     return (
@@ -640,6 +837,15 @@ function RecoCard({
       <p className="mt-1 text-sm text-gray-600">{rec.priceRange}</p>
       <p className="mt-1 text-xs text-gray-500">Stock: {rec.product.stock}</p>
       {rec.note ? <p className="mt-2 text-xs text-amber-800">{rec.note}</p> : null}
+      <Button
+        type="button"
+        size="sm"
+        className="mt-3"
+        disabled={recommended}
+        onClick={onRecommend}
+      >
+        {recommended ? "Added" : "Recommend"}
+      </Button>
     </div>
   );
 }

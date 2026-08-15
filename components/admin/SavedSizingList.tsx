@@ -22,7 +22,7 @@ export function SavedSizingList({ rows }: { rows: SizingCalculationDoc[] }) {
                   </p>
                 </div>
                 <Link
-                  href={`/admin/sales/sizing/${row._id.toString()}`}
+                  href={`/admin/sales/saved-sizings/${row._id.toString()}`}
                   className="text-sm font-medium text-brand-700 hover:underline"
                 >
                   View

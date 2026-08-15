@@ -8,7 +8,6 @@ import type { SalesNavBadgeCounts } from "@/lib/admin/sales-nav-badges";
 import { clsx } from "clsx";
 import { ClerkLoaded, UserButton } from "@clerk/nextjs";
 import {
-  Package,
   ClipboardList,
   LayoutDashboard,
   ShoppingBag,
@@ -19,49 +18,155 @@ import {
   Users,
   MessageCircle,
   Calculator,
+  FileText,
   List,
+  type LucideIcon,
 } from "lucide-react";
 
-type Item = {
+type NavLink = {
   href: string;
   label: string;
-  roles: AppRole[];
-  icon: typeof Package;
-  children?: Array<{ href: string; label: string }>;
+  icon: LucideIcon;
+  badge?: keyof SalesNavBadgeCounts;
 };
 
-const items: Item[] = [
+type NavSection = {
+  label: string;
+  links: NavLink[];
+};
+
+type NavArea = {
+  label: string;
+  roles: AppRole[];
+  prefix: string;
+  home: string;
+  sections: NavSection[];
+};
+
+const areas: NavArea[] = [
   {
-    href: "/admin/sales",
     label: "Sales",
     roles: ["sales_admin"],
-    icon: ClipboardList,
-    children: [
-      { href: "/admin/sales", label: "Dashboard" },
-      { href: "/admin/sales/orders", label: "Orders" },
-      { href: "/admin/sales/bookings", label: "Bookings" },
-      { href: "/admin/sales/product-inquiries", label: "Product inquiries" },
-      { href: "/admin/sales/sizing", label: "System sizing" },
-      { href: "/admin/sales/appliance-sheet", label: "Appliance sheet" },
-      { href: "/admin/sales/users", label: "Users" },
+    prefix: "/admin/sales",
+    home: "/admin/sales",
+    sections: [
+      {
+        label: "Overview",
+        links: [
+          { href: "/admin/sales", label: "Dashboard", icon: LayoutDashboard },
+        ],
+      },
+      {
+        label: "Customers",
+        links: [
+          {
+            href: "/admin/sales/orders",
+            label: "Orders",
+            icon: ClipboardList,
+            badge: "newOrders",
+          },
+          {
+            href: "/admin/sales/bookings",
+            label: "Bookings",
+            icon: ClipboardList,
+            badge: "newBookings",
+          },
+          {
+            href: "/admin/sales/product-inquiries",
+            label: "Product inquiries",
+            icon: MessageCircle,
+            badge: "newProductInquiries",
+          },
+        ],
+      },
+      {
+        label: "Sizing",
+        links: [
+          { href: "/admin/sales/sizing", label: "System sizing", icon: Calculator },
+          {
+            href: "/admin/sales/saved-sizings",
+            label: "Saved calculations",
+            icon: FileText,
+          },
+          {
+            href: "/admin/sales/appliance-sheet",
+            label: "Appliance sheet",
+            icon: List,
+          },
+        ],
+      },
+      {
+        label: "Directory",
+        links: [
+          { href: "/admin/sales/catalog", label: "Catalog", icon: ShoppingBag },
+          { href: "/admin/sales/users", label: "Users", icon: Users },
+        ],
+      },
     ],
   },
-  { href: "/admin/sales/catalog", label: "Catalog (read-only)", roles: ["sales_admin"], icon: ShoppingBag },
   {
-    href: "/admin/inventory/dashboard",
     label: "Inventory",
     roles: ["inventory_admin"],
-    icon: Package,
-    children: [
-      { href: "/admin/inventory/dashboard", label: "Dashboard" },
-      { href: "/admin/inventory/overview", label: "Overview" },
-      { href: "/admin/inventory/packages", label: "Packages" },
-      { href: "/admin/inventory/packages/add", label: "Add package" },
-      { href: "/admin/inventory/add", label: "Add product" },
-      { href: "/admin/inventory/categories", label: "Categories" },
+    prefix: "/admin/inventory",
+    home: "/admin/inventory/dashboard",
+    sections: [
+      {
+        label: "Overview",
+        links: [
+          {
+            href: "/admin/inventory/dashboard",
+            label: "Dashboard",
+            icon: LayoutDashboard,
+          },
+          {
+            href: "/admin/inventory/overview",
+            label: "Stock overview",
+            icon: Layers3,
+          },
+        ],
+      },
+      {
+        label: "Products",
+        links: [
+          { href: "/admin/inventory/add", label: "Add product", icon: PlusCircle },
+        ],
+      },
+      {
+        label: "Packages",
+        links: [
+          { href: "/admin/inventory/packages", label: "Packages", icon: Boxes },
+          {
+            href: "/admin/inventory/packages/add",
+            label: "Add package",
+            icon: PlusCircle,
+          },
+        ],
+      },
+      {
+        label: "Setup",
+        links: [
+          {
+            href: "/admin/inventory/categories",
+            label: "Categories",
+            icon: FolderTree,
+          },
+        ],
+      },
     ],
   },
 ];
+
+function isLinkActive(path: string, href: string, home: string): boolean {
+  if (href === home) return path === href;
+  if (href === "/admin/inventory/packages") {
+    return (
+      path === href ||
+      (path.startsWith(`${href}/`) &&
+        !path.startsWith("/admin/inventory/packages/add"))
+    );
+  }
+  return path === href || path.startsWith(`${href}/`);
+}
 
 function NavAttentionBadge({
   count,
@@ -93,12 +198,11 @@ export function AdminShell({
   children,
 }: {
   role: AppRole;
-  /** New order / booking counts for sales sidebar (Mongo-backed). */
   salesNavBadges?: SalesNavBadgeCounts;
   children: ReactNode;
 }) {
   const path = usePathname() || "";
-  const visible = items.filter((i) => i.roles.includes(role));
+  const visible = areas.filter((a) => a.roles.includes(role));
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50 print:min-h-0 print:overflow-visible print:bg-white">
@@ -122,120 +226,59 @@ export function AdminShell({
         </div>
       </header>
       <div className="flex-1 max-w-7xl mx-auto w-full px-4 py-6 flex flex-col md:flex-row gap-8 print:max-w-none print:mx-0 print:overflow-visible print:px-4 print:py-2 print:gap-0">
-        <aside className="w-full md:w-56 shrink-0 print:hidden">
-          <nav className="rounded-2xl border border-gray-200 bg-white p-2 space-y-0.5">
-            {visible.map((item) => {
-              const Icon = item.icon;
-              const active = item.children
-                ? item.href.startsWith("/admin/inventory")
-                  ? path.startsWith("/admin/inventory")
-                  : path.startsWith(item.href)
-                : path === item.href || path.startsWith(item.href + "/");
-              const salesAttentionTotal =
-                salesNavBadges && item.href === "/admin/sales"
-                  ? salesNavBadges.newOrders +
-                    salesNavBadges.newBookings +
-                    salesNavBadges.newProductInquiries
-                  : 0;
-              return (
-                <div key={item.href}>
-                  <Link
-                    href={item.href}
-                    className={clsx(
-                      "flex items-center gap-2 rounded-lg px-3 py-2 text-sm",
-                      active
-                        ? "bg-brand-700 text-white"
-                        : "text-gray-700 hover:bg-gray-100"
-                    )}
-                  >
-                    <Icon className="w-4 h-4 shrink-0" />
-                    <span className="flex-1 truncate">{item.label}</span>
-                    {item.href === "/admin/sales" && salesAttentionTotal > 0 ? (
-                      <NavAttentionBadge
-                        count={salesAttentionTotal}
-                        variant={active ? "onDark" : "default"}
-                      />
-                    ) : null}
-                  </Link>
-                  {item.children && active && (
-                    <div className="mt-1 ml-6 space-y-0.5 border-l border-gray-200 pl-3">
-                      {item.children.map((child) => {
-                        const childActive = path === child.href;
-                        const childBadge =
-                          salesNavBadges && child.href.endsWith("/orders")
-                            ? salesNavBadges.newOrders
-                            : salesNavBadges && child.href.endsWith("/bookings")
-                              ? salesNavBadges.newBookings
-                              : salesNavBadges &&
-                                  child.href.endsWith("/product-inquiries")
-                                ? salesNavBadges.newProductInquiries
-                                : salesNavBadges && child.href === "/admin/sales"
-                                  ? salesNavBadges.newOrders +
-                                    salesNavBadges.newBookings +
-                                    salesNavBadges.newProductInquiries
-                                  : 0;
-                        return (
-                          <Link
-                            key={child.href}
-                            href={child.href}
-                            className={clsx(
-                              "flex items-center gap-2 rounded-md px-2 py-1.5 text-xs",
-                              childActive
-                                ? "bg-brand-100 text-brand-800 font-medium"
-                                : "text-gray-600 hover:bg-gray-100"
-                            )}
-                          >
-                            {child.href === "/admin/sales" && (
-                              <LayoutDashboard className="w-3.5 h-3.5" />
-                            )}
-                            {child.href.endsWith("/orders") && (
-                              <ClipboardList className="w-3.5 h-3.5" />
-                            )}
-                            {child.href.endsWith("/bookings") && (
-                              <ClipboardList className="w-3.5 h-3.5" />
-                            )}
-                            {child.href.endsWith("/product-inquiries") && (
-                              <MessageCircle className="w-3.5 h-3.5" />
-                            )}
-                            {child.href.endsWith("/sizing") && (
-                              <Calculator className="w-3.5 h-3.5" />
-                            )}
-                            {child.href.endsWith("/appliance-sheet") && (
-                              <List className="w-3.5 h-3.5" />
-                            )}
-                            {child.href.endsWith("/users") && (
-                              <Users className="w-3.5 h-3.5" />
-                            )}
-                            {child.href.endsWith("/dashboard") && (
-                              <LayoutDashboard className="w-3.5 h-3.5" />
-                            )}
-                            {child.href.endsWith("/overview") && (
-                              <Layers3 className="w-3.5 h-3.5" />
-                            )}
-                            {child.href === "/admin/inventory/packages" && (
-                              <Boxes className="w-3.5 h-3.5" />
-                            )}
-                            {child.href.endsWith("/packages/add") && (
-                              <PlusCircle className="w-3.5 h-3.5" />
-                            )}
-                            {child.href === "/admin/inventory/add" && (
-                              <PlusCircle className="w-3.5 h-3.5" />
-                            )}
-                            {child.href.endsWith("/categories") && (
-                              <FolderTree className="w-3.5 h-3.5" />
-                            )}
-                            <span className="flex-1 truncate">{child.label}</span>
-                            {childBadge > 0 ? (
-                              <NavAttentionBadge count={childBadge} />
-                            ) : null}
-                          </Link>
-                        );
-                      })}
+        <aside className="w-full md:w-60 shrink-0 print:hidden">
+          <nav
+            className="rounded-2xl border border-gray-200 bg-white p-3 space-y-5"
+            aria-label="Admin"
+          >
+            {visible.map((area) => (
+              <div key={area.prefix}>
+                <p className="px-2 text-[11px] font-semibold uppercase tracking-wide text-gray-500">
+                  {area.label}
+                </p>
+                <div className="mt-2 space-y-4">
+                  {area.sections.map((section) => (
+                    <div key={section.label}>
+                      <p className="px-2 mb-1 text-[11px] font-medium text-gray-400">
+                        {section.label}
+                      </p>
+                      <ul className="space-y-0.5" role="list">
+                        {section.links.map((link) => {
+                          const Icon = link.icon;
+                          const active = isLinkActive(path, link.href, area.home);
+                          const badgeCount =
+                            link.badge && salesNavBadges
+                              ? salesNavBadges[link.badge]
+                              : 0;
+                          return (
+                            <li key={link.href}>
+                              <Link
+                                href={link.href}
+                                className={clsx(
+                                  "flex items-center gap-2 rounded-lg px-2.5 py-2 text-sm",
+                                  active
+                                    ? "bg-brand-700 text-white"
+                                    : "text-gray-700 hover:bg-gray-100"
+                                )}
+                              >
+                                <Icon className="w-4 h-4 shrink-0" aria-hidden />
+                                <span className="flex-1 truncate">{link.label}</span>
+                                {badgeCount > 0 ? (
+                                  <NavAttentionBadge
+                                    count={badgeCount}
+                                    variant={active ? "onDark" : "default"}
+                                  />
+                                ) : null}
+                              </Link>
+                            </li>
+                          );
+                        })}
+                      </ul>
                     </div>
-                  )}
+                  ))}
                 </div>
-              );
-            })}
+              </div>
+            ))}
           </nav>
         </aside>
         <div className="flex-1 min-w-0 print:w-full print:min-h-0 print:overflow-visible">
