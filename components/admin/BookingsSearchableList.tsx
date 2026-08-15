@@ -3,8 +3,9 @@
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { Card } from "@/components/ui/Card";
-import { Input } from "@/components/ui/Input";
+import { AdminSearchField } from "@/components/admin/AdminSearchField";
 import { InstallationBookingStatusBadge } from "@/components/ui/StatusBadge";
+import { matchesSearch } from "@/lib/admin/search";
 import type { InstallationBookingStatus } from "@/lib/types";
 
 export type BookingListRow = {
@@ -19,26 +20,15 @@ export type BookingListRow = {
   status: InstallationBookingStatus;
 };
 
-function normalize(s: string): string {
-  return s.trim().toLowerCase();
-}
-
 function rowMatches(query: string, row: BookingListRow): boolean {
-  const terms = normalize(query)
-    .split(/\s+/)
-    .filter(Boolean);
-  if (terms.length === 0) return true;
-  const hay = [
+  return matchesSearch(query, [
     row.bookingNumber,
     row.customerName,
     row.customerEmail,
     row.siteAddress,
     row.city,
     row.state,
-  ]
-    .map(normalize)
-    .join(" ");
-  return terms.every((t) => hay.includes(t));
+  ]);
 }
 
 export function BookingsSearchableList({ rows }: { rows: BookingListRow[] }) {
@@ -51,14 +41,11 @@ export function BookingsSearchableList({ rows }: { rows: BookingListRow[] }) {
 
   return (
     <div className="space-y-4">
-      <Input
+      <AdminSearchField
         label="Search bookings"
-        name="bookingSearch"
-        type="search"
         value={search}
-        onChange={(e) => setSearch(e.target.value)}
+        onChange={setSearch}
         placeholder="Booking number, name, email, or location…"
-        autoComplete="off"
         hint={
           rows.length === 0
             ? undefined

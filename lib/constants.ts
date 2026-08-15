@@ -94,3 +94,13 @@ export function hearAboutUsLabel(value: string | undefined): string | undefined 
   return value;
 }
 
+export const DEFAULT_INVOICE_PAYMENT_TERMS = "Payment before delivery";
+
+export const DEFAULT_INVOICE_WARRANTY =
+  "Manufacturer's warranty: 5 years Battery warranty, 2 years Inverter warranty. One year maintenance warranty if installed by Dayli Energy!";
+
+export const DEFAULT_INVOICE_VALIDITY = "Quote is valid for two weeks";
+
+/** Standard Nigerian VAT rate; sales can override per invoice. */
+export const DEFAULT_INVOICE_VAT_PERCENT = 7.5;
+

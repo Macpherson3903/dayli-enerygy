@@ -395,6 +395,35 @@ export const productAgentInquiryUpdateSchema = z.object({
   status: z.enum(["new", "in_progress", "resolved"]),
   internalNotes: z.string().max(8000),
 });
+export const invoiceLineItemInputSchema = z.object({
+  catalogItemId: z.string().trim().max(80).nullable().optional(),
+  catalogKind: z.enum(["product", "package"]).nullable().optional(),
+  description: z.string().trim().min(1).max(500),
+  quantity: z.number().positive().max(100_000),
+  unitCost: z.number().nonnegative().max(1e12),
+});
+
+export const createInvoiceSchema = z.object({
+  issuedAt: z.string().trim().min(1).max(40),
+  customer: z.object({
+    name: z.string().trim().min(1).max(200),
+    phone: z.string().trim().min(5).max(40),
+    email: z.string().trim().email().max(200),
+    address: z.string().trim().min(3).max(500),
+    city: z.string().trim().min(1).max(120),
+  }),
+  lineItems: z.array(invoiceLineItemInputSchema).min(1).max(80),
+  labour: z.number().nonnegative().max(1e12),
+  transportation: z.number().nonnegative().max(1e12),
+  discount: z.number().nonnegative().max(1e12),
+  vatPercent: z.number().min(0).max(100),
+  paymentTerms: z.string().trim().max(500),
+  warranty: z.string().trim().max(2000),
+  validity: z.string().trim().max(500),
+  accountNumber: z.string().trim().max(80),
+});
+
+export type CreateInvoiceInput = z.infer<typeof createInvoiceSchema>;
 export type InstallationBookingInput = z.infer<typeof installationBookingSchema>;
 export type ProductInput = z.infer<typeof productInputSchema>;
 export type ProductUpdateInput = z.infer<typeof productUpdateInputSchema>;

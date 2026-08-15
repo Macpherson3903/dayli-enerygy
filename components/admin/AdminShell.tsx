@@ -20,6 +20,7 @@ import {
   Calculator,
   FileText,
   List,
+  Receipt,
   type LucideIcon,
 } from "lucide-react";
 
@@ -64,6 +65,11 @@ const areas: NavArea[] = [
             label: "Orders",
             icon: ClipboardList,
             badge: "newOrders",
+          },
+          {
+            href: "/admin/sales/invoices",
+            label: "Invoices",
+            icon: Receipt,
           },
           {
             href: "/admin/sales/bookings",

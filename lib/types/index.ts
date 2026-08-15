@@ -342,3 +342,40 @@ export type QuotationApplianceSheetDoc = {
   createdAt: Date;
   updatedAt: Date;
 };
+
+export type InvoiceLineItem = {
+  catalogItemId: string | null;
+  catalogKind: "product" | "package" | null;
+  description: string;
+  quantity: number;
+  unitCost: number;
+  totalCost: number;
+};
+
+export type InvoiceDoc = {
+  _id: ObjectId;
+  workOrderNumber: string;
+  issuedAt: Date;
+  customer: {
+    name: string;
+    phone: string;
+    email: string;
+    address: string;
+    city: string;
+  };
+  lineItems: InvoiceLineItem[];
+  labour: number;
+  transportation: number;
+  discount: number;
+  vatPercent: number;
+  subtotal: number;
+  vatAmount: number;
+  grandTotal: number;
+  paymentTerms: string;
+  warranty: string;
+  validity: string;
+  accountNumber: string;
+  createdByUserId: string;
+  createdAt: Date;
+  updatedAt: Date;
+};
