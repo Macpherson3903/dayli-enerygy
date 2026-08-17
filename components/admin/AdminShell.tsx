@@ -224,7 +224,7 @@ export function AdminShell({
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50 print:min-h-0 print:overflow-visible print:bg-white">
-      <header className="bg-white border-b border-gray-200 z-20 print:hidden">
+      <header className="sticky top-0 bg-white border-b border-gray-200 z-20 print:hidden">
         <div className="max-w-7xl mx-auto px-4 h-14 flex items-center justify-between">
           <Link
             href="/"
@@ -244,7 +244,7 @@ export function AdminShell({
         </div>
       </header>
       <div className="flex-1 max-w-7xl mx-auto w-full px-4 py-6 flex flex-col md:flex-row gap-8 print:max-w-none print:mx-0 print:overflow-visible print:px-4 print:py-2 print:gap-0">
-        <aside className="w-full md:w-60 shrink-0 print:hidden">
+        <aside className="w-full md:w-60 shrink-0 print:hidden md:sticky md:top-14 md:self-start md:max-h-[calc(100vh-3.5rem)] md:overflow-y-auto">
           <nav
             className="rounded-2xl border border-gray-200 bg-white p-3 space-y-5"
             aria-label="Admin"
