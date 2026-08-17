@@ -587,13 +587,18 @@ export function SystemSizingTool({
         </div>
       </Card>
 
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <Stat label="Inverter target" value={`${formatNumber(sizing.inverterKva, 2)} kVA`} />
         <Stat label="Solar array" value={`${formatNumber(sizing.arrayW, 0)} W`} />
         <Stat
+          label="Battery bank"
+          value={`${formatNumber(sizing.batteryWh / 1000, 2)} kWh`}
+          hint="Usable-adjusted capacity"
+        />
+        <Stat
           label={`Battery at ${systemVoltage} V`}
           value={`${formatNumber(sizing.batteryAh, 0)} Ah`}
-          hint={`${formatNumber(sizing.batteryWh, 0)} Wh usable-adjusted`}
+          hint={`${formatNumber(sizing.batteryWh, 0)} Wh`}
         />
       </div>
 
