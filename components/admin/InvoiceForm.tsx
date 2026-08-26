@@ -192,7 +192,6 @@ export function InvoiceForm({ catalog }: { catalog: InvoiceCatalogPick[] }) {
             label="Email"
             name="email"
             type="email"
-            required
             value={customer.email}
             onChange={(e) => setCustomer((c) => ({ ...c, email: e.target.value }))}
           />

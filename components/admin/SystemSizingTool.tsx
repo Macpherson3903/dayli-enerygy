@@ -536,7 +536,7 @@ export function SystemSizingTool({
         </Button>
       </Card>
 
-      <Card className="p-4 sm:p-6">
+      <Card className="p-4 sm:p-6 print:hidden no-print">
         <h2 className="text-sm font-semibold text-gray-900">System voltage & assumptions</h2>
         <p className="mt-1 text-sm text-gray-600 print:hidden">
           Defaults suit typical Nigerian rooftop installs. Adjust if the site needs more backup or
@@ -604,12 +604,7 @@ export function SystemSizingTool({
 
       <Card className="p-4 sm:p-6">
         <h2 className="text-sm font-semibold text-gray-900">Recommended for this customer</h2>
-        {selectedForPrint.length === 0 ? (
-          <p className="mt-2 text-sm text-gray-600">
-            Nothing on the print list yet. Use Recommend on a catalog match, or add a product
-            manually below.
-          </p>
-        ) : (
+        {selectedForPrint.length > 0 ? (
           <ul className="mt-3 divide-y divide-gray-100" role="list">
             {selectedForPrint.map((item) => (
               <li key={item.productId} className="flex flex-wrap items-start justify-between gap-2 py-3">
@@ -641,7 +636,7 @@ export function SystemSizingTool({
               </li>
             ))}
           </ul>
-        )}
+        ) : null}
       </Card>
       </div>
 

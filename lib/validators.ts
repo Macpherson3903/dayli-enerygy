@@ -408,7 +408,14 @@ export const createInvoiceSchema = z.object({
   customer: z.object({
     name: z.string().trim().min(1).max(200),
     phone: z.string().trim().min(5).max(40),
-    email: z.string().trim().email().max(200),
+    email: z
+      .string()
+      .trim()
+      .max(200)
+      .refine(
+        (s) => s === "" || z.string().email().safeParse(s).success,
+        "Invalid email"
+      ),
     address: z.string().trim().min(3).max(500),
     city: z.string().trim().min(1).max(120),
   }),
