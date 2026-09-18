@@ -89,11 +89,20 @@ export default async function SavedSizingDetailPage({
         </Card>
 
         <div className="grid gap-3 sm:grid-cols-3">
+
+          {/* Inverter Result */}
           <Stat
             label="Inverter target"
             value={`${formatNumber(row.result.inverterKva, 2)} kVA`}
           />
+
+          {/* Solar Array */}
           <Stat label="Solar array" value={`${formatNumber(row.result.arrayW)} W`} />
+
+          {/* Battery Bank */}
+          <Stat label="Battery Bank" value={`${formatNumber(row.result.batteryWh / 1000, 2)} kWh`} />
+
+          {/* Battery voltage */}
           <Stat
             label={`Battery at ${row.result.systemVoltage} V`}
             value={`${formatNumber(row.result.batteryAh)} Ah`}
