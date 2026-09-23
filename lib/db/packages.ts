@@ -3,7 +3,7 @@ import { getDb } from "@/lib/mongodb";
 import type { PackageDoc, ProductPublic } from "@/lib/types";
 import { SEED_PACKAGES, type SeedPackage } from "@/data/seed-packages";
 import type { PackageInput } from "@/lib/validators";
-import { normalizePriceBounds, priceBoundsFromDoc } from "@/lib/pricing";
+import { priceFromDoc } from "@/lib/pricing";
 
 function isMongoUnreachableError(e: unknown): boolean {
   if (!e || typeof e !== "object") return false;
@@ -40,14 +40,14 @@ export type PackageCategoryRow = {
 };
 
 function seedPackageToPublic(s: SeedPackage): ProductPublic {
-  const { priceMin, priceMax } = normalizePriceBounds(s.priceMin, s.priceMax);
+  const { price, promoPrice } = priceFromDoc(s);
   return {
     id: `seed-pkg:${s.slug}`,
     name: s.name,
     slug: s.slug,
     category: s.category,
-    priceMin,
-    priceMax,
+    price,
+    promoPrice,
     description: s.description,
     shortDescription: s.shortDescription,
     image: s.image,
@@ -79,14 +79,14 @@ function packageCategoryOrDefault(p: PackageDoc): string {
 }
 
 function toPublic(p: PackageDoc): ProductPublic {
-  const { priceMin, priceMax } = priceBoundsFromDoc(p);
+  const { price, promoPrice } = priceFromDoc(p);
   return {
     id: p._id.toString(),
     name: p.name,
     slug: p.slug,
     category: packageCategoryOrDefault(p),
-    priceMin,
-    priceMax,
+    price,
+    promoPrice,
     description: p.description,
     shortDescription: p.shortDescription,
     image: p.image,
@@ -129,13 +129,13 @@ export async function seedPackagesIfEmpty() {
   if (n > 0) return;
   const now = new Date();
   const docs = SEED_PACKAGES.map((s) => {
-    const { priceMin, priceMax } = normalizePriceBounds(s.priceMin, s.priceMax);
+    const { price, promoPrice } = priceFromDoc(s);
     return {
     name: s.name,
     slug: s.slug,
     category: s.category.trim().toLowerCase(),
-    priceMin,
-    priceMax,
+    price,
+    promoPrice,
     description: s.description,
     shortDescription: s.shortDescription,
     image: s.image,
@@ -271,16 +271,12 @@ export async function getPackageForPdp(
 export async function createPackage(input: PackageInput) {
   const db = await getDb();
   const now = new Date();
-  const { priceMin, priceMax } = normalizePriceBounds(
-    input.priceMin,
-    input.priceMax
-  );
   const doc: Omit<PackageDoc, "_id"> = {
     name: input.name,
     slug: input.slug,
     category: input.category,
-    priceMin,
-    priceMax,
+    price: input.price,
+    promoPrice: input.promoPrice,
     description: input.description,
     shortDescription: input.shortDescription,
     image: input.image,
@@ -305,9 +301,20 @@ export async function updatePackage(id: string, input: Partial<PackageInput>) {
   Object.keys(patch).forEach((k) => {
     if (patch[k] === undefined) delete patch[k];
   });
+  const unset: Record<string, ""> = {};
+  if ("promoPrice" in input && input.promoPrice === undefined) {
+    unset.promoPrice = "";
+  }
+  if ("price" in input) {
+    unset.priceMin = "";
+    unset.priceMax = "";
+  }
   await db
     .collection(COL)
-    .updateOne({ _id: new ObjectId(id) }, { $set: patch });
+    .updateOne(
+      { _id: new ObjectId(id) },
+      { $set: patch, ...(Object.keys(unset).length ? { $unset: unset } : {}) }
+    );
 }
 
 export async function deletePackage(id: string) {

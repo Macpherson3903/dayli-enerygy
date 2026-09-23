@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 import { Input } from "@/components/ui/Input";
 import { clsx } from "clsx";
-import { formatPriceRange } from "@/lib/pricing";
+import { formatCatalogPrice } from "@/lib/pricing";
 
 export type InventoryCatalogRow = {
   id: string;
@@ -13,8 +13,8 @@ export type InventoryCatalogRow = {
   category: string;
   brand?: string;
   slug: string;
-  priceMin: number;
-  priceMax: number;
+  price: number;
+  promoPrice?: number;
   stock: number;
   active: boolean;
   featured?: boolean;
@@ -172,10 +172,7 @@ export function InventoryCatalogOverview({ rows }: { rows: InventoryCatalogRow[]
                     {row.kind === "product" ? row.brand ?? "—" : "—"}
                   </td>
                   <td className="px-4 py-3 font-medium text-gray-900 whitespace-nowrap">
-                    {formatPriceRange({
-                      priceMin: row.priceMin,
-                      priceMax: row.priceMax,
-                    })}
+                    {formatCatalogPrice(row)}
                   </td>
                   <td className="px-4 py-3">
                     <span

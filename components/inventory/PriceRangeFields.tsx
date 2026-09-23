@@ -1,31 +1,30 @@
 import { Input } from "@/components/ui/Input";
 
-export function PriceRangeFields({
-  priceMin,
-  priceMax,
+export function PriceFields({
+  price,
+  promoPrice,
 }: {
-  priceMin?: number;
-  priceMax?: number;
+  price?: number;
+  promoPrice?: number;
 }) {
   return (
     <div className="grid gap-3 sm:grid-cols-2">
       <Input
-        name="priceMin"
-        label="Minimum price (₦)"
+        name="price"
+        label="Price (₦)"
         type="number"
         min={0}
         step={1}
         required
-        defaultValue={priceMin}
+        defaultValue={price}
       />
       <Input
-        name="priceMax"
-        label="Maximum price (₦)"
+        name="promoPrice"
+        label="Promo price (₦, optional)"
         type="number"
         min={0}
         step={1}
-        required
-        defaultValue={priceMax}
+        defaultValue={promoPrice ?? ""}
       />
     </div>
   );

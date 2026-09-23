@@ -1,4 +1,4 @@
-import { formatPriceRange } from "@/lib/pricing";
+import { formatCatalogPrice } from "@/lib/pricing";
 import {
   batterySpecFromCatalog,
   inverterSpecFromCatalog,
@@ -13,8 +13,8 @@ export type SizingCatalogItem = {
   name: string;
   slug: string;
   category: string;
-  priceMin: number;
-  priceMax: number;
+  price: number;
+  promoPrice?: number;
   stock: number;
   active: boolean;
   shortDescription?: string;
@@ -139,7 +139,7 @@ function recommendPanels(
     quantity: best.quantity,
     unitLabel: `${best.spec.watts} W each`,
     coverageLabel: `${best.totalW.toLocaleString()} W array (${best.quantity} × ${best.spec.watts} W)`,
-    priceRange: formatPriceRange(best.product),
+    priceRange: formatCatalogPrice(best.product),
     note,
   };
 }
@@ -181,7 +181,7 @@ function recommendInverter(
     quantity: 1,
     unitLabel: `${kva} kVA`,
     coverageLabel: `${kva} kVA inverter for ${inverterW.toLocaleString()} W target`,
-    priceRange: formatPriceRange(best.product),
+    priceRange: formatCatalogPrice(best.product),
     note,
   };
 }
@@ -230,7 +230,7 @@ function recommendBatteries(
     quantity: best.quantity,
     unitLabel: `${best.spec.ah} Ah${best.spec.volts ? ` / ${best.spec.volts} V` : ""}`,
     coverageLabel: `${best.totalAhAtSystemV.toLocaleString()} Ah at ${sizing.systemVoltage} V (${best.totalWh.toLocaleString()} Wh bank)`,
-    priceRange: formatPriceRange(best.product),
+    priceRange: formatCatalogPrice(best.product),
     note: noteParts.join(" "),
   };
 }

@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { getInventoryCategories, getProductById } from "@/lib/db/products";
-import { priceBoundsFromDoc } from "@/lib/pricing";
+import { priceFromDoc } from "@/lib/pricing";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { ProductEditForm } from "@/components/inventory/ProductEditForm";
 import { DeleteProductButton } from "@/components/inventory/DeleteProductButton";
@@ -21,7 +21,7 @@ export default async function EditProductPage({
   if (!p) {
     notFound();
   }
-  const { priceMin, priceMax } = priceBoundsFromDoc(p);
+  const { price, promoPrice } = priceFromDoc(p);
   return (
     <div className="max-w-2xl space-y-4">
       <PageHeader
@@ -34,8 +34,8 @@ export default async function EditProductPage({
           name: p.name,
           category: p.category,
           brand: p.brand,
-          priceMin,
-          priceMax,
+          price,
+          promoPrice,
           description: p.description ?? "",
           shortDescription: p.shortDescription,
           image: p.image ?? "",

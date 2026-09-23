@@ -7,7 +7,7 @@ import { motion } from "framer-motion";
 import { useAuth, SignInButton } from "@clerk/nextjs";
 import { useCart } from "@/context/CartContext";
 import type { ProductPublic } from "@/lib/types";
-import { formatPriceRange } from "@/lib/pricing";
+import { formatCatalogPrice, formatNaira } from "@/lib/pricing";
 import { Button } from "@/components/ui/Button";
 import { ProductAgentModal } from "@/components/shop/ProductAgentModal";
 
@@ -66,20 +66,22 @@ export default function ProductDetailClient({
             <h1 className="text-2xl md:text-3xl font-bold text-gray-900">
               {product.name}
             </h1>
-            <p className="text-2xl font-bold text-green-700 mt-4">
-              {formatPriceRange({
-                priceMin: product.priceMin,
-                priceMax: product.priceMax,
-              })}
-            </p>
-            <p className="text-sm text-gray-500 mt-1">
-              {inStock ? "In stock" : "Currently out of stock"}
-              {product.priceMin !== product.priceMax ? (
-                <span className="block">
-                  Cart uses the starting price (₦
-                  {product.priceMin.toLocaleString()}); final quote may vary.
+            <div className="mt-4 flex items-baseline gap-3">
+              {product.promoPrice != null ? (
+                <span className="text-lg text-gray-400 line-through">
+                  {formatNaira(product.price)}
                 </span>
               ) : null}
+              <p className="text-2xl font-bold text-green-700">
+                {formatCatalogPrice(product)}
+              </p>
+              {product.promoPrice != null ? (
+                <span className="rounded-full bg-red-100 px-2.5 py-1 text-xs font-bold uppercase tracking-wide text-red-700">Promo</span>
+              ) : null}
+            </div>
+            <p className="text-sm text-gray-500 mt-1">
+              {inStock ? "In stock" : "Currently out of stock"}
+              {product.promoPrice != null ? "Promo price applied in cart." : null}
             </p>
             <p className="text-gray-600 mt-4 leading-relaxed">
               {product.description}
@@ -201,10 +203,7 @@ export default function ProductDetailClient({
                   <div className="min-w-0 flex-1">
                     <p className="font-medium line-clamp-2">{item.name}</p>
                     <p className="mt-1 text-sm text-gray-500">
-                      {formatPriceRange({
-                        priceMin: item.priceMin,
-                        priceMax: item.priceMax,
-                      })}
+                      {formatCatalogPrice(item)}
                     </p>
                   </div>
                   <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-lg bg-gray-100">

@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { clsx } from "clsx";
 import type { ProductPublic } from "@/lib/types";
-import { formatPriceRange } from "@/lib/pricing";
+import { formatCatalogPrice, formatNaira } from "@/lib/pricing";
 
 export default function ProductCard({
   product,
@@ -55,6 +55,11 @@ export default function ProductCard({
                         {product.itemKind === "package" ? "Package" : product.category}
                     </span>
                 )}
+                {product.promoPrice != null && (
+                    <span className="absolute right-3 top-3 rounded-full bg-red-600 px-2.5 py-1 text-xs font-bold uppercase tracking-wide text-white shadow-sm">
+                        Promo
+                    </span>
+                )}
             </div>
 
             {/* Content */}
@@ -73,13 +78,17 @@ export default function ProductCard({
 
                 {/* Footer */}
                 <div className="mt-4 flex items-center justify-between">
-                    {(product?.priceMin != null || product?.priceMax != null) && (
-                        <p className="font-bold text-green-700">
-                            {formatPriceRange({
-                              priceMin: product.priceMin,
-                              priceMax: product.priceMax,
-                            })}
-                        </p>
+                    {product?.price != null && (
+                        <div className="flex items-baseline gap-2">
+                            {product.promoPrice != null && (
+                                <span className="text-sm text-gray-400 line-through">
+                                    {formatNaira(product.price)}
+                                </span>
+                            )}
+                            <p className="font-bold text-green-700">
+                                {formatCatalogPrice(product)}
+                            </p>
+                        </div>
                     )}
 
                     <span className="text-sm font-medium text-green-600 group-hover:underline">

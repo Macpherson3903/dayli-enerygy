@@ -37,8 +37,9 @@ function formToProductInput(formData: FormData, forUpdate: boolean) {
   const name = String(formData.get("name") ?? "");
   const category = String(formData.get("category") ?? "solar");
   const brandRaw = String(formData.get("brand") ?? "");
-  const priceMin = Number(formData.get("priceMin"));
-  const priceMax = Number(formData.get("priceMax"));
+  const price = Number(formData.get("price"));
+  const promoRaw = String(formData.get("promoPrice") ?? "").trim();
+  const promoPrice = promoRaw === "" ? undefined : Number(promoRaw);
   const description = String(formData.get("description") ?? "");
   const shortRaw = String(formData.get("shortDescription") ?? "");
   const image = String(formData.get("image") ?? "").trim();
@@ -55,8 +56,8 @@ function formToProductInput(formData: FormData, forUpdate: boolean) {
     name,
     category: category.trim().toLowerCase(),
     brand: brandRaw.trim() || undefined,
-    priceMin,
-    priceMax,
+    price,
+    promoPrice,
     description,
     image,
     features,

@@ -1,6 +1,6 @@
 import { getProductsForSalesView } from "@/lib/db/products";
 import { getQuotationAppliancesPublic } from "@/lib/db/quotation-appliances";
-import { priceBoundsFromDoc } from "@/lib/pricing";
+import { priceFromDoc } from "@/lib/pricing";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { SystemSizingTool } from "@/components/admin/SystemSizingTool";
 import type { SizingCatalogItem } from "@/lib/solar-sizing";
@@ -14,14 +14,14 @@ export default async function SalesSystemSizingPage() {
     getQuotationAppliancesPublic(),
   ]);
   const catalog: SizingCatalogItem[] = products.map((p) => {
-    const { priceMin, priceMax } = priceBoundsFromDoc(p);
+    const { price, promoPrice } = priceFromDoc(p);
     return {
       id: p._id.toString(),
       name: p.name,
       slug: p.slug,
       category: p.category,
-      priceMin,
-      priceMax,
+      price,
+      promoPrice,
       stock: p.stock,
       active: p.active,
       shortDescription: p.shortDescription,

@@ -154,15 +154,15 @@ export default function ShopCatalogClient({
     if (priceFilter !== "all") {
       result = result.filter((p) =>
         catalogItemMatchesPriceFilter(
-          { priceMin: p.priceMin, priceMax: p.priceMax },
+          p,
           priceFilter
         )
       );
     }
     if (sort === "low") {
-      result = [...result].sort((a, b) => a.priceMin - b.priceMin);
+      result = [...result].sort((a, b) => (a.promoPrice ?? a.price) - (b.promoPrice ?? b.price));
     } else if (sort === "high") {
-      result = [...result].sort((a, b) => b.priceMax - a.priceMax);
+      result = [...result].sort((a, b) => (b.promoPrice ?? b.price) - (a.promoPrice ?? a.price));
     }
     return result;
   }, [initialProducts, category, sort, search, priceFilter]);
@@ -182,15 +182,15 @@ export default function ShopCatalogClient({
     if (priceFilter !== "all") {
       result = result.filter((p) =>
         catalogItemMatchesPriceFilter(
-          { priceMin: p.priceMin, priceMax: p.priceMax },
+          p,
           priceFilter
         )
       );
     }
     if (sort === "low") {
-      result = [...result].sort((a, b) => a.priceMin - b.priceMin);
+      result = [...result].sort((a, b) => (a.promoPrice ?? a.price) - (b.promoPrice ?? b.price));
     } else if (sort === "high") {
-      result = [...result].sort((a, b) => b.priceMax - a.priceMax);
+      result = [...result].sort((a, b) => (b.promoPrice ?? b.price) - (a.promoPrice ?? a.price));
     }
     return result;
   }, [initialPackages, pkgCategory, search, sort, priceFilter]);

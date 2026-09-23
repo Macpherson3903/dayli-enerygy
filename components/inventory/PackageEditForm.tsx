@@ -5,7 +5,7 @@ import { updatePackageAction } from "@/app/actions/packages";
 import { Input, Textarea } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
 import { ImageUrlField } from "./ImageUrlField";
-import { PriceRangeFields } from "./PriceRangeFields";
+import { PriceFields } from "./PriceRangeFields";
 import { useStatusMessage } from "@/context/StatusMessageContext";
 
 const initial: { error?: string; ok?: boolean } | undefined = undefined;
@@ -21,8 +21,8 @@ export function PackageEditForm({
     name: string;
     slug: string;
     category: string;
-    priceMin: number;
-    priceMax: number;
+    price: number;
+    promoPrice?: number;
     description: string;
     shortDescription?: string;
     image: string;
@@ -94,7 +94,7 @@ export function PackageEditForm({
         required
         pattern="[a-z0-9]+(-[a-z0-9]+)*"
       />
-      <PriceRangeFields priceMin={pkg.priceMin} priceMax={pkg.priceMax} />
+      <PriceFields price={pkg.price} promoPrice={pkg.promoPrice} />
       <Textarea
         name="description"
         label="Description"

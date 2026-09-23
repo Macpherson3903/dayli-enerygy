@@ -5,7 +5,7 @@ import { updateProductAction } from "@/app/actions/products";
 import { Input, Textarea } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
 import { ImageUrlField } from "./ImageUrlField";
-import { PriceRangeFields } from "./PriceRangeFields";
+import { PriceFields } from "./PriceRangeFields";
 import { useStatusMessage } from "@/context/StatusMessageContext";
 
 const initial: { error?: string; ok?: boolean } | undefined = undefined;
@@ -20,8 +20,8 @@ export function ProductEditForm({
     name: string;
     category: string;
     brand?: string;
-    priceMin: number;
-    priceMax: number;
+    price: number;
+    promoPrice?: number;
     description: string;
     shortDescription?: string;
     image: string;
@@ -94,10 +94,7 @@ export function ProductEditForm({
         label="Brand (optional)"
         defaultValue={product.brand ?? ""}
       />
-      <PriceRangeFields
-        priceMin={product.priceMin}
-        priceMax={product.priceMax}
-      />
+      <PriceFields price={product.price} promoPrice={product.promoPrice} />
       <Textarea
         name="description"
         label="Description"

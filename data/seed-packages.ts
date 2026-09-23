@@ -2,8 +2,8 @@ export type SeedPackage = {
   name: string;
   slug: string;
   category: string;
-  priceMin: number;
-  priceMax: number;
+  price: number;
+  promoPrice?: number;
   image: string;
   shortDescription: string;
   description: string;
@@ -18,8 +18,7 @@ export const SEED_PACKAGES: SeedPackage[] = [
     name: "Solar package — small home",
     slug: "solar-package-small-home",
     category: "residential",
-    priceMin: 800_000,
-    priceMax: 1_000_000,
+    price: 800_000,
     image: "/solarRoof.png",
     shortDescription: "Essential backup for lights, TV, and a fridge.",
     description:
@@ -43,8 +42,7 @@ export const SEED_PACKAGES: SeedPackage[] = [
     name: "Solar package — family home",
     slug: "solar-package-family-home",
     category: "residential",
-    priceMin: 1_500_000,
-    priceMax: 2_000_000,
+    price: 1_500_000,
     image: "/inverter.png",
     shortDescription: "More capacity for larger fridges, pumps, and mixed loads.",
     description:

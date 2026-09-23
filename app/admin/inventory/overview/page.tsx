@@ -4,7 +4,7 @@ import {
   InventoryCatalogOverview,
   type InventoryCatalogRow,
 } from "@/components/inventory/admin/InventoryCatalogOverview";
-import { priceBoundsFromDoc } from "@/lib/pricing";
+import { priceFromDoc } from "@/lib/pricing";
 import { PageHeader } from "@/components/ui/PageHeader";
 
 export const dynamic = "force-dynamic";
@@ -17,7 +17,7 @@ export default async function InventoryOverviewPage() {
 
   const rows: InventoryCatalogRow[] = [
     ...products.map((product) => {
-      const { priceMin, priceMax } = priceBoundsFromDoc(product);
+      const { price, promoPrice } = priceFromDoc(product);
       return {
         id: product._id.toString(),
         kind: "product" as const,
@@ -25,8 +25,8 @@ export default async function InventoryOverviewPage() {
         category: product.category,
         brand: product.brand,
         slug: product.slug,
-        priceMin,
-        priceMax,
+        price,
+        promoPrice,
         stock: product.stock,
         active: product.active,
         image: product.image,
@@ -34,15 +34,15 @@ export default async function InventoryOverviewPage() {
       };
     }),
     ...packages.map((pkg) => {
-      const { priceMin, priceMax } = priceBoundsFromDoc(pkg);
+      const { price, promoPrice } = priceFromDoc(pkg);
       return {
         id: pkg._id.toString(),
         kind: "package" as const,
         name: pkg.name,
         category: pkg.category,
         slug: pkg.slug,
-        priceMin,
-        priceMax,
+        price,
+        promoPrice,
         stock: pkg.stock,
         active: pkg.active,
         featured: pkg.featured,

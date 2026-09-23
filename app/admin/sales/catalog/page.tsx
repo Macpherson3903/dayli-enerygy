@@ -1,6 +1,6 @@
 import { getProductsForSalesView } from "@/lib/db/products";
 import { getPackagesForSalesView } from "@/lib/db/packages";
-import { priceBoundsFromDoc } from "@/lib/pricing";
+import { priceFromDoc } from "@/lib/pricing";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { CatalogSearchableTables } from "@/components/admin/CatalogSearchableTables";
 
@@ -20,26 +20,26 @@ export default async function SalesCatalogPage() {
       />
       <CatalogSearchableTables
         products={products.map((p) => {
-          const { priceMin, priceMax } = priceBoundsFromDoc(p);
+          const { price, promoPrice } = priceFromDoc(p);
           return {
             id: p._id.toString(),
             name: p.name,
             category: p.category,
-            priceMin,
-            priceMax,
+            price,
+            promoPrice,
             stock: p.stock,
             active: p.active,
           };
         })}
         packages={packages.map((p) => {
-          const { priceMin, priceMax } = priceBoundsFromDoc(p);
+          const { price, promoPrice } = priceFromDoc(p);
           return {
             id: p._id.toString(),
             name: p.name,
             category: p.category?.trim() || "general",
             slug: p.slug,
-            priceMin,
-            priceMax,
+            price,
+            promoPrice,
             stock: p.stock,
             active: p.active,
             featured: p.featured,

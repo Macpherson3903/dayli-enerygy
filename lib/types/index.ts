@@ -94,10 +94,11 @@ export type ProductDoc = {
   slug: string;
   category: string;
   brand?: string;
-  priceMin: number;
-  priceMax: number;
-  /** @deprecated Legacy single price — migrated to priceMin/priceMax on read. */
-  price?: number;
+  price: number;
+  promoPrice?: number;
+  /** @deprecated Pre-promotion range price fields, supported on read only. */
+  priceMin?: number;
+  priceMax?: number;
   description: string;
   shortDescription?: string;
   image: string;
@@ -115,10 +116,11 @@ export type PackageDoc = {
   slug: string;
   /** Package taxonomy for storefront filters (e.g. residential, commercial). */
   category: string;
-  priceMin: number;
-  priceMax: number;
-  /** @deprecated Legacy single price — migrated to priceMin/priceMax on read. */
-  price?: number;
+  price: number;
+  promoPrice?: number;
+  /** @deprecated Pre-promotion range price fields, supported on read only. */
+  priceMin?: number;
+  priceMax?: number;
   description: string;
   shortDescription?: string;
   image: string;
@@ -245,8 +247,8 @@ export type ProductPublic = {
   slug: string;
   category: string;
   brand?: string;
-  priceMin: number;
-  priceMax: number;
+  price: number;
+  promoPrice?: number;
   description: string;
   shortDescription?: string;
   image: string;

@@ -38,10 +38,11 @@ export const createOrderSchema = z.object({
   userId: z.string().min(1),
 });
 
-const productPriceRangeRefine = {
-  check: (d: { priceMin: number; priceMax: number }) => d.priceMin <= d.priceMax,
-  message: "Maximum price must be greater than or equal to minimum price",
-  path: ["priceMax"],
+const promoPriceRefine = {
+  check: (d: { price: number; promoPrice?: number }) =>
+    d.promoPrice == null || d.promoPrice < d.price,
+  message: "Promo price must be lower than the regular price",
+  path: ["promoPrice"],
 };
 
 const productInputFieldsSchema = z.object({
@@ -52,8 +53,8 @@ const productInputFieldsSchema = z.object({
     .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/),
   category: z.string().trim().min(1),
   brand: z.string().trim().max(120).optional(),
-  priceMin: z.number().nonnegative(),
-  priceMax: z.number().nonnegative(),
+  price: z.number().nonnegative(),
+  promoPrice: z.number().nonnegative().optional(),
   description: z.string().min(1),
   shortDescription: z.string().max(500).optional(),
   image: z
@@ -69,19 +70,19 @@ const productInputFieldsSchema = z.object({
 });
 
 export const productInputSchema = productInputFieldsSchema.refine(
-  productPriceRangeRefine.check,
+  promoPriceRefine.check,
   {
-    message: productPriceRangeRefine.message,
-    path: productPriceRangeRefine.path,
+    message: promoPriceRefine.message,
+    path: promoPriceRefine.path,
   }
 );
 
 /** Product edit form — slug is unchanged in DB, so it is omitted from validation. */
 export const productUpdateInputSchema = productInputFieldsSchema
   .omit({ slug: true })
-  .refine(productPriceRangeRefine.check, {
-    message: productPriceRangeRefine.message,
-    path: productPriceRangeRefine.path,
+  .refine(promoPriceRefine.check, {
+    message: promoPriceRefine.message,
+    path: promoPriceRefine.path,
   });
 
 export const packageInputSchema = z.object({
@@ -96,8 +97,8 @@ export const packageInputSchema = z.object({
     .min(1)
     .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/)
     .transform((s) => s.trim().toLowerCase()),
-  priceMin: z.number().nonnegative(),
-  priceMax: z.number().nonnegative(),
+  price: z.number().nonnegative(),
+  promoPrice: z.number().nonnegative().optional(),
   description: z.string().min(1),
   shortDescription: z.string().max(500).optional(),
   image: z
@@ -112,9 +113,9 @@ export const packageInputSchema = z.object({
   stock: z.number().int().nonnegative(),
   active: z.boolean().default(true),
   featured: z.boolean().default(false),
-}).refine((d) => d.priceMin <= d.priceMax, {
-  message: "Maximum price must be greater than or equal to minimum price",
-  path: ["priceMax"],
+}).refine(promoPriceRefine.check, {
+  message: promoPriceRefine.message,
+  path: promoPriceRefine.path,
 });
 
 export const orderStatusUpdateSchema = z.object({

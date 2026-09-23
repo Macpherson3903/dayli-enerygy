@@ -1,49 +1,33 @@
-/** Catalog/list price bounds (legacy `price` treated as both min and max). */
-export type PriceBounds = { priceMin: number; priceMax: number };
+export type CatalogPrice = { price: number; promoPrice?: number };
 
-export function normalizePriceBounds(
-  priceMin: number,
-  priceMax: number
-): PriceBounds {
-  const a = Number.isFinite(priceMin) ? priceMin : 0;
-  const b = Number.isFinite(priceMax) ? priceMax : a;
-  return {
-    priceMin: Math.min(a, b),
-    priceMax: Math.max(a, b),
-  };
-}
-
-export function priceBoundsFromDoc(doc: {
+/** Reads current prices and keeps pre-migration range records usable. */
+export function priceFromDoc(doc: {
+  price?: number;
+  promoPrice?: number;
   priceMin?: number;
   priceMax?: number;
-  price?: number;
-}): PriceBounds {
-  if (doc.priceMin != null || doc.priceMax != null) {
-    return normalizePriceBounds(
-      doc.priceMin ?? doc.priceMax ?? 0,
-      doc.priceMax ?? doc.priceMin ?? 0
-    );
-  }
-  const legacy = doc.price ?? 0;
-  return { priceMin: legacy, priceMax: legacy };
+}): CatalogPrice {
+  const price = Number.isFinite(doc.price)
+    ? Number(doc.price)
+    : Number(doc.priceMin ?? doc.priceMax ?? 0);
+  const promoPrice =
+    Number.isFinite(doc.promoPrice) && Number(doc.promoPrice) < price
+      ? Number(doc.promoPrice)
+      : undefined;
+  return { price, promoPrice };
 }
 
-/** Cart/checkout line price — uses catalog minimum. */
-export function cartUnitPrice(bounds: PriceBounds): number {
-  return bounds.priceMin;
+/** Cart/checkout line price — promotion price takes precedence. */
+export function cartUnitPrice(item: CatalogPrice): number {
+  return item.promoPrice ?? item.price;
 }
 
 export function formatNaira(amount: number): string {
   return `₦${amount.toLocaleString("en-NG")}`;
 }
 
-export function formatPriceRange(bounds: PriceBounds): string {
-  const { priceMin, priceMax } = normalizePriceBounds(
-    bounds.priceMin,
-    bounds.priceMax
-  );
-  if (priceMin === priceMax) return formatNaira(priceMin);
-  return `${formatNaira(priceMin)} - ${formatNaira(priceMax)}`;
+export function formatCatalogPrice(item: CatalogPrice): string {
+  return formatNaira(item.promoPrice ?? item.price);
 }
 
 export type CatalogPriceFilterId =
@@ -75,16 +59,13 @@ export function parseCatalogPriceFilterId(
   return hit?.id ?? "all";
 }
 
-/** True when the item's range overlaps the selected filter band. */
+/** True when the effective sale price is in the selected filter band. */
 export function catalogItemMatchesPriceFilter(
-  bounds: PriceBounds,
+  item: CatalogPrice,
   filterId: CatalogPriceFilterId
 ): boolean {
   const filter =
     CATALOG_PRICE_FILTERS.find((f) => f.id === filterId) ?? CATALOG_PRICE_FILTERS[0];
-  const { priceMin, priceMax } = normalizePriceBounds(
-    bounds.priceMin,
-    bounds.priceMax
-  );
-  return priceMin <= filter.max && priceMax >= filter.min;
+  const price = item.promoPrice ?? item.price;
+  return price >= filter.min && price <= filter.max;
 }

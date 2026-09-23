@@ -1,6 +1,6 @@
 import { getProductsForSalesView } from "@/lib/db/products";
 import { getPackagesForSalesView } from "@/lib/db/packages";
-import { priceBoundsFromDoc } from "@/lib/pricing";
+import { priceFromDoc } from "@/lib/pricing";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { InvoiceForm } from "@/components/admin/InvoiceForm";
 import type { InvoiceCatalogPick } from "@/components/admin/InvoiceForm";
@@ -15,25 +15,25 @@ export default async function NewInvoicePage() {
   ]);
   const catalog: InvoiceCatalogPick[] = [
     ...products.map((p) => {
-      const { priceMin, priceMax } = priceBoundsFromDoc(p);
+      const { price, promoPrice } = priceFromDoc(p);
       return {
         id: p._id.toString(),
         kind: "product" as const,
         name: p.name,
         category: p.category,
-        priceMin,
-        priceMax,
+        price,
+        promoPrice,
       };
     }),
     ...packages.map((p) => {
-      const { priceMin, priceMax } = priceBoundsFromDoc(p);
+      const { price, promoPrice } = priceFromDoc(p);
       return {
         id: p._id.toString(),
         kind: "package" as const,
         name: p.name,
         category: p.category?.trim() || "general",
-        priceMin,
-        priceMax,
+        price,
+        promoPrice,
       };
     }),
   ];

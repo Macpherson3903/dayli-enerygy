@@ -1,6 +1,6 @@
 import { getProductById } from "@/lib/db/products";
 import { getPackageById } from "@/lib/db/packages";
-import { cartUnitPrice, priceBoundsFromDoc } from "@/lib/pricing";
+import { cartUnitPrice, priceFromDoc } from "@/lib/pricing";
 import type { CreateOrderInput } from "@/lib/validators";
 
 export async function assertLineItemsValid(
@@ -14,7 +14,7 @@ export async function assertLineItemsValid(
           `Not enough stock for ${p.name}. Reduce the quantity in your cart or remove the item and try again.`
         );
       }
-      if (cartUnitPrice(priceBoundsFromDoc(p)) !== line.price) {
+      if (cartUnitPrice(priceFromDoc(p)) !== line.price) {
         throw new Error(
           `Price changed for ${p.name}. Please refresh and try again.`
         );
@@ -30,7 +30,7 @@ export async function assertLineItemsValid(
         `Not enough stock for ${pkg.name}. Reduce the quantity in your cart or remove the item and try again.`
       );
     }
-    if (cartUnitPrice(priceBoundsFromDoc(pkg)) !== line.price) {
+    if (cartUnitPrice(priceFromDoc(pkg)) !== line.price) {
       throw new Error(
         `Price changed for ${pkg.name}. Please refresh and try again.`
       );

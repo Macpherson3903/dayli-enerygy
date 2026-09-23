@@ -3,7 +3,7 @@ import { getDb } from "@/lib/mongodb";
 import type { ProductDoc, ProductPublic } from "@/lib/types";
 import { SEED_PRODUCTS, type SeedProduct } from "@/data/seed-products";
 import type { ProductInput } from "@/lib/validators";
-import { normalizePriceBounds, priceBoundsFromDoc } from "@/lib/pricing";
+import { priceFromDoc } from "@/lib/pricing";
 
 function isMongoUnreachableError(e: unknown): boolean {
   if (!e || typeof e !== "object") return false;
@@ -25,14 +25,14 @@ function shouldUsePublicSeedFallback(): boolean {
 
 /** Stable public shape from seed file when DB is offline (development only). */
 function seedProductToPublic(s: SeedProduct): ProductPublic {
-  const { priceMin, priceMax } = normalizePriceBounds(s.priceMin, s.priceMax);
+  const { price, promoPrice } = priceFromDoc(s);
   return {
     id: `seed:${s.slug}`,
     name: s.name,
     slug: s.slug,
     category: s.category,
-    priceMin,
-    priceMax,
+    price,
+    promoPrice,
     description: s.description,
     shortDescription: s.shortDescription,
     image: s.image,
@@ -62,15 +62,15 @@ export type InventoryCategoryRow = {
 };
 
 function toPublic(p: ProductDoc): ProductPublic {
-  const { priceMin, priceMax } = priceBoundsFromDoc(p);
+  const { price, promoPrice } = priceFromDoc(p);
   return {
     id: p._id.toString(),
     name: p.name,
     slug: p.slug,
     category: p.category,
     brand: p.brand,
-    priceMin,
-    priceMax,
+    price,
+    promoPrice,
     description: p.description,
     shortDescription: p.shortDescription,
     image: p.image,
@@ -91,13 +91,13 @@ export async function seedProductsIfEmpty() {
   if (n > 0) return;
   const now = new Date();
   const docs = SEED_PRODUCTS.map((s) => {
-    const { priceMin, priceMax } = normalizePriceBounds(s.priceMin, s.priceMax);
+    const { price, promoPrice } = priceFromDoc(s);
     return {
     name: s.name,
     slug: s.slug,
     category: s.category,
-    priceMin,
-    priceMax,
+    price,
+    promoPrice,
     brand: undefined,
     description: s.description,
     shortDescription: s.shortDescription,
@@ -233,17 +233,13 @@ export async function getProductPublicBySlug(
 export async function createProduct(input: ProductInput) {
   const db = await getDb();
   const now = new Date();
-  const { priceMin, priceMax } = normalizePriceBounds(
-    input.priceMin,
-    input.priceMax
-  );
   const doc: Omit<ProductDoc, "_id"> = {
     name: input.name,
     slug: input.slug,
     category: input.category,
     brand: input.brand,
-    priceMin,
-    priceMax,
+    price: input.price,
+    promoPrice: input.promoPrice,
     description: input.description,
     shortDescription: input.shortDescription,
     image: input.image,
@@ -364,9 +360,20 @@ export async function updateProduct(
   Object.keys(patch).forEach((k) => {
     if (patch[k] === undefined) delete patch[k];
   });
+  const unset: Record<string, ""> = {};
+  if ("promoPrice" in input && input.promoPrice === undefined) {
+    unset.promoPrice = "";
+  }
+  if ("price" in input) {
+    unset.priceMin = "";
+    unset.priceMax = "";
+  }
   await db
     .collection(COL)
-    .updateOne({ _id: new ObjectId(id) }, { $set: patch });
+    .updateOne(
+      { _id: new ObjectId(id) },
+      { $set: patch, ...(Object.keys(unset).length ? { $unset: unset } : {}) }
+    );
 }
 
 export async function deleteProduct(id: string) {

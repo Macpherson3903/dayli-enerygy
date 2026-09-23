@@ -3,15 +3,15 @@
 import { useMemo, useState } from "react";
 import { AdminSearchField } from "@/components/admin/AdminSearchField";
 import { matchesSearch } from "@/lib/admin/search";
-import { formatPriceRange } from "@/lib/pricing";
+import { formatCatalogPrice } from "@/lib/pricing";
 
 export type CatalogListRow = {
   id: string;
   name: string;
   category: string;
   slug?: string;
-  priceMin: number;
-  priceMax: number;
+  price: number;
+  promoPrice?: number;
   stock: number;
   active: boolean;
   featured?: boolean;
@@ -69,7 +69,7 @@ function CatalogTable({
               {kind === "package" ? (
                 <th className="px-4 py-2 font-medium">Slug</th>
               ) : null}
-              <th className="px-4 py-2 font-medium">Price range</th>
+              <th className="px-4 py-2 font-medium">Price</th>
               <th className="px-4 py-2 font-medium">Stock</th>
               {kind === "package" ? (
                 <th className="px-4 py-2 font-medium">Featured</th>
@@ -101,10 +101,7 @@ function CatalogTable({
                     <td className="px-4 py-2 font-mono text-xs">{row.slug}</td>
                   ) : null}
                   <td className="px-4 py-2">
-                    {formatPriceRange({
-                      priceMin: row.priceMin,
-                      priceMax: row.priceMax,
-                    })}
+                    {formatCatalogPrice(row)}
                   </td>
                   <td className="px-4 py-2">{row.stock}</td>
                   {kind === "package" ? (

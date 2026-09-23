@@ -16,15 +16,15 @@ import {
   DEFAULT_INVOICE_WARRANTY,
 } from "@/lib/constants";
 import { computeInvoiceTotals } from "@/lib/invoice-totals";
-import { formatNaira, formatPriceRange } from "@/lib/pricing";
+import { formatNaira, formatCatalogPrice } from "@/lib/pricing";
 
 export type InvoiceCatalogPick = {
   id: string;
   kind: "product" | "package";
   name: string;
   category: string;
-  priceMin: number;
-  priceMax: number;
+  price: number;
+  promoPrice?: number;
 };
 
 type LineDraft = {
@@ -115,7 +115,7 @@ export function InvoiceForm({ catalog }: { catalog: InvoiceCatalogPick[] }) {
       catalogItemId: item.id,
       catalogKind: item.kind,
       description: item.name,
-      unitCost: item.priceMin,
+      unitCost: item.promoPrice ?? item.price,
     };
     if (targetKey) {
       updateLine(targetKey, next);
@@ -237,10 +237,7 @@ export function InvoiceForm({ catalog }: { catalog: InvoiceCatalogPick[] }) {
                     </span>
                   </span>
                   <span className="shrink-0 text-xs text-gray-600">
-                    {formatPriceRange({
-                      priceMin: item.priceMin,
-                      priceMax: item.priceMax,
-                    })}
+                    {formatCatalogPrice(item)}
                   </span>
                 </button>
               </li>
