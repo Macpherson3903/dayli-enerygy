@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { PackageDoc } from "@/lib/types";
-import { formatCatalogPrice, priceFromDoc } from "@/lib/pricing";
+import { formatCatalogPrice, formatNaira, priceFromDoc } from "@/lib/pricing";
 
 export function PackagesOverviewTable({ packages }: { packages: PackageDoc[] }) {
   return (
@@ -20,8 +20,9 @@ export function PackagesOverviewTable({ packages }: { packages: PackageDoc[] }) 
           </tr>
         </thead>
         <tbody>
-          {packages.map((pkg) => (
-            <tr
+          {packages.map((pkg) => {
+            const price = priceFromDoc(pkg);
+            return <tr
               key={pkg._id.toString()}
               className="border-b border-gray-100 align-middle last:border-0"
             >
@@ -39,7 +40,13 @@ export function PackagesOverviewTable({ packages }: { packages: PackageDoc[] }) 
               </td>
               <td className="px-4 py-3 font-mono text-xs">{pkg.slug}</td>
               <td className="px-4 py-3">
-                {formatCatalogPrice(priceFromDoc(pkg))}
+                {price.promoPrice != null ? (
+                  <div className="flex items-center gap-2 whitespace-nowrap">
+                    <span className="text-xs text-gray-400 line-through">{formatNaira(price.price)}</span>
+                    <span className="font-semibold text-green-700">{formatCatalogPrice(price)}</span>
+                    <span className="rounded-full bg-red-100 px-2 py-0.5 text-[10px] font-bold uppercase text-red-700">Promo</span>
+                  </div>
+                ) : formatCatalogPrice(price)}
               </td>
               <td className="px-4 py-3">{pkg.stock}</td>
               <td className="px-4 py-3">{pkg.featured ? "Yes" : "No"}</td>
@@ -52,8 +59,8 @@ export function PackagesOverviewTable({ packages }: { packages: PackageDoc[] }) 
                   Edit
                 </Link>
               </td>
-            </tr>
-          ))}
+            </tr>;
+          })}
         </tbody>
       </table>
     </div>

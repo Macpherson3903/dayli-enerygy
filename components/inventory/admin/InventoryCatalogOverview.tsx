@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 import { Input } from "@/components/ui/Input";
 import { clsx } from "clsx";
-import { formatCatalogPrice } from "@/lib/pricing";
+import { formatCatalogPrice, formatNaira } from "@/lib/pricing";
 
 export type InventoryCatalogRow = {
   id: string;
@@ -171,8 +171,24 @@ export function InventoryCatalogOverview({ rows }: { rows: InventoryCatalogRow[]
                   <td className="px-4 py-3 text-gray-700">
                     {row.kind === "product" ? row.brand ?? "—" : "—"}
                   </td>
-                  <td className="px-4 py-3 font-medium text-gray-900 whitespace-nowrap">
-                    {formatCatalogPrice(row)}
+                  <td className="px-4 py-3 whitespace-nowrap">
+                    {row.promoPrice != null ? (
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs text-gray-400 line-through">
+                          {formatNaira(row.price)}
+                        </span>
+                        <span className="font-semibold text-green-700">
+                          {formatCatalogPrice(row)}
+                        </span>
+                        <span className="rounded-full bg-red-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-red-700">
+                          Promo
+                        </span>
+                      </div>
+                    ) : (
+                      <span className="font-medium text-gray-900">
+                        {formatCatalogPrice(row)}
+                      </span>
+                    )}
                   </td>
                   <td className="px-4 py-3">
                     <span

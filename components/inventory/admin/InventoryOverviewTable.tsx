@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { ProductDoc } from "@/lib/types";
-import { formatCatalogPrice, priceFromDoc } from "@/lib/pricing";
+import { formatCatalogPrice, formatNaira, priceFromDoc } from "@/lib/pricing";
 
 export function InventoryOverviewTable({ products }: { products: ProductDoc[] }) {
   return (
@@ -19,8 +19,9 @@ export function InventoryOverviewTable({ products }: { products: ProductDoc[] })
           </tr>
         </thead>
         <tbody>
-          {products.map((product) => (
-            <tr
+          {products.map((product) => {
+            const price = priceFromDoc(product);
+            return <tr
               key={product._id.toString()}
               className="border-b border-gray-100 align-middle last:border-0"
             >
@@ -36,7 +37,13 @@ export function InventoryOverviewTable({ products }: { products: ProductDoc[] })
               <td className="px-4 py-3 capitalize">{product.category}</td>
               <td className="px-4 py-3">{product.brand ?? "-"}</td>
               <td className="px-4 py-3">
-                {formatCatalogPrice(priceFromDoc(product))}
+                {price.promoPrice != null ? (
+                  <div className="flex items-center gap-2 whitespace-nowrap">
+                    <span className="text-xs text-gray-400 line-through">{formatNaira(price.price)}</span>
+                    <span className="font-semibold text-green-700">{formatCatalogPrice(price)}</span>
+                    <span className="rounded-full bg-red-100 px-2 py-0.5 text-[10px] font-bold uppercase text-red-700">Promo</span>
+                  </div>
+                ) : formatCatalogPrice(price)}
               </td>
               <td className="px-4 py-3">{product.stock}</td>
               <td className="px-4 py-3">{product.active ? "Yes" : "No"}</td>
@@ -48,8 +55,8 @@ export function InventoryOverviewTable({ products }: { products: ProductDoc[] })
                   Edit
                 </Link>
               </td>
-            </tr>
-          ))}
+            </tr>;
+          })}
         </tbody>
       </table>
     </div>
